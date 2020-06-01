@@ -1257,8 +1257,8 @@ end;
 
 function coloraverage(const c1, c2: LongWord; const opact: integer): LongWord;
 var
-  r1, g1, b1: integer;
-  r2, g2, b2: integer;
+  r1, g1, b1: byte;
+  r2, g2, b2: byte;
   opact2: integer;
 begin
   if (c1 = c2) or (opact >= 100) then
@@ -1266,17 +1266,22 @@ begin
     Result := c2;
     Exit;
   end;
-  r1 := GetRValue(c1);
-  g1 := GetGValue(c1);
-  b1 := GetBValue(c1);
-  r2 := GetRValue(c2);
-  g2 := GetGValue(c2);
-  b2 := GetBValue(c2);
+  if opact <= 0 then
+  begin
+    Result := c1;
+    Exit;
+  end;
+  r1 := c1;
+  g1 := c1 shr 8;
+  b1 := c1 shr 16;
+  r2 := c2;
+  g2 := c2 shr 8;
+  b2 := c2 shr 16;
   opact2 := 100 - opact;
-  r1 := GetIntInRange((r1 * opact2 + r2 * opact) div 100, 0, 255);
-  g1 := GetIntInRange((g1 * opact2 + g2 * opact) div 100, 0, 255);
-  b1 := GetIntInRange((b1 * opact2 + b2 * opact) div 100, 0, 255);
-  Result := RGB(r1, g1, b1);
+  r1 := (r1 * opact2 + r2 * opact) div 100;
+  g1 := (g1 * opact2 + g2 * opact) div 100;
+  b1 := (b1 * opact2 + b2 * opact) div 100;
+  Result := r1 or (g1 shl 8) or (b1 shl 16);
 end;
 
 procedure TForm1.LLeftMousePaintAt(const X, Y: integer);
@@ -1285,11 +1290,7 @@ var
   c, c1, c2: LongWord;
   tsize: integer;
   tline: PLongWordarray;
-  sqmaxdist: integer;
-  sqdist: integer;
   newopacity: integer;
-  sqry: integer;
-  frac: single;
 begin
   tsize := terrain.texturesize;
   if PenSpeedButton1.Down then
@@ -1311,20 +1312,15 @@ begin
   end
   else if PenSpeedButton2.Down then
   begin
-//    sqmaxdist := sqr(fpensize div 2);
     for iY := GetIntInRange(Y - fpensize div 2, 0, tsize - 1) to GetIntInRange(Y + fpensize div 2, 0, tsize - 1) do
     begin
-//      sqry := (iY - Y) * (iY - Y);
       tline := terrain.Texture.ScanLine[iY];
       for iX := GetIntInRange(X - fpensize div 2, 0, tsize - 1) to GetIntInRange(X + fpensize div 2, 0, tsize - 1) do
         if layer[iX, iY].pass < fopacity then
         begin
-//          sqdist := (iX - X) * (iX - X) + sqry;
-//          if sqdist <= sqmaxdist then
           newopacity := pen2hit[iX - X, iY - Y];
           if newopacity <> 0 then
           begin
-//            layer[iX, iY].pass := fopacity;
             layer[iX, iY].pass := newopacity;
             c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
             c2 := RGBSwap(tline[iX]);
@@ -1337,23 +1333,14 @@ begin
   end
   else if PenSpeedButton3.Down then
   begin
-//    sqmaxdist := sqr(fpensize div 2);
     for iY := GetIntInRange(Y - fpensize div 2, 0, tsize - 1) to GetIntInRange(Y + fpensize div 2, 0, tsize - 1) do
     begin
-//      sqry := (iY - Y) * (iY - Y);
       tline := terrain.Texture.ScanLine[iY];
       for iX := GetIntInRange(X - fpensize div 2, 0, tsize - 1) to GetIntInRange(X + fpensize div 2, 0, tsize - 1) do
         if layer[iX, iY].pass < fopacity then
         begin
-//          sqdist := (iX - X) * (iX - X) + sqry;
-//          if sqdist <= sqmaxdist then
           newopacity := pen3hit[iX - X, iY - Y];
-          //if newopacity <> 0 then
-
           begin
-//            frac := (1 - sqdist / sqmaxdist) * fopacity;
-//            newopacity := GetIntInRange(round(frac), 0, 100);
-
             if layer[iX, iY].pass < newopacity then
             begin
               layer[iX, iY].pass := newopacity;

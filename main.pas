@@ -246,6 +246,7 @@ type
     procedure LLeftMousePaintAt(const X, Y: integer);
     procedure LLeftMousePaintTo(const X, Y: integer);
     procedure CalcPenHit;
+    procedure DoRefreshPaintBox(const r: TRect);
   public
     { Public declarations }
   end;
@@ -1032,11 +1033,16 @@ begin
 end;
 
 procedure TForm1.PaintBox1Paint(Sender: TObject);
+begin
+  DoRefreshPaintBox(Rect(0, 0, terrain.texturesize - 1, terrain.texturesize - 1));
+end;
+
+procedure TForm1.DoRefreshPaintBox(const r: TRect);
 var
   C: TCanvas;
 begin
   C := PaintBox1.Canvas;
-  C.Draw(0, 0, terrain.Texture);
+  C.CopyRect(r, terrain.Texture.Canvas, r);
 end;
 
 procedure TForm1.SelectWADFileButtonClick(Sender: TObject);
@@ -1240,6 +1246,8 @@ begin
   if button = mbLeft then
   begin
     LLeftMousePaintTo(X, Y);
+    lmousedownx := X;
+    lmousedowny := Y;
     lmousedown := False;
   end;
 end;
@@ -1360,39 +1368,61 @@ end;
 procedure TForm1.LLeftMousePaintTo(const X, Y: integer);
 var
   dx, dy: integer;
-  stepx, stepy: double;
-  dist: double;
-  curx, cury: double;
-  lastx, lasty: double;
-  steps: integer;
-  i: integer;
+  curx, cury: integer;
+  sx, sy,
+  ax, ay,
+  d: integer;
 begin
   if not lmousedown then
     Exit;
 
   dx := X - lmousedownx;
+  ax := 2 * abs(dx);
+  if dx < 0 then
+    sx := -1
+  else
+    sx := 1;
   dy := Y - lmousedowny;
-  dist := sqrt(sqr(dx) + sqr(dy));
-  stepx := dx / (dist + 1);
-  stepy := dy / (dist + 1);
+  ay := 2 * abs(dy);
+  if dy < 0 then
+    sy := -1
+  else
+    sy := 1;
 
   curx := lmousedownx;
   cury := lmousedowny;
-  lastx := -10000.0;
-  lasty := -10000.0;
 
-  if abs(dx) > abs(dy) then
-    steps := round(abs(dx)) + 1
-  else
-    steps := round(abs(dy)) + 1;
-  for i := 0 to steps do
+  if ax > ay then
   begin
-    if (round(lastx) <> round(curx)) and (round(lasty) <> round(cury)) then
-      LLeftMousePaintAt(round(curx), round(cury));
-    lastx := curx;
-    lasty := cury;
-    curx := curx + stepx;
-    cury := cury + stepy;
+    d := ay - ax div 2;
+    while true do
+    begin
+      LLeftMousePaintAt(curx, cury);
+      if curx = X then break;
+      if d >= 0 then
+      begin
+        cury := cury + sy;
+        d := d - ax;
+      end;
+      curx := curx + sx;
+      d := d + ay;
+    end;
+  end
+  else
+  begin
+    d := ax - ay div 2;
+    while true do
+    begin
+      LLeftMousePaintAt(curx, cury);
+      if y = Y then break;
+      if d >= 0 then
+      begin
+        curx := curx + sx;
+        d := d - ay;
+      end;
+      cury := cury + sy;
+      d := d + ax;
+    end;
   end;
 end;
 

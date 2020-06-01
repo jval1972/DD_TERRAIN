@@ -504,7 +504,12 @@ procedure TForm1.DoSaveTerrain(const fname: string);
 begin
   SetFileName(fname);
 
-  terrain.SaveToFile(fname);
+  Screen.Cursor := crHourglass;
+  try
+    terrain.SaveToFile(fname);
+  finally
+    Screen.Cursor := crDefault;
+  end;
 
   changed := False;
 end;
@@ -523,7 +528,13 @@ begin
 
   undoManager.Clear;
 
-  terrain.LoadFromFile(fname);
+  Screen.Cursor := crHourglass;
+  try
+    terrain.LoadFromFile(fname);
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
   PaintBox1.Width := terrain.texturesize;
   PaintBox1.Height := terrain.texturesize;
 
@@ -770,9 +781,14 @@ procedure TForm1.Undo1Click(Sender: TObject);
 begin
   if undoManager.CanUndo then
   begin
-    undoManager.Undo;
-    glneedsupdate := True;
-    needsrecalc := True;
+    Screen.Cursor := crHourglass;
+    try
+      undoManager.Undo;
+      glneedsupdate := True;
+      needsrecalc := True;
+    finally
+      Screen.Cursor := crDefault;
+    end;
   end;
 end;
 
@@ -780,9 +796,14 @@ procedure TForm1.Redo1Click(Sender: TObject);
 begin
   if undoManager.CanRedo then
   begin
-    undoManager.Redo;
-    glneedsupdate := True;
-    needsrecalc := True;
+    Screen.Cursor := crHourglass;
+    try
+      undoManager.Redo;
+      glneedsupdate := True;
+      needsrecalc := True;
+    finally
+      Screen.Cursor := crDefault;
+    end;
   end;
 end;
 

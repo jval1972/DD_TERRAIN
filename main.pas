@@ -1295,18 +1295,24 @@ end;
 procedure TForm1.LLeftMousePaintAt(const X, Y: integer);
 var
   iX, iY: integer;
+  iX1, iX2, iY1, iY2: integer;
   c, c1, c2: LongWord;
   tsize: integer;
   tline: PLongWordarray;
   newopacity: integer;
 begin
   tsize := terrain.texturesize;
+  iX1 := GetIntInRange(X - fpensize div 2, 0, tsize - 1);
+  iX2 := GetIntInRange(X + fpensize div 2, 0, tsize - 1);
+  iY1 := GetIntInRange(Y - fpensize div 2, 0, tsize - 1);
+  iY2 := GetIntInRange(Y + fpensize div 2, 0, tsize - 1);
+
   if PenSpeedButton1.Down then
   begin
-    for iY := GetIntInRange(Y - fpensize div 2, 0, tsize - 1) to GetIntInRange(Y + fpensize div 2, 0, tsize - 1) do
+    for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
-      for iX := GetIntInRange(X - fpensize div 2, 0, tsize - 1) to GetIntInRange(X + fpensize div 2, 0, tsize - 1) do
+      for iX := iX1 to iX2 do
         if layer[iX, iY].pass < fopacity then
         begin
           layer[iX, iY].pass := fopacity;
@@ -1314,16 +1320,16 @@ begin
           c2 := RGBSwap(tline[iX]);
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
-          PaintBox1.Canvas.Pixels[iX, iY] := c;
         end;
     end;
+    DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
   end
   else if PenSpeedButton2.Down then
   begin
-    for iY := GetIntInRange(Y - fpensize div 2, 0, tsize - 1) to GetIntInRange(Y + fpensize div 2, 0, tsize - 1) do
+    for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
-      for iX := GetIntInRange(X - fpensize div 2, 0, tsize - 1) to GetIntInRange(X + fpensize div 2, 0, tsize - 1) do
+      for iX := iX1 to iX2 do
         if layer[iX, iY].pass < fopacity then
         begin
           newopacity := pen2hit[iX - X, iY - Y];
@@ -1334,17 +1340,17 @@ begin
             c2 := RGBSwap(tline[iX]);
             c := coloraverage(c2, c1, fopacity);
             tline[iX] := RGBSwap(c);
-            PaintBox1.Canvas.Pixels[iX, iY] := c;
           end;
         end;
     end;
+    DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
   end
   else if PenSpeedButton3.Down then
   begin
-    for iY := GetIntInRange(Y - fpensize div 2, 0, tsize - 1) to GetIntInRange(Y + fpensize div 2, 0, tsize - 1) do
+    for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
-      for iX := GetIntInRange(X - fpensize div 2, 0, tsize - 1) to GetIntInRange(X + fpensize div 2, 0, tsize - 1) do
+      for iX := iX1 to iX2 do
         if layer[iX, iY].pass < fopacity then
         begin
           newopacity := pen3hit[iX - X, iY - Y];
@@ -1356,11 +1362,11 @@ begin
               c2 := RGBSwap(tline[iX]);
               c := coloraverage(c2, c1, newopacity);
               tline[iX] := RGBSwap(c);
-              PaintBox1.Canvas.Pixels[iX, iY] := c;
             end;
           end;
         end;
     end;
+    DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
   end;
   changed := true;
 end;

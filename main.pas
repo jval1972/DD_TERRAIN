@@ -39,6 +39,7 @@ uses
 type
   drawlayeritem_t = packed record
     pass: byte;
+    color: integer;
   end;
 
   drawlayer_t = packed array[0..MAXTEXTURESIZE - 1, 0..MAXTEXTURESIZE - 1] of drawlayeritem_t;
@@ -1351,18 +1352,21 @@ begin
     begin
       tline := terrain.Texture.ScanLine[iY];
       for iX := iX1 to iX2 do
-        if layer[iX, iY].pass < fopacity then
+      begin
+        newopacity := pen2hit[iX - X, iY - Y];
+        if layer[iX, iY].pass < newopacity then
         begin
-          newopacity := pen2hit[iX - X, iY - Y];
-          if newopacity <> 0 then
-          begin
-            layer[iX, iY].pass := newopacity;
-            c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
-            c2 := RGBSwap(tline[iX]);
-            c := coloraverage(c2, c1, fopacity);
-            tline[iX] := RGBSwap(c);
-          end;
+          if layer[iX, iY].pass = 0 then
+            c2 := RGBSwap(tline[iX])
+          else
+            c2 := layer[iX, iY].color;
+          layer[iX, iY].color := c2;
+          layer[iX, iY].pass := newopacity;
+          c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
+          c := coloraverage(c2, c1, fopacity);
+          tline[iX] := RGBSwap(c);
         end;
+      end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
   end
@@ -1372,20 +1376,21 @@ begin
     begin
       tline := terrain.Texture.ScanLine[iY];
       for iX := iX1 to iX2 do
-        if layer[iX, iY].pass < fopacity then
+      begin
+        newopacity := pen3hit[iX - X, iY - Y];
+        if layer[iX, iY].pass < newopacity then
         begin
-          newopacity := pen3hit[iX - X, iY - Y];
-          begin
-            if layer[iX, iY].pass < newopacity then
-            begin
-              layer[iX, iY].pass := newopacity;
-              c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
-              c2 := RGBSwap(tline[iX]);
-              c := coloraverage(c2, c1, newopacity);
-              tline[iX] := RGBSwap(c);
-            end;
-          end;
+          if layer[iX, iY].pass = 0 then
+            c2 := RGBSwap(tline[iX])
+          else
+            c2 := layer[iX, iY].color;
+          layer[iX, iY].color := c2;
+          layer[iX, iY].pass := newopacity;
+          c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
+          c := coloraverage(c2, c1, newopacity);
+          tline[iX] := RGBSwap(c);
         end;
+      end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
   end;

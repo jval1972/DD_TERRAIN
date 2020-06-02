@@ -36,6 +36,7 @@ uses
 const
   MAXHEIGHTMAPSIZE = 65;
   MAXTEXTURESIZE = 2048;
+  HEIGHTMAPRANGE = 359;
 
 type
   heightbufferitem_t = packed record
@@ -97,11 +98,13 @@ uses
 
 constructor TTerrain.Create;
 begin
-  ftexture := TBitmap.Create;
   ftexturesize := 1024;
+
+  ftexture := TBitmap.Create;
   ftexture.Width := ftexturesize;
   ftexture.Height := ftexturesize;
   ftexture.PixelFormat := pf32bit;
+
   ClearTexture;
   GetMem(fheightmap, SizeOf(heightbuffer_t));
   ClearHeightmap;
@@ -418,6 +421,7 @@ begin
       end;
   ret := DoValidateHeightmapItem(x, y);
   Result := Result or ret;
+  fheightmap[x, y].height := GetIntInRange(fheightmap[x, y].height, -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
 end;
 
 procedure TTerrain.Clear(const newt, newh: integer);

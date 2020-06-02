@@ -46,11 +46,20 @@ type
   drawlayer_p = ^drawlayer_t;
 
 type
+  heightlayeritem_t = packed record
+    pass: boolean;
+  end;
+
+  heightlayer_t = packed array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of heightlayeritem_t;
+  heightlayer_p = ^heightlayer_t;
+
+type
   colorbuffer_t = array[0..MAXTEXTURESIZE - 1, 0..MAXTEXTURESIZE - 1] of LongWord;
   colorbuffer_p = ^colorbuffer_t;
 
 const
   MAXPENSIZE = 128;
+  MAXHEIGHTSIZE = 128;
 
 type
   TForm1 = class(TForm)
@@ -140,17 +149,21 @@ type
     Panel11: TPanel;
     FlatSizeLabel: TLabel;
     Panel1: TPanel;
-    OpacityPaintBox: TPaintBox;
-    OpacityLabel: TLabel;
-    PenSizeLabel: TLabel;
-    PenSizePaintBox: TPaintBox;
-    Label3: TLabel;
-    Label2: TLabel;
     Panel12: TPanel;
     PenSpeedButton1: TSpeedButton;
     PenSpeedButton2: TSpeedButton;
     PenSpeedButton3: TSpeedButton;
     PenSpeedButton4: TSpeedButton;
+    PenSpeedButton5: TSpeedButton;
+    Label3: TLabel;
+    PenSizePaintBox: TPaintBox;
+    PenSizeLabel: TLabel;
+    OpacityLabel: TLabel;
+    OpacityPaintBox: TPaintBox;
+    Label2: TLabel;
+    Label1: TLabel;
+    HeightPaintBox: TPaintBox;
+    HeightLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -201,11 +214,13 @@ type
     procedure PenSpeedButton2Click(Sender: TObject);
     procedure PenSpeedButton3Click(Sender: TObject);
     procedure PenSpeedButton4Click(Sender: TObject);
+    procedure PenSpeedButton5Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
     fwadfilename: string;
-    layer: drawlayer_p;
+    drawlayer: drawlayer_p;
+    heightlayer: heightlayer_p;
     colorbuffersize: integer;
     colorbuffer: colorbuffer_p;
     changed: Boolean;
@@ -220,14 +235,17 @@ type
     needsrecalc: boolean;
     fopacity: integer;
     fpensize: integer;
+    fheightsize: integer;
     foldopacity: integer;
     foldpensize: integer;
     OpacitySlider: TSliderHook;
     PenSizeSlider: TSliderHook;
+    HeightSlider: TSliderHook;
     closing: boolean;
     lmousedown: boolean;
     lmousedownx, lmousedowny: integer;
     lmouseheightmapx, lmouseheightmapy: integer;
+    hmouseheightmapx, hmouseheightmapy: integer;
     pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     bitmapbuffer: TBitmap;
@@ -299,7 +317,8 @@ begin
   PageControl1.ActivePageIndex := 0;
   PageControl2.ActivePageIndex := 0;
 
-  GetMem(layer, SizeOf(drawlayer_t));
+  GetMem(drawlayer, SizeOf(drawlayer_t));
+  GetMem(heightlayer, SizeOf(heightlayer_t));
   GetMem(colorbuffer, SizeOf(colorbuffer_t));
   FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
   colorbuffersize := 128;
@@ -311,8 +330,12 @@ begin
   lmouseheightmapx := 0;
   lmouseheightmapy := 0;
 
+  hmouseheightmapx := 0;
+  hmouseheightmapy := 0;
+  
   fopacity := 100;
   fpensize := 64;
+  fheightsize := 64;
   foldopacity := -1;
   foldpensize := -1;
 
@@ -405,6 +428,10 @@ begin
   PenSizeSlider := TSliderHook.Create(PenSizePaintBox);
   PenSizeSlider.Min := 1;
   PenSizeSlider.Max := MAXPENSIZE;
+
+  HeightSlider := TSliderHook.Create(HeightPaintBox);
+  HeightSlider.Min := -MAXHEIGHTSIZE;
+  HeightSlider.Max := MAXHEIGHTSIZE;
 
   doCreate := True;
   if ParamCount > 0 then
@@ -593,8 +620,10 @@ begin
 
   OpacitySlider.Free;
   PenSizeSlider.Free;
+  HeightSlider.Free;
   terrain.Free;
-  Freemem(layer, SizeOf(drawlayer_t));
+  Freemem(drawlayer, SizeOf(drawlayer_t));
+  Freemem(heightlayer, SizeOf(heightlayer_t));
   Freemem(colorbuffer, SizeOf(colorbuffer_t));
   
   bitmapbuffer.Free;
@@ -1005,12 +1034,18 @@ begin
   PenSizeSlider.Position := fpensize;
   PenSizePaintBox.Invalidate;
   PenSizeSlider.OnSliderHookChange := UpdateFromSliders;
+
+  HeightSlider.OnSliderHookChange := nil;
+  HeightSlider.Position := fheightsize;
+  HeightPaintBox.Invalidate;
+  HeightSlider.OnSliderHookChange := UpdateFromSliders;
 end;
 
 procedure TForm1.SlidersToLabels;
 begin
   OpacityLabel.Caption := Format('%d', [Round(OpacitySlider.Position)]);
   PenSizeLabel.Caption := Format('%d', [Round(PenSizeSlider.Position)]);
+  HeightLabel.Caption := Format('%d', [Round(HeightSlider.Position)]);
 end;
 
 procedure TForm1.TerrainToControls;
@@ -1034,6 +1069,7 @@ begin
   SlidersToLabels;
   fopacity := Round(OpacitySlider.Position);
   fpensize := Round(PenSizeSlider.Position);
+  fheightsize := Round(HeightSlider.Position);
   CalcPenMasks;
   needsrecalc := True;
 end;
@@ -1095,12 +1131,14 @@ end;
 procedure TForm1.DoRefreshPaintBox(const r: TRect);
 var
   C: TCanvas;
-  x, y, hsize, hstep, checkstep: integer;
+  x, y, k, hsize, hstep, checkstep: integer;
   drawx, drawy: integer;
   pointx, pointy: integer;
   pointrect: TRect;
   hitem: heightbufferitem_t;
+  hx, hy: integer;
   drawredpoints: boolean;
+  drawheightmap: boolean;
 
   procedure lineandpoint(const ax, ay: integer);
   begin
@@ -1108,18 +1146,66 @@ var
     if drawredpoints then
   end;
 
+  function hcolor: LongWord;
+  var
+    g: integer;
+  begin
+    g := GetIntInRange(Round(hitem.height + HEIGHTMAPRANGE * 256 / (2 * HEIGHTMAPRANGE)), 0, 255);
+    Result := RGB(g, g, g);
+  end;
+
 begin
   C := bitmapbuffer.Canvas;
   C.CopyRect(r, terrain.Texture.Canvas, r);
+
+  hsize := terrain.heightmapsize;
+  hstep := terrain.texturesize div (hsize - 1);
+  checkstep := MaxI(64, hstep * 3);
+
+  drawheightmap := PenSpeedButton5.Down;
+  if drawheightmap then
+  begin
+    C.Pen.Style := psSolid;
+
+    drawx := 0;
+    for x := 0 to hsize - 1 do
+    begin
+      if intersectRange(drawx - checkstep - 1, drawx + checkstep + 1, r.Left, r.Right) then
+      begin
+        drawy := 0;
+        for y := 0 to hsize - 1 do
+        begin
+          if intersectRect(r, Rect(drawx - checkstep - 1, drawy - checkstep - 1, drawx + checkstep + 1, drawy + checkstep + 1)) then
+          begin
+            hitem := terrain.Heightmap[x, y];
+            C.Pen.Color := hcolor;
+            hx := drawx + hitem.dx;
+            hy := drawy + hitem.dy;
+            for k := -hstep div 2 to hstep + 2 do
+            begin
+              if (hy + k) mod 8 = 4 then
+              begin
+                C.MoveTo(hx - hstep div 2, hy + k);
+                C.LineTo(hx + hstep div 2, hy + k);
+              end;
+              if (hx + k) mod 8 = 4 then
+              begin
+                C.MoveTo(hx + k, hy - hstep div 2);
+                C.LineTo(hx + k, hy + hstep div 2);
+              end;
+            end;
+          end;
+          drawy := drawy + hstep;
+        end;
+      end;
+      drawx := drawx + hstep;
+    end;
+  end;
 
   C.Pen.Style := psSolid;
   C.Pen.Color := RGB(128, 255, 128);
   C.Brush.Style := bsSolid;
   C.Brush.Color := RGB(255, 0, 0);
-
-  hsize := terrain.heightmapsize;
-  hstep := terrain.texturesize div (hsize - 1);
-  checkstep := MaxI(64, hstep * 3);
 
   drawx := 0;
   for x := 0 to hsize - 2 do
@@ -1367,8 +1453,11 @@ begin
     lmousedowny := Y;
 
     terrain.TerrainToHeightmapIndex(X, Y, lmouseheightmapx, lmouseheightmapy);
+    terrain.TerrainToHeightmapIndex(X, Y, hmouseheightmapx, hmouseheightmapy);
 
-    ZeroMemory(layer, SizeOf(drawlayer_t));
+    ZeroMemory(drawlayer, SizeOf(drawlayer_t));
+    ZeroMemory(heightlayer, SizeOf(heightlayer_t));
+
     LLeftMousePaintTo(X, Y);
   end;
 end;
@@ -1378,6 +1467,7 @@ procedure TForm1.PaintBox1MouseUp(Sender: TObject; Button: TMouseButton;
 begin
   if button = mbLeft then
   begin
+    terrain.TerrainToHeightmapIndex(X, Y, hmouseheightmapx, hmouseheightmapy);
     LLeftMousePaintTo(X, Y);
     lmousedownx := X;
     lmousedowny := Y;
@@ -1390,6 +1480,7 @@ procedure TForm1.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
 begin
   if lmousedown then
   begin
+    terrain.TerrainToHeightmapIndex(X, Y, hmouseheightmapx, hmouseheightmapy);
     LLeftMousePaintTo(X, Y);
     lmousedownx := X;
     lmousedowny := Y;
@@ -1434,6 +1525,7 @@ var
   tline: PLongWordarray;
   newopacity: integer;
   hchanged: boolean;
+  hitem: heightbufferitem_t;
 begin
   tsize := terrain.texturesize;
   iX1 := GetIntInRange(X - fpensize div 2, 0, tsize - 1);
@@ -1447,9 +1539,9 @@ begin
     begin
       tline := terrain.Texture.ScanLine[iY];
       for iX := iX1 to iX2 do
-        if layer[iX, iY].pass < fopacity then
+        if drawlayer[iX, iY].pass < fopacity then
         begin
-          layer[iX, iY].pass := fopacity;
+          drawlayer[iX, iY].pass := fopacity;
           c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
           c2 := RGBSwap(tline[iX]);
           c := coloraverage(c2, c1, fopacity);
@@ -1467,14 +1559,14 @@ begin
       for iX := iX1 to iX2 do
       begin
         newopacity := pen2mask[iX - X, iY - Y];
-        if layer[iX, iY].pass < newopacity then
+        if drawlayer[iX, iY].pass < newopacity then
         begin
-          if layer[iX, iY].pass = 0 then
+          if drawlayer[iX, iY].pass = 0 then
             c2 := RGBSwap(tline[iX])
           else
-            c2 := layer[iX, iY].color;
-          layer[iX, iY].color := c2;
-          layer[iX, iY].pass := newopacity;
+            c2 := drawlayer[iX, iY].color;
+          drawlayer[iX, iY].color := c2;
+          drawlayer[iX, iY].pass := newopacity;
           c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
@@ -1492,14 +1584,14 @@ begin
       for iX := iX1 to iX2 do
       begin
         newopacity := pen3mask[iX - X, iY - Y];
-        if layer[iX, iY].pass < newopacity then
+        if drawlayer[iX, iY].pass < newopacity then
         begin
-          if layer[iX, iY].pass = 0 then
+          if drawlayer[iX, iY].pass = 0 then
             c2 := RGBSwap(tline[iX])
           else
-            c2 := layer[iX, iY].color;
-          layer[iX, iY].color := c2;
-          layer[iX, iY].pass := newopacity;
+            c2 := drawlayer[iX, iY].color;
+          drawlayer[iX, iY].color := c2;
+          drawlayer[iX, iY].pass := newopacity;
           c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
           c := coloraverage(c2, c1, newopacity);
           tline[iX] := RGBSwap(c);
@@ -1520,6 +1612,27 @@ begin
       iY2 := terrain.HeightmapToCoord(lmouseheightmapy) + 2 * terrain.heightmapblocksize;
       DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
       changed := true;
+    end;
+  end
+  else if PenSpeedButton5.Down then
+  begin
+    hchanged := False;
+    if not heightlayer[hmouseheightmapx, hmouseheightmapy].pass then
+    begin
+      hchanged := True;
+      heightlayer[hmouseheightmapx, hmouseheightmapy].pass := true;
+      hitem := terrain.Heightmap[hmouseheightmapx, hmouseheightmapy];
+      hitem.height := terrain.Heightmap[hmouseheightmapx, hmouseheightmapy].height + fheightsize;
+      terrain.Heightmap[hmouseheightmapx, hmouseheightmapy] := hitem;
+      changed := true;
+    end;
+    if hchanged then
+    begin
+      iX1 := GetIntInRange(X - terrain.heightmapblocksize, 0, tsize - 1);
+      iX2 := GetIntInRange(X + terrain.heightmapblocksize, 0, tsize - 1);
+      iY1 := GetIntInRange(Y - terrain.heightmapblocksize, 0, tsize - 1);
+      iY2 := GetIntInRange(Y + terrain.heightmapblocksize, 0, tsize - 1);
+      DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
     end;
   end;
 end;
@@ -1633,6 +1746,11 @@ begin
 end;
 
 procedure TForm1.PenSpeedButton4Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PenSpeedButton5Click(Sender: TObject);
 begin
   PaintBox1.Invalidate;
 end;

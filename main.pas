@@ -122,7 +122,7 @@ type
     TabSheet5: TTabSheet;
     OpenGLScrollBox: TScrollBox;
     OpenGLPanel: TPanel;
-    Panel1: TPanel;
+    OpenWADMainPanel: TPanel;
     Panel2: TPanel;
     Panel6: TPanel;
     Panel3: TPanel;
@@ -221,8 +221,8 @@ type
     closing: boolean;
     lmousedown: boolean;
     lmousedownx, lmousedowny: integer;
-    pen2hit: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
-    pen3hit: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
+    pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
+    pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNewTerrain(const tsize, hsize: integer);
@@ -246,7 +246,7 @@ type
     function GetWADFlatAsBitmap(const fwad: string; const flat: string): TBitmap;
     procedure LLeftMousePaintAt(const X, Y: integer);
     procedure LLeftMousePaintTo(const X, Y: integer);
-    procedure CalcPenHit;
+    procedure CalcPenMasks;
     procedure DoRefreshPaintBox(const r: TRect);
   public
     { Public declarations }
@@ -302,8 +302,8 @@ begin
   foldopacity := -1;
   foldpensize := -1;
 
-  CalcPenHit;
-  
+  CalcPenMasks;
+
   NotifyFlatsListBox;
 
   undoManager := TUndoRedoManager.Create;
@@ -1014,7 +1014,7 @@ begin
   SlidersToLabels;
   fopacity := Round(OpacitySlider.Position);
   fpensize := Round(PenSizeSlider.Position);
-  CalcPenHit;
+  CalcPenMasks;
   needsrecalc := True;
 end;
 
@@ -1252,7 +1252,7 @@ procedure TForm1.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
 begin
   if button = mbLeft then
   begin
-    CalcPenHit;
+    CalcPenMasks;
     SaveUndo;
     lmousedown := True;
     lmousedownx := X;
@@ -1353,7 +1353,7 @@ begin
       tline := terrain.Texture.ScanLine[iY];
       for iX := iX1 to iX2 do
       begin
-        newopacity := pen2hit[iX - X, iY - Y];
+        newopacity := pen2mask[iX - X, iY - Y];
         if layer[iX, iY].pass < newopacity then
         begin
           if layer[iX, iY].pass = 0 then
@@ -1377,7 +1377,7 @@ begin
       tline := terrain.Texture.ScanLine[iY];
       for iX := iX1 to iX2 do
       begin
-        newopacity := pen3hit[iX - X, iY - Y];
+        newopacity := pen3mask[iX - X, iY - Y];
         if layer[iX, iY].pass < newopacity then
         begin
           if layer[iX, iY].pass = 0 then
@@ -1458,7 +1458,7 @@ begin
   end;
 end;
 
-procedure TForm1.CalcPenHit;
+procedure TForm1.CalcPenMasks;
 var
   iX, iY: integer;
   sqmaxdist: integer;
@@ -1471,8 +1471,8 @@ begin
   foldopacity := fopacity;
   foldpensize := fpensize;
 
-  ZeroMemory(@pen2hit, SizeOf(pen2hit));
-  ZeroMemory(@pen3hit, SizeOf(pen3hit));
+  ZeroMemory(@pen2mask, SizeOf(pen2mask));
+  ZeroMemory(@pen3mask, SizeOf(pen3mask));
   sqmaxdist := sqr(fpensize div 2);
   for iY := -fpensize div 2 to fpensize div 2 do
   begin
@@ -1482,9 +1482,9 @@ begin
       sqdist := iX * iX + sqry;
       if sqdist <= sqmaxdist then
       begin
-        pen2hit[iX, iY] := fopacity;
+        pen2mask[iX, iY] := fopacity;
         frac := (1 - sqdist / sqmaxdist) * fopacity;
-        pen3hit[iX, iY] := GetIntInRange(round(frac), 0, 100);
+        pen3mask[iX, iY] := GetIntInRange(round(frac), 0, 100);
       end;
     end;
   end;

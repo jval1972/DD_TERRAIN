@@ -46,6 +46,10 @@ function MaxI(const a, b: Integer): Integer;
 
 function MinI(const a, b: Integer): Integer;
 
+function MaxD(const a, b: Double): Double;
+
+function MinD(const a, b: Double): Double;
+
 function CopyFile(const sname, dname: string): boolean;
 
 procedure BackupFile(const fname: string);
@@ -158,6 +162,22 @@ begin
 end;
 
 function MinI(const a, b: Integer): Integer;
+begin
+  if a < b then
+    Result := a
+  else
+    Result := b;
+end;
+
+function MaxD(const a, b: Double): Double;
+begin
+  if a > b then
+    Result := a
+  else
+    Result := b;
+end;
+
+function MinD(const a, b: Double): Double;
 begin
   if a < b then
     Result := a

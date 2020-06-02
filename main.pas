@@ -150,6 +150,7 @@ type
     PenSpeedButton1: TSpeedButton;
     PenSpeedButton2: TSpeedButton;
     PenSpeedButton3: TSpeedButton;
+    PenSpeedButton4: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -196,6 +197,10 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
+    procedure PenSpeedButton1Click(Sender: TObject);
+    procedure PenSpeedButton2Click(Sender: TObject);
+    procedure PenSpeedButton3Click(Sender: TObject);
+    procedure PenSpeedButton4Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -222,6 +227,7 @@ type
     closing: boolean;
     lmousedown: boolean;
     lmousedownx, lmousedowny: integer;
+    lmouseheightmapx, lmouseheightmapy: integer;
     pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     bitmapbuffer: TBitmap;
@@ -301,6 +307,9 @@ begin
   lmousedown := false;
   lmousedownx := 0;
   lmousedowny := 0;
+
+  lmouseheightmapx := 0;
+  lmouseheightmapy := 0;
 
   fopacity := 100;
   fpensize := 64;
@@ -405,7 +414,7 @@ begin
   if DoCreate then
   begin
     SetFileName('');
-    DoNewTerrain(1024, 33);
+    DoNewTerrain(1024, 17);
     glneedsupdate := True;
     needsrecalc := True;
     undoManager.Clear;
@@ -1088,33 +1097,46 @@ var
   C: TCanvas;
   x, y, hsize, hstep, checkstep: integer;
   drawx, drawy: integer;
+  pointx, pointy: integer;
+  pointrect: TRect;
   hitem: heightbufferitem_t;
+  drawredpoints: boolean;
+
+  procedure lineandpoint(const ax, ay: integer);
+  begin
+    C.LineTo(ax, ay);
+    if drawredpoints then
+  end;
+
 begin
   C := bitmapbuffer.Canvas;
   C.CopyRect(r, terrain.Texture.Canvas, r);
 
   C.Pen.Style := psSolid;
   C.Pen.Color := RGB(128, 255, 128);
+  C.Brush.Style := bsSolid;
+  C.Brush.Color := RGB(255, 0, 0);
+
   hsize := terrain.heightmapsize;
   hstep := terrain.texturesize div (hsize - 1);
-  checkstep := hstep * 3 div 2;
+  checkstep := MaxI(64, hstep * 3);
 
   drawx := 0;
   for x := 0 to hsize - 2 do
   begin
-    if intersectRange(drawx, drawx + checkstep, r.Left, r.Right) then
+    if intersectRange(drawx - checkstep - 1, drawx + checkstep + 1, r.Left, r.Right) then
     begin
       drawy := 0;
       for y := 0 to hsize - 2 do
       begin
-        if intersectRect(r, Rect(drawx, drawy, drawx + checkstep, drawy + checkstep)) then
+        if intersectRect(r, Rect(drawx - checkstep - 1, drawy - checkstep - 1, drawx + checkstep + 1, drawy + checkstep + 1)) then
         begin
           hitem := terrain.Heightmap[x, y];
           C.MoveTo(drawx + hitem.dx, drawy + hitem.dy);
           hitem := terrain.Heightmap[x + 1, y];
           C.LineTo(drawx + hstep + hitem.dx, drawy + hitem.dy);
           hitem := terrain.Heightmap[x, y + 1];
-          C.MoveTo(drawx + hitem.dx, drawy + hstep + hitem.dy);
+          C.LineTo(drawx + hitem.dx, drawy + hstep + hitem.dy);
           hitem := terrain.Heightmap[x + 1, y + 1];
           C.LineTo(drawx + hstep + hitem.dx, drawy + hstep + hitem.dy);
           hitem := terrain.Heightmap[x + 1, y];
@@ -1126,6 +1148,30 @@ begin
     drawx := drawx + hstep;
   end;
 
+  drawredpoints := PenSpeedButton4.Down;
+  if drawredpoints then
+  begin
+    drawx := 0;
+    for x := 0 to hsize - 1 do
+    begin
+      if intersectRange(drawx, drawx + checkstep, r.Left, r.Right) then
+      begin
+        drawy := 0;
+        for y := 0 to hsize - 1 do
+        begin
+          hitem := terrain.Heightmap[x, y];
+          pointx := drawx + hitem.dx;
+          pointy := drawy + hitem.dy;
+          pointrect := Rect(pointx - 2, pointy - 2, pointx + 2, pointy + 2);
+          if intersectRect(r, pointrect) then
+            C.FillRect(pointrect);
+          drawy := drawy + hstep;
+        end;
+      end;
+      drawx := drawx + hstep;
+    end;
+  end;
+  
   PaintBox1.Canvas.CopyRect(r, C, r);
 end;
 
@@ -1319,6 +1365,9 @@ begin
     lmousedown := True;
     lmousedownx := X;
     lmousedowny := Y;
+
+    terrain.TerrainToHeightmapIndex(X, Y, lmouseheightmapx, lmouseheightmapy);
+
     ZeroMemory(layer, SizeOf(drawlayer_t));
     LLeftMousePaintTo(X, Y);
   end;
@@ -1384,6 +1433,7 @@ var
   tsize: integer;
   tline: PLongWordarray;
   newopacity: integer;
+  hchanged: boolean;
 begin
   tsize := terrain.texturesize;
   iX1 := GetIntInRange(X - fpensize div 2, 0, tsize - 1);
@@ -1407,6 +1457,7 @@ begin
         end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
+    changed := true;
   end
   else if PenSpeedButton2.Down then
   begin
@@ -1431,6 +1482,7 @@ begin
       end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
+    changed := true;
   end
   else if PenSpeedButton3.Down then
   begin
@@ -1455,8 +1507,21 @@ begin
       end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
+    changed := true;
+  end
+  else if PenSpeedButton4.Down then
+  begin
+    hchanged := terrain.MoveHeightmapPoint(lmouseheightmapx, lmouseheightmapy, X, Y);
+    if hchanged then
+    begin
+      iX1 := terrain.HeightmapToCoord(lmouseheightmapx) - 2 * terrain.heightmapblocksize;
+      iX2 := terrain.HeightmapToCoord(lmouseheightmapx) + 2 * terrain.heightmapblocksize;
+      iY1 := terrain.HeightmapToCoord(lmouseheightmapy) - 2 * terrain.heightmapblocksize;
+      iY2 := terrain.HeightmapToCoord(lmouseheightmapy) + 2 * terrain.heightmapblocksize;
+      DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
+      changed := true;
+    end;
   end;
-  changed := true;
 end;
 
 procedure TForm1.LLeftMousePaintTo(const X, Y: integer);
@@ -1550,6 +1615,26 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TForm1.PenSpeedButton1Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PenSpeedButton2Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PenSpeedButton3Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PenSpeedButton4Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
 end;
 
 end.

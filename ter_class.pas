@@ -39,8 +39,8 @@ const
 
 type
   heightbufferitem_t = packed record
-    height: smallint;
-    dx, dy: smallint;
+    height: integer;
+    dx, dy: integer;
   end;
   heightbufferitem_p = ^heightbufferitem_t;
   heightbuffer_t = packed array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of heightbufferitem_t;
@@ -55,12 +55,15 @@ type
     fheightmapsize: integer;
   protected
     procedure ClearTexture;
+    procedure ClearHeightmap;
     function GetTexture: TBitmap;
     procedure SetTextureSize(const val: integer);
     procedure SetHeightmapSize(const val: integer);
     function GetHeightmap(x, y: integer): heightbufferitem_t;
     procedure SetHeightmap(x, y: integer; val: heightbufferitem_t);
-    procedure ValidateHeightmapItem(x, y: integer);
+    function DoValidateHeightmapItem(x, y: integer): boolean;
+    function ValidateHeightmapItem(x, y: integer): boolean;
+    function ValidHeightmapPivotAngle(const x, y: integer): boolean;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -69,6 +72,11 @@ type
     function LoadFromStream(const strm: TStream): boolean;
     procedure SaveToFile(const fname: string; const compressed: boolean = true);
     function LoadFromFile(const fname: string): boolean;
+    procedure TerrainToHeightmapIndex(const tX, tY: integer; out hX, hY: integer);
+    function MoveHeightmapPoint(const hX, hY: integer; const px, py: integer): boolean;
+    function HeightmapToCoord(const h: integer): integer;
+    function HeightmapCoords(const x, y: integer): TPoint;
+    function heightmapblocksize: integer;
     property Texture: TBitmap read GetTexture;
     property Heightmap[x, y: integer]: heightbufferitem_t read GetHeightmap write SetHeightmap;
     property texturesize: integer read ftexturesize;
@@ -85,7 +93,7 @@ const
 implementation
 
 uses
-  ter_utils, zBitmap;
+  Math, ter_utils, zBitmap;
 
 constructor TTerrain.Create;
 begin
@@ -96,7 +104,7 @@ begin
   ftexture.PixelFormat := pf32bit;
   ClearTexture;
   GetMem(fheightmap, SizeOf(heightbuffer_t));
-  ZeroMemory(fheightmap, SizeOf(heightbuffer_t));
+  ClearHeightmap;
   fheightmapsize := 17;
   Inherited;
 end;
@@ -118,6 +126,11 @@ begin
     A := PLongWordArray(ftexture.ScanLine[i]);
     ZeroMemory(A, ftexturesize * SizeOf(LongWord));
   end;
+end;
+
+procedure TTerrain.ClearHeightmap;
+begin
+  ZeroMemory(fheightmap, SizeOf(heightbuffer_t));
 end;
 
 function TTerrain.GetTexture: TBitmap;
@@ -161,6 +174,7 @@ end;
 procedure TTerrain.SetHeightmap(x, y: integer; val: heightbufferitem_t);
 var
   item: heightbufferitem_p;
+  oldx, oldy: integer;
 begin
   if (x < 0) or (x > fheightmapsize) then
     Exit;
@@ -173,51 +187,123 @@ begin
       if item.dy = val.dy then
         Exit;
 
+  oldx := item.dx;
+  oldy := item.dy;
   item^ := val;
+  if not ValidHeightmapPivotAngle(x, y) then
+  begin
+    item.dy := oldy;
+    if not ValidHeightmapPivotAngle(x, y) then
+    begin
+      item.dx := oldx;
+      item.dy := val.dy;
+      if not ValidHeightmapPivotAngle(x, y) then
+        item.dy := oldy;
+    end;
+  end;
   ValidateHeightmapItem(x, y);
 end;
 
-procedure TTerrain.ValidateHeightmapItem(x, y: integer);
+type
+  fpoint_t = record
+    x, y: double;
+  end;
+  fpoint6_t = array[0..5] of fpoint_t;
+
+function IsPointInPolygon(const p: fpoint_t; const poly: fpoint6_t): boolean;
 var
+  minX, maxX, minY, maxY: double;
+  i, j: integer;
+begin
+  minX := poly[0].x;
+  maxX := poly[0].x;
+  minY := poly[0].Y;
+  maxY := poly[0].Y;
+  for i := 1 to 5 do
+  begin
+    minX := MinD(poly[i].x, minX);
+    maxX := MaxD(poly[i].x, maxX);
+    minY := MinD(poly[i].y, minY);
+    maxY := MaxD(poly[i].y, maxY);
+  end;
+
+  if (p.x < minX) or (p.x > maxX) or (p.y < minY) or (p.Y > maxY) then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  Result := False;
+  i := 0;
+  j := 5;
+  while i < 6 do
+  begin
+    if (poly[i].y > p.y ) <> (poly[j].y > p.y) then
+      if p.X < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x then
+        Result := not Result;
+    j := i;
+    inc(i);
+  end;
+end;
+
+function TTerrain.DoValidateHeightmapItem(x, y: integer): boolean;
+const
+  EPSILON = 1.0;
+  MAXITERS = 100;
+var
+  maxedgedxdy: integer;
   maxdxdy: integer;
   item: heightbufferitem_p;
+  poly: fpoint6_t;
+  point: fpoint_t;
+  fdx, fdy: double;
+  frac: double;
+  iters: integer;
+  savedx, savedy: integer;
 begin
+  Result := False;
   if (x < 0) or (x > fheightmapsize) then
     Exit;
   if (y < 0) or (y > fheightmapsize) then
     Exit;
 
-  maxdxdy := ftexturesize div (fheightmapsize - 1) - 1;
+  maxedgedxdy := (ftexturesize div (fheightmapsize - 1)) div 2 - 1;
   item := @fheightmap[x, y];
 
+  savedx := item.dx;
+  savedy := item.dy;
   if (x = 0) or (x = fheightmapsize - 1) then
     if (y = 0) or (y = fheightmapsize - 1) then
     begin
       item.dx := 0;
       item.dy := 0;
+      Result := (item.dx <> savedx) or (item.dy <> savedy);
       Exit;
     end;
 
   if (x = 0) or (x = fheightmapsize - 1) then
   begin
     item.dx := 0;
-    if item.dy > maxdxdy then
-      item.dy := maxdxdy
-    else if item.dy < -maxdxdy then
-      item.dy := -maxdxdy;
+    if item.dy > maxedgedxdy then
+      item.dy := maxedgedxdy
+    else if item.dy < -maxedgedxdy then
+      item.dy := -maxedgedxdy;
+    Result := (item.dx <> savedx) or (item.dy <> savedy);
     Exit;
   end;
 
   if (y = 0) or (y = fheightmapsize - 1) then
   begin
     item.dy := 0;
-    if item.dx > maxdxdy then
-      item.dx := maxdxdy
-    else if item.dx < -maxdxdy then
-      item.dx := -maxdxdy;
+    if item.dx > maxedgedxdy then
+      item.dx := maxedgedxdy
+    else if item.dx < -maxedgedxdy then
+      item.dx := -maxedgedxdy;
+    Result := (item.dx <> savedx) or (item.dy <> savedy);
     Exit;
   end;
 
+  maxdxdy := ftexturesize div (fheightmapsize - 1) - 1;
   if item.dx > maxdxdy then
     item.dx := maxdxdy
   else if item.dx < -maxdxdy then
@@ -226,6 +312,112 @@ begin
     item.dy := maxdxdy
   else if item.dy < -maxdxdy then
     item.dy := -maxdxdy;
+
+  poly[0].x := HeightmapToCoord(x) + fheightmap[x, y - 1].dx;
+  poly[0].y := HeightmapToCoord(y - 1) + fheightmap[x, y - 1].dy + EPSILON;
+
+  poly[1].x := HeightmapToCoord(x + 1) + fheightmap[x + 1, y - 1].dx - EPSILON;
+  poly[1].y := HeightmapToCoord(y - 1) + fheightmap[x + 1, y - 1].dy + EPSILON;
+
+  poly[2].x := HeightmapToCoord(x + 1) + fheightmap[x + 1, y].dx - EPSILON;
+  poly[2].y := HeightmapToCoord(y) + fheightmap[x + 1, y].dy;
+
+  poly[3].x := HeightmapToCoord(x) + fheightmap[x, y + 1].dx;
+  poly[3].y := HeightmapToCoord(y + 1) + fheightmap[x, y + 1].dy - EPSILON;
+
+  poly[4].x := HeightmapToCoord(x - 1) + fheightmap[x - 1, y + 1].dx + EPSILON;
+  poly[4].y := HeightmapToCoord(y + 1) + fheightmap[x - 1, y + 1].dy - EPSILON;
+
+  poly[5].x := HeightmapToCoord(x - 1) + fheightmap[x - 1, y].dx + EPSILON;
+  poly[5].y := HeightmapToCoord(y) + fheightmap[x - 1, y].dy;
+
+  fdx := fheightmap[x, y].dx;
+  fdy := fheightmap[x, y].dy;
+  point.x := HeightmapToCoord(x) + fdx;
+  point.y := HeightmapToCoord(y) + fdy;
+
+  iters := 0;
+  frac := (heightmapblocksize - 1) / heightmapblocksize;
+  while not IsPointInPolygon(point, poly) do
+  begin
+    fdx := fdx * frac;
+    fdy := fdy * frac;
+    point.x := HeightmapToCoord(x) + fdx;
+    point.y := HeightmapToCoord(y) + fdy;
+    inc(iters);
+    if iters >= MAXITERS then
+      break;
+  end;
+
+  fheightmap[x, y].dx := trunc(fdx);
+  fheightmap[x, y].dy := trunc(fdy);
+
+  Result := (item.dx <> savedx) or (item.dy <> savedy);
+end;
+
+function TTerrain.ValidHeightmapPivotAngle(const x, y: integer): boolean;
+var
+  angles: array[0..5] of Double;
+  dangles: array[0..5] of Double;
+  i: integer;
+  dx, dy: integer;
+  sum: double;
+begin
+  if (x <= 0) or (x >= fheightmapsize - 1) or (y = 0) or (y >= fheightmapsize - 1) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x - 1, y).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x - 1, y).Y;
+  angles[0] := Arctan2(dy, dx) * 180 / pi;
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x - 1, y + 1).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x - 1, y + 1).Y;
+  angles[1] := Arctan2(dy, dx) * 180 / pi;
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x, y + 1).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x, y + 1).Y;
+  angles[2] := Arctan2(dy, dx) * 180 / pi;
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x + 1, y).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x + 1, y).Y;
+  angles[3] := Arctan2(dy, dx) * 180 / pi;
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x + 1, y - 1).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x + 1, y - 1).Y;
+  angles[4] := Arctan2(dy, dx) * 180 / pi;
+  dx := HeightmapCoords(x, y).X - HeightmapCoords(x, y - 1).X;
+  dy := HeightmapCoords(x, y).Y - HeightmapCoords(x, y - 1).Y;
+  angles[5] := Arctan2(dy, dx) * 180 / pi;
+
+  dangles[0] := angles[5] - angles[0];
+  for i := 1 to 5 do
+    dangles[i] := angles[i - 1] - angles[i];
+  sum := 0;
+  for i := 0 to 5 do
+  begin
+    if dangles[i] < 0 then
+      sum := sum + dangles[i] + 360
+    else
+      sum := sum + dangles[i];
+  end;
+  Result := abs(sum - 360) < 1.0;
+end;
+
+function TTerrain.ValidateHeightmapItem(x, y: integer): boolean;
+var
+  iX, iY: integer;
+  ret: boolean;
+begin
+//  Result := DoValidateHeightmapItem(x, y);
+  Result := False;
+  for iX := GetIntInRange(x - 2, 0, fheightmapsize - 1) to GetIntInRange(x + 2, 0, fheightmapsize - 1) do
+    for iY := GetIntInRange(y - 2, 0, fheightmapsize - 1) to GetIntInRange(y + 2, 0, fheightmapsize - 1) do
+      if (iX <> x) and (iY <> y) then
+      begin
+        ret := DoValidateHeightmapItem(iX, iY);
+        Result := Result or ret;
+      end;
+  ret := DoValidateHeightmapItem(x, y);
+  Result := Result or ret;
 end;
 
 procedure TTerrain.Clear(const newt, newh: integer);
@@ -233,6 +425,7 @@ begin
   SetTextureSize(newt);
   SetHeightmapSize(newh);
   ClearTexture;
+  ClearHeightmap;
 end;
 
 procedure TTerrain.SaveToStream(const strm: TStream; const compressed: boolean = true);
@@ -354,6 +547,86 @@ begin
   end;
 end;
 
+procedure TTerrain.TerrainToHeightmapIndex(const tX, tY: integer; out hX, hY: integer);
+var
+  centerx, centery: integer;
+  blocksize: integer;
+  x, y: integer;
+  mindist: double;
+  dist: double;
+begin
+  centerx := tX * (fheightmapsize - 1) div ftexturesize;
+  centery := tY * (fheightmapsize - 1) div ftexturesize;
+
+
+  hX := GetIntInRange(centerx, 0, fheightmapsize - 1);
+  hY := GetIntInRange(centery, 0, fheightmapsize - 1);
+
+  mindist := 1000000000.0;
+
+  blocksize := ftexturesize div (fheightmapsize - 1);
+  for x := GetIntInRange(centerx - 2, 0, fheightmapsize - 1) to GetIntInRange(centerx + 2, 0, fheightmapsize - 1) do
+    for y := GetIntInRange(centery - 2, 0, fheightmapsize - 1) to GetIntInRange(centery + 2, 0, fheightmapsize - 1) do
+    begin
+      dist := sqr(x * blocksize + fheightmap[x, y].dx - tX) + sqr(y * blocksize + fheightmap[x, y].dy - tY);
+      if dist < mindist then
+      begin
+        hX := x;
+        hY := y;
+        mindist := dist;
+      end;
+    end;
+end;
+
+function TTerrain.MoveHeightmapPoint(const hX, hY: integer; const px, py: integer): boolean;
+var
+  blocksize: integer;
+  curx, cury: integer;
+  oldx, oldy: integer;
+begin
+  Result := False;
+  if (hX < 0) or (hX > fheightmapsize) then
+    Exit;
+  if (hY < 0) or (hY > fheightmapsize) then
+    Exit;
+
+  blocksize := ftexturesize div (fheightmapsize - 1);
+  curx := hX * blocksize + fheightmap[hX, hY].dx;
+  cury := hY * blocksize + fheightmap[hX, hY].dy;
+
+  oldx := fheightmap[hX, hY].dx;
+  oldy := fheightmap[hX, hY].dy;
+  fheightmap[hX, hY].dx := px - hX * blocksize;
+  fheightmap[hX, hY].dy := py - hY * blocksize;
+  if not ValidHeightmapPivotAngle(hX, hY) then
+  begin
+    fheightmap[hX, hY].dx := oldx;
+    fheightmap[hX, hY].dy := oldy;
+  end;
+
+  ValidateHeightmapItem(hX, hY);
+
+  Result := (curx <> hX * blocksize + fheightmap[hX, hY].dx) or (cury <> hY * blocksize + fheightmap[hX, hY].dy);
+end;
+
+function TTerrain.HeightmapToCoord(const h: integer): integer;
+var
+  h1: integer;
+begin
+  h1 := GetIntInRange(h, 0, fheightmapsize - 1);
+  Result := h1 * (ftexturesize div (fheightmapsize - 1));
+end;
+
+function TTerrain.HeightmapCoords(const x, y: integer): TPoint;
+begin
+  Result.X := HeightmapToCoord(x) + fheightmap[x, y].dx;
+  Result.Y := HeightmapToCoord(y) + fheightmap[x, y].dy;
+end;
+
+function TTerrain.heightmapblocksize: integer;
+begin
+  Result := ftexturesize div (fheightmapsize - 1);
+end;
 ////////////////////////////////////////////////////////////////////////////////
 function ter_validatetexturesize(const t: integer): integer;
 begin

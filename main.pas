@@ -113,7 +113,6 @@ type
     ExportScreenshot1: TMenuItem;
     Wireframe1: TMenuItem;
     Renderenviroment1: TMenuItem;
-    Label2: TLabel;
     SaveDialog2: TSaveDialog;
     PageControl2: TPageControl;
     TabSheet4: TTabSheet;
@@ -140,15 +139,17 @@ type
     FlatsListBox: TListBox;
     Panel11: TPanel;
     FlatSizeLabel: TLabel;
+    Panel1: TPanel;
     OpacityPaintBox: TPaintBox;
     OpacityLabel: TLabel;
+    PenSizeLabel: TLabel;
+    PenSizePaintBox: TPaintBox;
+    Label3: TLabel;
+    Label2: TLabel;
     Panel12: TPanel;
     PenSpeedButton1: TSpeedButton;
     PenSpeedButton2: TSpeedButton;
     PenSpeedButton3: TSpeedButton;
-    Label3: TLabel;
-    PenSizePaintBox: TPaintBox;
-    PenSizeLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -223,6 +224,7 @@ type
     lmousedownx, lmousedowny: integer;
     pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
+    bitmapbuffer: TBitmap;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNewTerrain(const tsize, hsize: integer);
@@ -278,6 +280,9 @@ begin
   Randomize;
 
   DoubleBuffered := True;
+
+  bitmapbuffer := TBitmap.Create;
+  bitmapbuffer.PixelFormat := pf32bit;
 
   ter_LoadSettingFromFile(ChangeFileExt(ParamStr(0), '.ini'));
 
@@ -468,6 +473,8 @@ begin
   terrain.Clear(tsize, hsize);
   PaintBox1.Width := tsize;
   PaintBox1.Height := tsize;
+  bitmapbuffer.Width := tsize;
+  bitmapbuffer.Height := tsize;
   TerrainToControls;
   glneedsupdate := True;
   needsrecalc := True;
@@ -538,6 +545,8 @@ begin
 
   PaintBox1.Width := terrain.texturesize;
   PaintBox1.Height := terrain.texturesize;
+  bitmapbuffer.Width := terrain.texturesize;
+  bitmapbuffer.Height := terrain.texturesize;
 
   TerrainToControls;
   filemenuhistory.AddPath(fname);
@@ -578,6 +587,8 @@ begin
   terrain.Free;
   Freemem(layer, SizeOf(drawlayer_t));
   Freemem(colorbuffer, SizeOf(colorbuffer_t));
+  
+  bitmapbuffer.Free;
 end;
 
 resourcestring
@@ -1059,12 +1070,63 @@ begin
   DoRefreshPaintBox(Rect(0, 0, terrain.texturesize - 1, terrain.texturesize - 1));
 end;
 
+function intersectRect(const r1, r2: TRect): boolean;
+begin
+  Result :=  not ((r2.left > r1.right) or
+                  (r2.right < r1.left) or
+                  (r2.top > r1.bottom) or
+                  (r2.bottom < r1.top));
+end;
+
+function intersectRange(const a1, a2, b1, b2: integer): boolean;
+begin
+  Result := (a1 <= b2) and (a2 >= b1);
+end;
+
 procedure TForm1.DoRefreshPaintBox(const r: TRect);
 var
   C: TCanvas;
+  x, y, hsize, hstep, checkstep: integer;
+  drawx, drawy: integer;
+  hitem: heightbufferitem_t;
 begin
-  C := PaintBox1.Canvas;
+  C := bitmapbuffer.Canvas;
   C.CopyRect(r, terrain.Texture.Canvas, r);
+
+  C.Pen.Style := psSolid;
+  C.Pen.Color := RGB(128, 255, 128);
+  hsize := terrain.heightmapsize;
+  hstep := terrain.texturesize div (hsize - 1);
+  checkstep := hstep * 3 div 2;
+
+  drawx := 0;
+  for x := 0 to hsize - 2 do
+  begin
+    if intersectRange(drawx, drawx + checkstep, r.Left, r.Right) then
+    begin
+      drawy := 0;
+      for y := 0 to hsize - 2 do
+      begin
+        if intersectRect(r, Rect(drawx, drawy, drawx + checkstep, drawy + checkstep)) then
+        begin
+          hitem := terrain.Heightmap[x, y];
+          C.MoveTo(drawx + hitem.dx, drawy + hitem.dy);
+          hitem := terrain.Heightmap[x + 1, y];
+          C.LineTo(drawx + hstep + hitem.dx, drawy + hitem.dy);
+          hitem := terrain.Heightmap[x, y + 1];
+          C.MoveTo(drawx + hitem.dx, drawy + hstep + hitem.dy);
+          hitem := terrain.Heightmap[x + 1, y + 1];
+          C.LineTo(drawx + hstep + hitem.dx, drawy + hstep + hitem.dy);
+          hitem := terrain.Heightmap[x + 1, y];
+          C.LineTo(drawx + hstep + hitem.dx, drawy + hitem.dy);
+        end;
+        drawy := drawy + hstep;
+      end;
+    end;
+    drawx := drawx + hstep;
+  end;
+
+  PaintBox1.Canvas.CopyRect(r, C, r);
 end;
 
 procedure TForm1.SelectWADFileButtonClick(Sender: TObject);

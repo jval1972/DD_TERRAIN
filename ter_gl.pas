@@ -47,7 +47,7 @@ procedure ResetCamera;
 
 procedure glBeginScene(const Width, Height: integer);
 procedure glEndScene(dc: HDC);
-procedure glRenderEnviroment;
+procedure glRenderEnviroment(const t: TTerrain);
 procedure glRenderTerrain(const t: TTerrain);
 
 type
@@ -63,10 +63,9 @@ var
   pt_rendredtriangles: integer = 0;
 
 var
-  trunktexture: TGLuint = 0;
-  twigtexture: TGLuint = 0;
+  terraintexture: TGLuint = 0;
 
-function gld_CreateTexture(const pic: TPicture; const transparent: boolean): TGLUint;
+function gld_CreateTexture(const pic: TBitmap; const transparent: boolean): TGLUint;
 
 function RGBSwap(const l: LongWord): LongWord;
 
@@ -167,10 +166,10 @@ begin
   SwapBuffers(dc);                                // Display the scene
 end;
 
-procedure glRenderEnviroment;
+procedure glRenderEnviroment(const t: TTerrain);
 const
-  DRUNIT = 2.5;
-  DREPEATS = 10;
+  DRUNIT = 5.0;
+  DREPEATS = 4;
   DWORLD = DREPEATS + 1;
 var
   i: integer;
@@ -181,15 +180,17 @@ begin
 
     glBegin(GL_LINES);
       for i := -DREPEATS to DREPEATS do
-      begin
-        glVertex3f((DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
-        glVertex3f(-(DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
-      end;
+        if odd(i) then
+        begin
+          glVertex3f((DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
+          glVertex3f(-(DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
+        end;
       for i := -DREPEATS to DREPEATS do
-      begin
-        glVertex3f(i * DRUNIT, 0.0, (DREPEATS + 1) * DRUNIT);
-        glVertex3f(i * DRUNIT, 0.0, -(DREPEATS + 1) * DRUNIT);
-      end;
+        if odd(i) then
+        begin
+          glVertex3f(i * DRUNIT, 0.0, (DREPEATS + 1) * DRUNIT);
+          glVertex3f(i * DRUNIT, 0.0, -(DREPEATS + 1) * DRUNIT);
+        end;
     glEnd;
 
     glEnable(GL_CULL_FACE);
@@ -290,19 +291,11 @@ begin
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
 
-  glBindTexture(GL_TEXTURE_2D, trunktexture);
+  glBindTexture(GL_TEXTURE_2D, terraintexture);
 
   pt_rendredtriangles := 0;
-//  glRenderFaces(t.mVertCount, t.mFaceCount, t.mVert, t.mNormal, t.mUV, t.mFace);
-{  if opt_rendertwig then
-  begin
-    glBindTexture(GL_TEXTURE_2D, twigtexture);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GEQUAL, 0.5);
-//    glRenderFaces(t.mTwigVertCount, t.mTwigFaceCount, t.mTwigVert, t.mTwigNormal, t.mTwigUV, t.mTwigFace);
-  end;}
+
+  t.RenderMeshGL(10);
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
@@ -325,27 +318,27 @@ begin
   Result := PLongWord(@A)^;
 end;
 
-function gld_CreateTexture(const pic: TPicture; const transparent: boolean): TGLUint;
-const
-  TEXTDIM = 256;
+function gld_CreateTexture(const pic: TBitmap; const transparent: boolean): TGLUint;
 var
   buffer, line: PLongWordArray;
   bm: TBitmap;
   i, j: integer;
   dest: PLongWord;
+  texdim: integer;
 begin
+  texdim := Max(pic.Width, pic.Height);
   bm := TBitmap.Create;
-  bm.Width := TEXTDIM;
-  bm.Height := TEXTDIM;
+  bm.Width := texdim;
+  bm.Height := texdim;
   bm.PixelFormat := pf32bit;
-  bm.Canvas.StretchDraw(Rect(0, 0, TEXTDIM, TEXTDIM), pic.Graphic);
+  bm.Canvas.StretchDraw(Rect(0, 0, texdim, texdim), pic);
 
-  GetMem(buffer, TEXTDIM * TEXTDIM * SizeOf(LongWord));
+  GetMem(buffer, texdim * texdim * SizeOf(LongWord));
   dest := @buffer[0];
-  for j := bm.Height - 1 downto 0 do
+  for j := texdim - 1 downto 0 do
   begin
     line := bm.ScanLine[j];
-    for i := bm.Height - 1 downto 0 do
+    for i := texdim - 1 downto 0 do
     begin
       dest^ := RGBSwap(line[i]);
       inc(dest);
@@ -354,7 +347,7 @@ begin
   bm.Free;
 
   if transparent then
-    for i := 0 to TEXTDIM * TEXTDIM - 1 do
+    for i := 0 to texdim * texdim - 1 do
       if buffer[i] and $FFFFFF = 0 then
         buffer[i] := 0
       else
@@ -364,14 +357,14 @@ begin
   glBindTexture(GL_TEXTURE_2D, Result);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
-               TEXTDIM, TEXTDIM,
+               texdim, texdim,
                0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-  FreeMem(buffer, TEXTDIM * TEXTDIM * SizeOf(LongWord));
+  FreeMem(buffer, texdim * texdim * SizeOf(LongWord));
 end;
 
 end.

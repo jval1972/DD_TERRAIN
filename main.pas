@@ -149,12 +149,6 @@ type
     Panel11: TPanel;
     FlatSizeLabel: TLabel;
     Panel1: TPanel;
-    Panel12: TPanel;
-    PenSpeedButton1: TSpeedButton;
-    PenSpeedButton2: TSpeedButton;
-    PenSpeedButton3: TSpeedButton;
-    PenSpeedButton4: TSpeedButton;
-    PenSpeedButton5: TSpeedButton;
     Label3: TLabel;
     PenSizePaintBox: TPaintBox;
     PenSizeLabel: TLabel;
@@ -164,6 +158,13 @@ type
     Label1: TLabel;
     HeightPaintBox: TPaintBox;
     HeightLabel: TLabel;
+    Bevel1: TBevel;
+    PenSpeedButton5: TSpeedButton;
+    PenSpeedButton1: TSpeedButton;
+    PenSpeedButton2: TSpeedButton;
+    PenSpeedButton3: TSpeedButton;
+    PenSpeedButton4: TSpeedButton;
+    Bevel2: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -196,7 +197,6 @@ type
     procedure Options1Click(Sender: TObject);
     procedure Wireframe1Click(Sender: TObject);
     procedure TrunkImageDblClick(Sender: TObject);
-    procedure TwigImageDblClick(Sender: TObject);
     procedure Renderenviroment1Click(Sender: TObject);
     procedure SeedEditKeyPress(Sender: TObject; var Key: Char);
     procedure ExportObjModel1Click(Sender: TObject);
@@ -412,8 +412,7 @@ begin
 
   OpenGLPanelResize(sender);    // sets up the perspective
 
-//  trunktexture := gld_CreateTexture(TrunkImage.Picture, False);
-//  twigtexture := gld_CreateTexture(TwigImage.Picture, True);
+  terraintexture := gld_CreateTexture(terrain.Texture, False);
 
   glneedsupdate := True;
 
@@ -600,8 +599,7 @@ begin
   wglMakeCurrent(0, 0);
   wglDeleteContext(rc);
 
-  glDeleteTextures(1, @trunktexture);
-  glDeleteTextures(1, @twigtexture);
+  glDeleteTextures(1, @terraintexture);
 
   stringtobigstring(filemenuhistory.PathStringIdx(0), @opt_filemenuhistory0);
   stringtobigstring(filemenuhistory.PathStringIdx(1), @opt_filemenuhistory1);
@@ -921,11 +919,12 @@ begin
     try
       if needsrecalc then
       begin
-  // generate texture      tree.generate;
+        glDeleteTextures(1, @terraintexture);
+        terraintexture := gld_CreateTexture(terrain.Texture, False);
         needsrecalc := False;
       end;
-      glRenderEnviroment;
-//      glRenderTree(tree);
+      glRenderEnviroment(terrain);
+      glRenderTerrain(terrain);
     finally
       glEndScene(dc);
     end;
@@ -996,18 +995,8 @@ begin
   if OpenPictureDialog1.Execute then
   begin
 //    TrunkImage.Picture.LoadFromFile(OpenPictureDialog1.FileName);
-    glDeleteTextures(1, @trunktexture);
+    glDeleteTextures(1, @terraintexture);
 //    trunktexture := gld_CreateTexture(TrunkImage.Picture, False);
-  end;
-end;
-
-procedure TForm1.TwigImageDblClick(Sender: TObject);
-begin
-  if OpenPictureDialog2.Execute then
-  begin
-//    TwigImage.Picture.LoadFromFile(OpenPictureDialog2.FileName);
-    glDeleteTextures(1, @twigtexture);
-//    twigtexture := gld_CreateTexture(TwigImage.Picture, True);
   end;
 end;
 
@@ -1150,7 +1139,7 @@ var
   var
     g: integer;
   begin
-    g := GetIntInRange(Round(hitem.height + HEIGHTMAPRANGE * 256 / (2 * HEIGHTMAPRANGE)), 0, 255);
+    g := GetIntInRange(Round(128 + hitem.height * 128 / HEIGHTMAPRANGE), 0, 255);
     Result := RGB(g, g, g);
   end;
 
@@ -1472,6 +1461,7 @@ begin
     lmousedownx := X;
     lmousedowny := Y;
     lmousedown := False;
+    needsrecalc := True;
   end;
 end;
 

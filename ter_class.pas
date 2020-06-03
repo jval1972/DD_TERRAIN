@@ -78,6 +78,7 @@ type
     function HeightmapToCoord(const h: integer): integer;
     function HeightmapCoords(const x, y: integer): TPoint;
     function heightmapblocksize: integer;
+    procedure RenderMeshGL(const sz: single);
     property Texture: TBitmap read GetTexture;
     property Heightmap[x, y: integer]: heightbufferitem_t read GetHeightmap write SetHeightmap;
     property texturesize: integer read ftexturesize;
@@ -94,7 +95,7 @@ const
 implementation
 
 uses
-  Math, ter_utils, zBitmap;
+  Math, dglOpenGL, ter_utils, zBitmap;
 
 constructor TTerrain.Create;
 begin
@@ -631,6 +632,48 @@ function TTerrain.heightmapblocksize: integer;
 begin
   Result := ftexturesize div (fheightmapsize - 1);
 end;
+
+procedure TTerrain.RenderMeshGL(const sz: single);
+var
+  iX, iY: integer;
+
+  procedure vertexGL(const hX, hY: integer);
+  var
+    it: heightbufferitem_p;
+    pp: TPoint;
+    xx, yy, zz: single;
+    uu, vv: single;
+  begin
+    it := @fheightmap[hX, hY];
+    pp := HeightmapCoords(hX, hY);
+    xx := (pp.X - ftexturesize / 2) * sz / ftexturesize;
+    yy := it.height * sz / ftexturesize;
+    zz := (pp.Y - ftexturesize / 2) * sz / ftexturesize;
+    uu := -hX / fheightmapsize;
+    vv := -hY / fheightmapsize;
+    glTexCoord2f(uu, vv);
+    glVertex3f(xx, yy, zz);
+  end;
+
+begin
+  glDisable(GL_CULL_FACE);
+
+  glBegin(GL_TRIANGLES);
+
+    for iX := 0 to fheightmapsize - 2 do
+      for iY := 0 to fheightmapsize - 2 do
+      begin
+        vertexGL(iX, iY);
+        vertexGL(iX + 1, iY);
+        vertexGL(iX, iY + 1);
+        vertexGL(iX + 1, iY);
+        vertexGL(iX, iY + 1);
+        vertexGL(iX + 1, iY + 1);
+      end;
+      
+  glEnd;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 function ter_validatetexturesize(const t: integer): integer;
 begin

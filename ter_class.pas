@@ -38,10 +38,14 @@ const
   MAXTEXTURESIZE = 2048;
   HEIGHTMAPRANGE = 359;
 
+const
+  HMF_STRETCHTEXTURE = 1;
+
 type
   heightbufferitem_t = packed record
     height: integer;
     dx, dy: integer;
+    flags: LongWord;
   end;
   heightbufferitem_p = ^heightbufferitem_t;
   heightbuffer_t = packed array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of heightbufferitem_t;
@@ -77,6 +81,7 @@ type
     function MoveHeightmapPoint(const hX, hY: integer; const px, py: integer): boolean;
     function HeightmapToCoord(const h: integer): integer;
     function HeightmapCoords(const x, y: integer): TPoint;
+    function SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;
     function heightmapblocksize: integer;
     procedure RenderMeshGL(const sz: single);
     property Texture: TBitmap read GetTexture;
@@ -189,7 +194,8 @@ begin
   if item.height = val.height then
     if item.dx = val.dx then
       if item.dy = val.dy then
-        Exit;
+        if item.flags = val.flags then
+          Exit;
 
   oldx := item.dx;
   oldy := item.dy;
@@ -628,6 +634,39 @@ begin
   Result.Y := HeightmapToCoord(y) + fheightmap[x, y].dy;
 end;
 
+function TTerrain.SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;
+var
+  hsum: integer;
+  cnt: integer;
+  iX, iY: integer;
+  mean: double;
+  oldh: integer;
+begin
+  Result := False;
+
+  if factorpct = 0 then
+    Exit;
+
+  hsum := 0;
+  cnt := 0;
+  for iX := GetIntInRange(x - 1, 0, fheightmapsize - 1) to GetIntInRange(x + 1, 0, fheightmapsize - 1) do
+    for iY := GetIntInRange(y - 1, 0, fheightmapsize - 1) to GetIntInRange(y + 1, 0, fheightmapsize - 1) do
+      if (iX <> x) or (iY <> y) then
+      begin
+        hsum := hsum + fheightmap[iX, iY].height;
+        inc(cnt);
+      end;
+
+  if cnt = 0 then
+    Exit;
+
+  mean := hsum / cnt;
+
+  oldh := fheightmap[x, y].height;
+  fheightmap[x, y].height := Round(fheightmap[x, y].height * (100 - factorpct) / 100 + mean * factorpct / 100);
+  Result := fheightmap[x, y].height <> oldh;
+end;
+
 function TTerrain.heightmapblocksize: integer;
 begin
   Result := ftexturesize div (fheightmapsize - 1);
@@ -649,8 +688,16 @@ var
     xx := (pp.X - ftexturesize / 2) * sz / ftexturesize;
     yy := it.height * sz / ftexturesize;
     zz := (pp.Y - ftexturesize / 2) * sz / ftexturesize;
-    uu := -hX / fheightmapsize;
-    vv := -hY / fheightmapsize;
+    if it.flags and HMF_STRETCHTEXTURE <> 0 then
+    begin
+      uu := -hX / fheightmapsize;
+      vv := -hY / fheightmapsize;
+    end
+    else
+    begin
+      uu := -pp.X / ftexturesize;
+      vv := -pp.Y / ftexturesize;
+    end;
     glTexCoord2f(uu, vv);
     glVertex3f(xx, yy, zz);
   end;

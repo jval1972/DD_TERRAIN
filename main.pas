@@ -158,13 +158,17 @@ type
     Label1: TLabel;
     HeightPaintBox: TPaintBox;
     HeightLabel: TLabel;
-    Bevel1: TBevel;
-    PenSpeedButton5: TSpeedButton;
     PenSpeedButton1: TSpeedButton;
     PenSpeedButton2: TSpeedButton;
     PenSpeedButton3: TSpeedButton;
     PenSpeedButton4: TSpeedButton;
+    PenSpeedButton5: TSpeedButton;
+    PenSpeedButton6: TSpeedButton;
+    Bevel1: TBevel;
     Bevel2: TBevel;
+    Label4: TLabel;
+    SmoothPaintBox: TPaintBox;
+    SmoothLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -215,6 +219,7 @@ type
     procedure PenSpeedButton3Click(Sender: TObject);
     procedure PenSpeedButton4Click(Sender: TObject);
     procedure PenSpeedButton5Click(Sender: TObject);
+    procedure PenSpeedButton6Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -236,16 +241,19 @@ type
     fopacity: integer;
     fpensize: integer;
     fheightsize: integer;
+    fsmoothfactor: integer;
     foldopacity: integer;
     foldpensize: integer;
     OpacitySlider: TSliderHook;
     PenSizeSlider: TSliderHook;
     HeightSlider: TSliderHook;
+    SmoothSlider: TSliderHook;
     closing: boolean;
     lmousedown: boolean;
     lmousedownx, lmousedowny: integer;
     lmouseheightmapx, lmouseheightmapy: integer;
     hmouseheightmapx, hmouseheightmapy: integer;
+    lasthmouseheightmapx, lasthmouseheightmapy: integer;
     pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     bitmapbuffer: TBitmap;
@@ -288,7 +296,8 @@ uses
   ter_defs,
   ter_utils,
   frm_newterrain,
-  ter_wadreader;
+  ter_wadreader,
+  frm_editheightmapitem;
 
 {$R *.dfm}
 
@@ -332,10 +341,13 @@ begin
 
   hmouseheightmapx := 0;
   hmouseheightmapy := 0;
-  
+  lasthmouseheightmapx := -1;
+  lasthmouseheightmapy := -1;
+
   fopacity := 100;
   fpensize := 64;
   fheightsize := 64;
+  fsmoothfactor := 50;
   foldopacity := -1;
   foldpensize := -1;
 
@@ -431,6 +443,10 @@ begin
   HeightSlider := TSliderHook.Create(HeightPaintBox);
   HeightSlider.Min := -MAXHEIGHTSIZE;
   HeightSlider.Max := MAXHEIGHTSIZE;
+
+  SmoothSlider := TSliderHook.Create(SmoothPaintBox);
+  SmoothSlider.Min := 0;
+  SmoothSlider.Max := 100;
 
   doCreate := True;
   if ParamCount > 0 then
@@ -619,6 +635,7 @@ begin
   OpacitySlider.Free;
   PenSizeSlider.Free;
   HeightSlider.Free;
+  SmoothSlider.Free;
   terrain.Free;
   Freemem(drawlayer, SizeOf(drawlayer_t));
   Freemem(heightlayer, SizeOf(heightlayer_t));
@@ -1028,6 +1045,11 @@ begin
   HeightSlider.Position := fheightsize;
   HeightPaintBox.Invalidate;
   HeightSlider.OnSliderHookChange := UpdateFromSliders;
+
+  SmoothSlider.OnSliderHookChange := nil;
+  SmoothSlider.Position := fsmoothfactor;
+  SmoothPaintBox.Invalidate;
+  SmoothSlider.OnSliderHookChange := UpdateFromSliders;
 end;
 
 procedure TForm1.SlidersToLabels;
@@ -1035,6 +1057,7 @@ begin
   OpacityLabel.Caption := Format('%d', [Round(OpacitySlider.Position)]);
   PenSizeLabel.Caption := Format('%d', [Round(PenSizeSlider.Position)]);
   HeightLabel.Caption := Format('%d', [Round(HeightSlider.Position)]);
+  SmoothLabel.Caption := Format('%d', [Round(SmoothSlider.Position)]);
 end;
 
 procedure TForm1.TerrainToControls;
@@ -1059,6 +1082,7 @@ begin
   fopacity := Round(OpacitySlider.Position);
   fpensize := Round(PenSizeSlider.Position);
   fheightsize := Round(HeightSlider.Position);
+  fsmoothfactor := Round(HeightSlider.Position);
   CalcPenMasks;
   needsrecalc := True;
 end;
@@ -1151,7 +1175,7 @@ begin
   hstep := terrain.texturesize div (hsize - 1);
   checkstep := MaxI(64, hstep * 3);
 
-  drawheightmap := PenSpeedButton5.Down;
+  drawheightmap := PenSpeedButton5.Down or PenSpeedButton6.Down;
   if drawheightmap then
   begin
     C.Pen.Style := psSolid;
@@ -1432,6 +1456,9 @@ end;
 
 procedure TForm1.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
+var
+  it: heightbufferitem_t;
+  iX, iY: integer;
 begin
   if button = mbLeft then
   begin
@@ -1448,6 +1475,16 @@ begin
     ZeroMemory(heightlayer, SizeOf(heightlayer_t));
 
     LLeftMousePaintTo(X, Y);
+  end
+  else if button = mbRight then
+  begin
+    terrain.TerrainToHeightmapIndex(X, Y, iX, iY);
+    it := terrain.Heightmap[iX, iY];
+    if EditHeightmapItem(it) then
+    begin
+      terrain.Heightmap[iX, iY] := it;
+      PaintBox1.Invalidate;
+    end;
   end;
 end;
 
@@ -1462,6 +1499,8 @@ begin
     lmousedowny := Y;
     lmousedown := False;
     needsrecalc := True;
+    lasthmouseheightmapx := -1;
+    lasthmouseheightmapy := -1;
   end;
 end;
 
@@ -1624,6 +1663,24 @@ begin
       iY2 := GetIntInRange(Y + terrain.heightmapblocksize, 0, tsize - 1);
       DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
     end;
+  end
+  else if PenSpeedButton6.Down then
+  begin
+    if (hmouseheightmapx <> lasthmouseheightmapx) or (lasthmouseheightmapy <> hmouseheightmapy) then
+    begin
+      lasthmouseheightmapx := hmouseheightmapx;
+      lasthmouseheightmapy := hmouseheightmapy;
+      hchanged := terrain.SmoothHeightmap(hmouseheightmapx, hmouseheightmapy, fsmoothfactor);
+      if hchanged then
+      begin
+        changed := true;
+        iX1 := GetIntInRange(X - terrain.heightmapblocksize, 0, tsize - 1);
+        iX2 := GetIntInRange(X + terrain.heightmapblocksize, 0, tsize - 1);
+        iY1 := GetIntInRange(Y - terrain.heightmapblocksize, 0, tsize - 1);
+        iY2 := GetIntInRange(Y + terrain.heightmapblocksize, 0, tsize - 1);
+        DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
+      end;
+    end;
   end;
 end;
 
@@ -1676,7 +1733,7 @@ begin
     while true do
     begin
       LLeftMousePaintAt(curx, cury);
-      if y = Y then break;
+      if cury = Y then break;
       if d >= 0 then
       begin
         curx := curx + sx;
@@ -1741,6 +1798,11 @@ begin
 end;
 
 procedure TForm1.PenSpeedButton5Click(Sender: TObject);
+begin
+  PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PenSpeedButton6Click(Sender: TObject);
 begin
   PaintBox1.Invalidate;
 end;

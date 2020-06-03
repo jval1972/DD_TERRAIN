@@ -49,7 +49,8 @@ uses
   ter_class in 'ter_class.pas',
   ter_wadreader in 'ter_wadreader.pas',
   pngimage1 in 'pngimage1.pas',
-  ter_defs in 'ter_defs.pas';
+  ter_defs in 'ter_defs.pas',
+  frm_editheightmapitem in 'frm_editheightmapitem.pas' {EditHeightmapItemForm};
 
 {$R *.res}
 

@@ -169,6 +169,9 @@ type
     Label4: TLabel;
     SmoothPaintBox: TPaintBox;
     SmoothLabel: TLabel;
+    N1: TMenuItem;
+    PasteTexture1: TMenuItem;
+    PasteHeightmap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -220,6 +223,8 @@ type
     procedure PenSpeedButton4Click(Sender: TObject);
     procedure PenSpeedButton5Click(Sender: TObject);
     procedure PenSpeedButton6Click(Sender: TObject);
+    procedure PasteTexture1Click(Sender: TObject);
+    procedure PasteHeightmap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -840,6 +845,7 @@ procedure TForm1.Edit1Click(Sender: TObject);
 begin
   Undo1.Enabled := undoManager.CanUndo;
   Redo1.Enabled := undoManager.CanRedo;
+  PasteTexture1.Enabled := Clipboard.HasFormat(CF_BITMAP);
 end;
 
 procedure TForm1.Undo1Click(Sender: TObject);
@@ -1482,8 +1488,11 @@ begin
     it := terrain.Heightmap[iX, iY];
     if EditHeightmapItem(it) then
     begin
+      SaveUndo;
       terrain.Heightmap[iX, iY] := it;
+      changed := true;
       PaintBox1.Invalidate;
+      glneedsupdate := True;
     end;
   end;
 end;
@@ -1805,6 +1814,75 @@ end;
 procedure TForm1.PenSpeedButton6Click(Sender: TObject);
 begin
   PaintBox1.Invalidate;
+end;
+
+procedure TForm1.PasteTexture1Click(Sender: TObject);
+var
+  tempBitmap: TBitmap;
+begin
+  // if there is an image on clipboard
+  if Clipboard.HasFormat(CF_BITMAP) then
+  begin
+    SaveUndo;
+
+    tempBitmap := TBitmap.Create;
+    tempBitmap.LoadFromClipboardFormat(CF_BITMAP, ClipBoard.GetAsHandle(cf_Bitmap), 0);
+
+    tempBitmap.PixelFormat := pf32bit;
+
+    terrain.Texture.Canvas.StretchDraw(Rect(0, 0, terrain.texturesize, terrain.texturesize), tempBitmap);
+
+    tempBitmap.Free;
+
+    changed := true;
+    PaintBox1.Invalidate;
+    glneedsupdate := True;
+    needsrecalc := True;
+  end;
+end;
+
+procedure TForm1.PasteHeightmap1Click(Sender: TObject);
+var
+  tempBitmap1, tempBitmap2: TBitmap;
+  hX, hY: integer;
+  c: LongWord;
+  pt: TPoint;
+  h: integer;
+  it: heightbufferitem_t;
+begin
+  // if there is an image on clipboard
+  if Clipboard.HasFormat(CF_BITMAP) then
+  begin
+    SaveUndo;
+
+    tempBitmap1 := TBitmap.Create;
+    tempBitmap1.LoadFromClipboardFormat(CF_BITMAP, ClipBoard.GetAsHandle(cf_Bitmap), 0);
+
+    tempBitmap1.PixelFormat := pf32bit;
+
+    tempBitmap2 := TBitmap.Create;
+    tempBitmap2.Width := terrain.texturesize;
+    tempBitmap2.Height := terrain.texturesize;
+    tempBitmap2.Canvas.StretchDraw(Rect(0, 0, tempBitmap2.Width, tempBitmap2.Height), tempBitmap1);
+
+    for hX := 0 to terrain.heightmapsize - 1 do
+      for hY := 0 to terrain.heightmapsize - 1 do
+      begin
+        pt := terrain.HeightmapCoords(hX, hY);
+        c := tempBitmap2.Canvas.Pixels[GetIntInRange(pt.X, 0, tempBitmap2.Width - 1), GetIntInRange(pt.Y, 0, tempBitmap2.Height - 1)];
+        h := GetIntInRange(Round((GetRValue(c) + GetGValue(c) + GetBValue(c)) / 768 * 2 * HEIGHTMAPRANGE) - HEIGHTMAPRANGE, -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
+        it := terrain.Heightmap[hX, hY];
+        it.height := h;
+        terrain.Heightmap[hX, hY] := it;
+      end;
+
+    tempBitmap1.Free;
+    tempBitmap2.Free;
+
+    changed := true;
+    PaintBox1.Invalidate;
+    glneedsupdate := True;
+  end;
 end;
 
 end.

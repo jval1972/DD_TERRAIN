@@ -4451,6 +4451,17 @@ object Form1: TForm1
         ShortCut = 16451
         OnClick = Copy1Click
       end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object PasteTexture1: TMenuItem
+        Caption = 'Paste Texture'
+        OnClick = PasteTexture1Click
+      end
+      object PasteHeightmap1: TMenuItem
+        Caption = 'Paste Heightmap'
+        OnClick = PasteHeightmap1Click
+      end
     end
     object Options1: TMenuItem
       Caption = '&Options'

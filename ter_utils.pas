@@ -228,7 +228,7 @@ begin
   if Length(fname) < MAXDISPFNAME then
   begin
     Result := fname;
-    exit;
+    Exit;
   end;
   Result := '';
   for i := Length(fname) downto Length(fname) - (MAXDISPFNAME - 6) do
@@ -252,19 +252,19 @@ begin
   vsize := GetFileVersionInfoSize(PChar(fname), zero);
   if vsize = 0 then
   begin
-    result := '';
-    exit;
+    Result := '';
+    Exit;
   end;
 
   GetMem(buffer, vsize + 1);
   GetFileVersionInfo(PChar(fname), 0, vsize, buffer);
   VerQueryValue(buffer, '\StringFileInfo\040904E4\FileVersion', res, len);
-  result := '';
+  Result := '';
   for i := 0 to len - 1 do
   begin
     if PChar(res)^ = #0 then
       break;
-    result := result + PChar(res)^;
+    Result := Result + PChar(res)^;
     res := pointer(integer(res) + 1);
   end;
   FreeMem(pointer(buffer), vsize + 1);
@@ -293,9 +293,9 @@ end;
 function TDNumberList.Get(Index: Integer): integer;
 begin
   if (Index < 0) or (Index >= fNumItems) then
-    result := 0
+    Result := 0
   else
-    result := fList[Index];
+    Result := fList[Index];
 end;
 
 procedure TDNumberList.Put(Index: Integer; const value: integer);
@@ -307,7 +307,7 @@ function TDNumberList.Add(const value: integer): integer;
 begin
   ReallocMem(fList, (fNumItems + 1) * SizeOf(integer));
   Put(fNumItems, value);
-  result := fNumItems;
+  Result := fNumItems;
   inc(fNumItems);
 end;
 
@@ -325,8 +325,8 @@ var
 begin
   if (Index < 0) or (Index >= fNumItems) then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
 
   for i := Index + 1 to fNumItems - 1 do
@@ -335,7 +335,7 @@ begin
   ReallocMem(pointer(fList), (fNumItems - 1) * SizeOf(integer));
   dec(fNumItems);
 
-  result := true;
+  Result := True;
 end;
 
 function TDNumberList.IndexOf(const value: integer): integer;
@@ -345,10 +345,10 @@ begin
   for i := 0 to fNumItems - 1 do
     if fList[i] = value then
     begin
-      result := i;
-      exit;
+      Result := i;
+      Exit;
     end;
-  result := -1;
+  Result := -1;
 end;
 
 procedure TDNumberList.Clear;
@@ -404,9 +404,9 @@ function TDNumberList.Sum: integer;
 var
   i: integer;
 begin
-  result := 0;
+  Result := 0;
   for i := 0 to fNumItems - 1 do
-    result := result + fList[i];
+    Result := Result + fList[i];
 end;
 
 constructor TString.Create(const astring: string);

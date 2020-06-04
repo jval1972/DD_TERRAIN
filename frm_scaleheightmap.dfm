@@ -1,10 +1,10 @@
-object NewForm: TNewForm
+object ScaleHeightmapItemForm: TScaleHeightmapItemForm
   Left = 360
   Top = 159
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = 'New Terrain'
-  ClientHeight = 276
+  Caption = 'Scale heightmap item'
+  ClientHeight = 180
   ClientWidth = 348
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1045,14 +1045,11 @@ object NewForm: TNewForm
     0000000000000000000000000000000000000000000000000000000000000000
     00000000000000000000000000000000000000000000000000000000}
   OldCreateOrder = False
-  Position = poMainFormCenter
-  OnCreate = FormCreate
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
-    Top = 231
+    Top = 135
     Width = 348
     Height = 45
     Align = alBottom
@@ -1082,54 +1079,57 @@ object NewForm: TNewForm
     Left = 0
     Top = 0
     Width = 348
-    Height = 231
+    Height = 135
     Align = alClient
     Caption = ' '
     TabOrder = 1
     object Label1: TLabel
       Left = 24
-      Top = 184
-      Width = 94
+      Top = 26
+      Width = 23
       Height = 13
-      Caption = 'Mesh quad size: %d'
+      Caption = 'Mul: '
     end
     object Label2: TLabel
       Left = 24
-      Top = 200
-      Width = 134
+      Top = 58
+      Width = 22
       Height = 13
-      Caption = 'Resulting mesh triangles: %d'
+      Caption = 'Div: '
     end
-    object TextureSizeRadioGroup: TRadioGroup
+    object Label3: TLabel
       Left = 24
-      Top = 24
-      Width = 129
-      Height = 113
-      Caption = ' Texture Size '
-      ItemIndex = 2
-      Items.Strings = (
-        '256'
-        '512'
-        '1024'
-        '2048')
-      TabOrder = 0
-      OnClick = TextureSizeRadioGroupClick
+      Top = 90
+      Width = 25
+      Height = 13
+      Caption = 'Add: '
     end
-    object HeightmapSizeRadioGroup: TRadioGroup
-      Left = 176
+    object MulEdit: TEdit
+      Left = 64
       Top = 24
-      Width = 145
-      Height = 137
-      Caption = ' Heightmap Size '
-      ItemIndex = 2
-      Items.Strings = (
-        '5'
-        '9'
-        '17'
-        '33'
-        '65')
+      Width = 121
+      Height = 21
+      TabOrder = 0
+      Text = '1'
+      OnKeyDown = MulEditKeyDown
+    end
+    object DivEdit: TEdit
+      Left = 64
+      Top = 56
+      Width = 121
+      Height = 21
       TabOrder = 1
-      OnClick = HeightmapSizeRadioGroupClick
+      Text = '1'
+      OnKeyDown = DivEditKeyDown
+    end
+    object AddEdit: TEdit
+      Left = 64
+      Top = 88
+      Width = 121
+      Height = 21
+      TabOrder = 2
+      Text = '0'
+      OnKeyDown = AddEditKeyDown
     end
   end
 end

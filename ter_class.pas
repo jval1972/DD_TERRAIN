@@ -148,7 +148,7 @@ begin
     raise Exception.Create(Format('TTerrain.GetTexture(): Invalid Texture Dimentions (%dx%d), should be (%d, %d)', [ftexture.Width, ftexture.Height, ftexturesize, ftexturesize]));
   if ftexture.PixelFormat <> pf32bit then
     raise Exception.Create('TTerrain.GetTexture(): Invalid Texture pixel format');
-  result := ftexture;
+  Result := ftexture;
 end;
 
 procedure TTerrain.SetTextureSize(const val: integer);
@@ -494,15 +494,15 @@ begin
   strm.Read(magic, SizeOf(Integer));
   if magic <> TERRAIN_MAGIC then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
 
   strm.Read(foo, SizeOf(Integer));
   if foo <> 0 then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
 
   strm.Read(sz, SizeOf(Integer));

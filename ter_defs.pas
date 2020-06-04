@@ -258,10 +258,10 @@ var
 begin
   if not FileExists(fn) then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
-  result := true;
+  Result := True;
 
   s := TStringList.Create;
   try

@@ -50,7 +50,8 @@ uses
   ter_wadreader in 'ter_wadreader.pas',
   pngimage1 in 'pngimage1.pas',
   ter_defs in 'ter_defs.pas',
-  frm_editheightmapitem in 'frm_editheightmapitem.pas' {EditHeightmapItemForm};
+  frm_editheightmapitem in 'frm_editheightmapitem.pas' {EditHeightmapItemForm},
+  frm_scaleheightmap in 'frm_scaleheightmap.pas' {ScaleHeightmapItemForm};
 
 {$R *.res}
 

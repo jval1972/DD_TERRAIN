@@ -85,11 +85,11 @@ function char8tostring(src: char8_t): string;
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   i := 0;
   while (i < 8) and (src[i] <> #0) do
   begin
-    result := result + src[i];
+    Result := Result + src[i];
     inc(i);
   end;
 end;
@@ -106,12 +106,12 @@ begin
   i := 1;
   while (i <= len) do
   begin
-    result[i - 1] := src[i];
+    Result[i - 1] := src[i];
     inc(i);
   end;
 
   for i := len to 7 do
-    result[i] := #0;
+    Result[i] := #0;
 end;
 
 constructor TWadReader.Create;
@@ -221,7 +221,7 @@ begin
     Result := true;
   end
   else
-    Result := false;
+    Result := False;
 end;
 
 function TWadReader.ReadEntry(const aname: string; var buf: pointer; var bufsize: integer): boolean; 
@@ -232,7 +232,7 @@ begin
   if id >= 0 then
     Result := ReadEntry(id, buf, bufsize)
   else
-    Result := false;
+    Result := False;
 end;
 
 function TWadReader.EntryName(const id: integer): string;
@@ -268,7 +268,7 @@ end;
 
 function TWadReader.EntryInfo(const aname: string): Pfilelump_t;
 begin
-  result := EntryInfo(EntryId(aname));
+  Result := EntryInfo(EntryId(aname));
 end;
 
 function TWadReader.NumEntries: integer;

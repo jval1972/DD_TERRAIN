@@ -116,14 +116,14 @@ type
     HistoryItem7: TMenuItem;
     HistoryItem8: TMenuItem;
     HistoryItem9: TMenuItem;
-    PageControl1: TPageControl;
+    EditPageControl: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     ExportScreenshot1: TMenuItem;
     Wireframe1: TMenuItem;
     Renderenviroment1: TMenuItem;
     SaveDialog2: TSaveDialog;
-    PageControl2: TPageControl;
+    MainPageControl: TPageControl;
     TabSheet4: TTabSheet;
     PaintScrollBox: TScrollBox;
     PaintBox1: TPaintBox;
@@ -161,7 +161,6 @@ type
     PenSpeedButton1: TSpeedButton;
     PenSpeedButton2: TSpeedButton;
     PenSpeedButton3: TSpeedButton;
-    PenSpeedButton4: TSpeedButton;
     PenSpeedButton5: TSpeedButton;
     PenSpeedButton6: TSpeedButton;
     Bevel1: TBevel;
@@ -172,6 +171,9 @@ type
     N1: TMenuItem;
     PasteTexture1: TMenuItem;
     PasteHeightmap1: TMenuItem;
+    PenSpeedButton4: TSpeedButton;
+    ools1: TMenuItem;
+    Adjustheightmap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -205,7 +207,6 @@ type
     procedure Wireframe1Click(Sender: TObject);
     procedure TrunkImageDblClick(Sender: TObject);
     procedure Renderenviroment1Click(Sender: TObject);
-    procedure SeedEditKeyPress(Sender: TObject; var Key: Char);
     procedure ExportObjModel1Click(Sender: TObject);
     procedure ExportScreenshot1Click(Sender: TObject);
     procedure PaintBox1Paint(Sender: TObject);
@@ -225,6 +226,7 @@ type
     procedure PenSpeedButton6Click(Sender: TObject);
     procedure PasteTexture1Click(Sender: TObject);
     procedure PasteHeightmap1Click(Sender: TObject);
+    procedure Adjustheightmap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -242,7 +244,7 @@ type
     undoManager: TUndoRedoManager;
     filemenuhistory: TFileMenuHistory;
     glneedsupdate: boolean;
-    needsrecalc: boolean;
+    glneedstexturerecalc: boolean;
     fopacity: integer;
     fpensize: integer;
     fheightsize: integer;
@@ -302,7 +304,8 @@ uses
   ter_utils,
   frm_newterrain,
   ter_wadreader,
-  frm_editheightmapitem;
+  frm_editheightmapitem,
+  frm_scaleheightmap;
 
 {$R *.dfm}
 
@@ -328,8 +331,8 @@ begin
 
   closing := False;
 
-  PageControl1.ActivePageIndex := 0;
-  PageControl2.ActivePageIndex := 0;
+  EditPageControl.ActivePageIndex := 0;
+  MainPageControl.ActivePageIndex := 0;
 
   GetMem(drawlayer, SizeOf(drawlayer_t));
   GetMem(heightlayer, SizeOf(heightlayer_t));
@@ -337,7 +340,7 @@ begin
   FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
   colorbuffersize := 128;
 
-  lmousedown := false;
+  lmousedown := False;
   lmousedownx := 0;
   lmousedowny := 0;
 
@@ -433,7 +436,7 @@ begin
 
   glneedsupdate := True;
 
-  needsrecalc := True;
+  glneedstexturerecalc := True;
 
   TabSheet1.DoubleBuffered := True;
 
@@ -463,7 +466,7 @@ begin
     SetFileName('');
     DoNewTerrain(1024, 17);
     glneedsupdate := True;
-    needsrecalc := True;
+    glneedstexturerecalc := True;
     undoManager.Clear;
   end;
 
@@ -533,7 +536,7 @@ begin
   bitmapbuffer.Height := tsize;
   TerrainToControls;
   glneedsupdate := True;
-  needsrecalc := True;
+  glneedstexturerecalc := True;
   undoManager.Clear;
 end;
 
@@ -608,7 +611,7 @@ begin
   filemenuhistory.AddPath(fname);
   SetFileName(fname);
   glneedsupdate := True;
-  needsrecalc := True;
+  glneedstexturerecalc := True;
   Result := True;
 end;
 
@@ -761,7 +764,7 @@ begin
   Done := False;
 
   Sleep(1);
-  if needsrecalc then
+  if glneedstexturerecalc then
     glneedsupdate := True;
 
   if not glneedsupdate then
@@ -846,6 +849,7 @@ begin
   Undo1.Enabled := undoManager.CanUndo;
   Redo1.Enabled := undoManager.CanRedo;
   PasteTexture1.Enabled := Clipboard.HasFormat(CF_BITMAP);
+  PasteHeightmap1.Enabled := Clipboard.HasFormat(CF_BITMAP);
 end;
 
 procedure TForm1.Undo1Click(Sender: TObject);
@@ -856,7 +860,7 @@ begin
     try
       undoManager.Undo;
       glneedsupdate := True;
-      needsrecalc := True;
+      glneedstexturerecalc := True;
     finally
       Screen.Cursor := crDefault;
     end;
@@ -871,7 +875,7 @@ begin
     try
       undoManager.Redo;
       glneedsupdate := True;
-      needsrecalc := True;
+      glneedstexturerecalc := True;
     finally
       Screen.Cursor := crDefault;
     end;
@@ -888,7 +892,7 @@ begin
   terrain.LoadFromStream(s);
   TerrainToControls;
   glneedsupdate := True;
-  needsrecalc := True;
+  glneedstexturerecalc := True;
 end;
 
 procedure TForm1.SaveUndo;
@@ -940,11 +944,11 @@ begin
   begin
     glBeginScene(OpenGLPanel.Width, OpenGLPanel.Height);
     try
-      if needsrecalc then
+      if glneedstexturerecalc then
       begin
         glDeleteTextures(1, @terraintexture);
         terraintexture := gld_CreateTexture(terrain.Texture, False);
-        needsrecalc := False;
+        glneedstexturerecalc := False;
       end;
       glRenderEnviroment(terrain);
       glRenderTerrain(terrain);
@@ -991,14 +995,19 @@ procedure TForm1.Copy1Click(Sender: TObject);
 var
   b: TBitmap;
 begin
-  b := TBitmap.Create;
-  try
-    DoRenderGL; // JVAL: For some unknown reason this must be called before glReadPixels
-    Get3dPreviewBitmap(b);
-    Clipboard.Assign(b);
-  finally
-    b.Free;
-  end;
+  if MainPageControl.ActivePageIndex = 1 then
+  begin
+    b := TBitmap.Create;
+    try
+      DoRenderGL; // JVAL: For some unknown reason this must be called before glReadPixels
+      Get3dPreviewBitmap(b);
+      Clipboard.Assign(b);
+    finally
+      b.Free;
+    end;
+  end
+  else
+    Clipboard.Assign(terrain.Texture);
 end;
 
 procedure TForm1.Options1Click(Sender: TObject);
@@ -1027,12 +1036,6 @@ procedure TForm1.Renderenviroment1Click(Sender: TObject);
 begin
   opt_renderevniroment := not opt_renderevniroment;
   glneedsupdate := True;
-end;
-
-procedure TForm1.SeedEditKeyPress(Sender: TObject; var Key: Char);
-begin
-  if not (Key in [#8, '0'..'9']) then
-    Key := #0;
 end;
 
 procedure TForm1.UpdateSliders;
@@ -1072,7 +1075,6 @@ begin
     Exit;
 
   PaintBox1.Invalidate;
-//  SeedEdit.Text := IntToStr(tree.mProperties.mSeed);
   StatusBar1.Panels[0].Text := Format('Terrain Size: %dx%d', [Terrain.texturesize, Terrain.texturesize]);
   StatusBar1.Panels[1].Text := Format('Heightmap Size: %dx%d', [Terrain.heightmapsize, Terrain.heightmapsize]);
   UpdateSliders;
@@ -1090,7 +1092,7 @@ begin
   fheightsize := Round(HeightSlider.Position);
   fsmoothfactor := Round(HeightSlider.Position);
   CalcPenMasks;
-  needsrecalc := True;
+  glneedstexturerecalc := True;
 end;
 
 procedure TForm1.ExportObjModel1Click(Sender: TObject);
@@ -1298,14 +1300,14 @@ var
 begin
   wad := TWADReader.Create;
   wad.OpenWadFile(wadname);
-  inflats := false;
+  inflats := False;
   FlatsListBox.Items.Clear;
   for i := 0 to wad.NumEntries - 1 do
   begin
     if UpperCase(wad.EntryName(i)) = 'F_START' then
-      inflats := true
+      inflats := True
     else if UpperCase(wad.EntryName(i)) = 'F_END' then
-      inflats := false
+      inflats := False
     else if inflats then
       FlatsListBox.Items.Add(UpperCase(wad.EntryName(i)));
   end;
@@ -1365,15 +1367,15 @@ begin
   if (fwad <> '') and FileExists(fwad) then
   begin
     wad.OpenWadFile(fwad);
-    inflats := false;
+    inflats := False;
     for i := 0 to wad.NumEntries - 1 do
     begin
       if (UpperCase(wad.EntryName(i)) = 'PLAYPAL') or (UpperCase(wad.EntryName(i)) = 'PALETTE') then
         palidx := i
       else if UpperCase(wad.EntryName(i)) = 'F_START' then
-        inflats := true
+        inflats := True
       else if UpperCase(wad.EntryName(i)) = 'F_END' then
-        inflats := false
+        inflats := False
       else if inflats then
       begin
         if UpperCase(wad.EntryName(i)) = UpperCase(flat) then
@@ -1490,7 +1492,7 @@ begin
     begin
       SaveUndo;
       terrain.Heightmap[iX, iY] := it;
-      changed := true;
+      changed := True;
       PaintBox1.Invalidate;
       glneedsupdate := True;
     end;
@@ -1507,7 +1509,7 @@ begin
     lmousedownx := X;
     lmousedowny := Y;
     lmousedown := False;
-    needsrecalc := True;
+    glneedstexturerecalc := True;
     lasthmouseheightmapx := -1;
     lasthmouseheightmapy := -1;
   end;
@@ -1587,7 +1589,7 @@ begin
         end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
-    changed := true;
+    changed := True;
   end
   else if PenSpeedButton2.Down then
   begin
@@ -1612,7 +1614,7 @@ begin
       end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
-    changed := true;
+    changed := True;
   end
   else if PenSpeedButton3.Down then
   begin
@@ -1637,7 +1639,7 @@ begin
       end;
     end;
     DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
-    changed := true;
+    changed := True;
   end
   else if PenSpeedButton4.Down then
   begin
@@ -1649,7 +1651,7 @@ begin
       iY1 := terrain.HeightmapToCoord(lmouseheightmapy) - 2 * terrain.heightmapblocksize;
       iY2 := terrain.HeightmapToCoord(lmouseheightmapy) + 2 * terrain.heightmapblocksize;
       DoRefreshPaintBox(Rect(iX1, iY1, iX2, iY2));
-      changed := true;
+      changed := True;
     end;
   end
   else if PenSpeedButton5.Down then
@@ -1658,11 +1660,11 @@ begin
     if not heightlayer[hmouseheightmapx, hmouseheightmapy].pass then
     begin
       hchanged := True;
-      heightlayer[hmouseheightmapx, hmouseheightmapy].pass := true;
+      heightlayer[hmouseheightmapx, hmouseheightmapy].pass := True;
       hitem := terrain.Heightmap[hmouseheightmapx, hmouseheightmapy];
       hitem.height := terrain.Heightmap[hmouseheightmapx, hmouseheightmapy].height + fheightsize;
       terrain.Heightmap[hmouseheightmapx, hmouseheightmapy] := hitem;
-      changed := true;
+      changed := True;
     end;
     if hchanged then
     begin
@@ -1682,7 +1684,7 @@ begin
       hchanged := terrain.SmoothHeightmap(hmouseheightmapx, hmouseheightmapy, fsmoothfactor);
       if hchanged then
       begin
-        changed := true;
+        changed := True;
         iX1 := GetIntInRange(X - terrain.heightmapblocksize, 0, tsize - 1);
         iX2 := GetIntInRange(X + terrain.heightmapblocksize, 0, tsize - 1);
         iY1 := GetIntInRange(Y - terrain.heightmapblocksize, 0, tsize - 1);
@@ -1723,7 +1725,7 @@ begin
   if ax > ay then
   begin
     d := ay - ax div 2;
-    while true do
+    while True do
     begin
       LLeftMousePaintAt(curx, cury);
       if curx = X then break;
@@ -1739,7 +1741,7 @@ begin
   else
   begin
     d := ax - ay div 2;
-    while true do
+    while True do
     begin
       LLeftMousePaintAt(curx, cury);
       if cury = Y then break;
@@ -1834,10 +1836,10 @@ begin
 
     tempBitmap.Free;
 
-    changed := true;
+    changed := True;
     PaintBox1.Invalidate;
     glneedsupdate := True;
-    needsrecalc := True;
+    glneedstexturerecalc := True;
   end;
 end;
 
@@ -1879,7 +1881,32 @@ begin
     tempBitmap1.Free;
     tempBitmap2.Free;
 
-    changed := true;
+    changed := True;
+    PaintBox1.Invalidate;
+    glneedsupdate := True;
+  end;
+end;
+
+procedure TForm1.Adjustheightmap1Click(Sender: TObject);
+var
+  amul, adiv, aadd: integer;
+  hX, hY: integer;
+  it: heightbufferitem_t;
+begin
+  amul := 1;
+  adiv := 1;
+  aadd := 0;
+  if GetScaleHeightmapInfo(amul, adiv, aadd) then
+  begin
+    SaveUndo;
+    for hX := 0 to terrain.heightmapsize - 1 do
+      for hY := 0 to terrain.heightmapsize - 1 do
+      begin
+        it := terrain.Heightmap[hX, hY];
+        it.height := GetIntInRange(round(it.height * amul / adiv + aadd), -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
+        terrain.Heightmap[hX, hY] := it;
+      end;
+    changed := True;
     PaintBox1.Invalidate;
     glneedsupdate := True;
   end;

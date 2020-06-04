@@ -52,6 +52,12 @@ type
   heightbuffer_p = ^heightbuffer_t;
 
 type
+  point3d_t = record
+    X, Y, Z: integer;
+  end;
+  point3d_p = ^point3d_t;
+
+type
   TTerrain = class(TObject)
   private
     ftexture: TBitmap;
@@ -81,6 +87,7 @@ type
     function MoveHeightmapPoint(const hX, hY: integer; const px, py: integer): boolean;
     function HeightmapToCoord(const h: integer): integer;
     function HeightmapCoords(const x, y: integer): TPoint;
+    function HeightmapCoords3D(const x, y: integer): point3d_t;
     function SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;
     function heightmapblocksize: integer;
     procedure RenderMeshGL(const sz: single);
@@ -632,6 +639,13 @@ function TTerrain.HeightmapCoords(const x, y: integer): TPoint;
 begin
   Result.X := HeightmapToCoord(x) + fheightmap[x, y].dx;
   Result.Y := HeightmapToCoord(y) + fheightmap[x, y].dy;
+end;
+
+function TTerrain.HeightmapCoords3D(const x, y: integer): point3d_t;
+begin
+  Result.X := HeightmapToCoord(x) + fheightmap[x, y].dx;
+  Result.Y := HeightmapToCoord(y) + fheightmap[x, y].dy;
+  Result.Z := fheightmap[x, y].height;
 end;
 
 function TTerrain.SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;

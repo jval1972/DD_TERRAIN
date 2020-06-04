@@ -4388,6 +4388,10 @@ object Form1: TForm1
           Caption = '3D View Screenshot'
           OnClick = ExportScreenshot1Click
         end
+        object RadixWADFile1: TMenuItem
+          Caption = 'Radix WAD File'
+          OnClick = RadixWADFile1Click
+        end
       end
       object N2: TMenuItem
         Caption = '-'
@@ -4554,5 +4558,12 @@ object Form1: TForm1
     Filter = 'wad files(*.wad)|*.wad|All files (*.*)|*.*'
     Left = 149
     Top = 137
+  end
+  object SaveWADDialog: TSaveDialog
+    DefaultExt = 'WAD'
+    Filter = 'wad files(*.wad)|*.wad|All files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
+    Left = 337
+    Top = 224
   end
 end

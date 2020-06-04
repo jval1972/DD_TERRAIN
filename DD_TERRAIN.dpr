@@ -51,7 +51,11 @@ uses
   pngimage1 in 'pngimage1.pas',
   ter_defs in 'ter_defs.pas',
   frm_editheightmapitem in 'frm_editheightmapitem.pas' {EditHeightmapItemForm},
-  frm_scaleheightmap in 'frm_scaleheightmap.pas' {ScaleHeightmapItemForm};
+  frm_scaleheightmap in 'frm_scaleheightmap.pas' {ScaleHeightmapItemForm},
+  ter_wadexport in 'ter_wadexport.pas',
+  ter_wadwriter in 'ter_wadwriter.pas',
+  ter_wad in 'ter_wad.pas',
+  ter_doomdata in 'ter_doomdata.pas';
 
 {$R *.res}
 

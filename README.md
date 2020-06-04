@@ -10,7 +10,8 @@ Export screenshots to clipboard
 
 Multiple Undo/Redo
 
-https://i.postimg.cc/tChNLCpF/Image4.png
+## Screenshots
 
+![Screenshot1](https://i.postimg.cc/tChNLCpF/Image4.png "Screenshot1")
 
 ## Downloads

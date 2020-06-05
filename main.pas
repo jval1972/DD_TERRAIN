@@ -902,8 +902,6 @@ begin
 end;
 
 procedure TForm1.SaveUndo(const dosavebitmap: boolean);
-var
-  oldm: boolean;
 begin
   savebitmapundo := dosavebitmap;
   undoManager.SaveUndo;
@@ -1984,7 +1982,7 @@ begin
   if SaveWADDialog.Execute then
   begin
     BackupFile(SaveWADDialog.FileName);
-    ExportTerrainToFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw);
+    ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
   end;
 end;
 

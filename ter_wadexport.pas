@@ -37,8 +37,13 @@ uses
   ter_utils,
   ter_wad;
 
-procedure ExportTerrainToFile(const t: TTerrain; const fname: string; const levelname: string; const palette: PByteArray;
-  const defceilingheight: integer = 512);
+procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const flags: LongWord; const defceilingheight: integer = 512);
+
+const
+  ETF_SLOPED = 1;
+  ETF_CALCDXDY = 2;
 
 implementation
 
@@ -84,8 +89,9 @@ begin
   end;
 end;
 
-procedure ExportTerrainToFile(const t: TTerrain; const fname: string; const levelname: string; const palette: PByteArray;
-  const defceilingheight: integer = 512);
+procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const flags: LongWord; const defceilingheight: integer = 512);
 var
   doomthings: Pmapthing_tArray;
   numdoomthings: integer;
@@ -103,6 +109,7 @@ var
   c, r, g, b: LongWord;
   flat: PByteArray;
   bm: TBitmap;
+  sidetex: char8_t;
 
   function AddThingToWad(const x, y: integer; const angle: smallint; const mtype: word; const options: smallint): integer;
   var
@@ -226,16 +233,28 @@ var
     inc(numdoomlinedefs);
   end;
 
-  procedure AddTriangleToWAD(const iX1, iY1, iX2, iY2, iX3, iY3: integer);
+  function GetHeightmapCoords3D(const iX, iY: integer): point3d_t;
+  begin
+    if flags and ETF_CALCDXDY <> 0 then
+      Result := t.HeightmapCoords3D(iX, iY)
+    else
+    begin
+      Result.X := t.HeightmapToCoord(iX);
+      Result.Y := t.HeightmapToCoord(iY);
+      Result.Z := t.Heightmap[iX, iY].height;
+    end;
+  end;
+
+  procedure AddSlopedTriangleToWAD(const iX1, iY1, iX2, iY2, iX3, iY3: integer);
   var
     v1, v2, v3: integer;
     p1, p2, p3: point3d_t;
     l1, l2, l3: integer;
     sec: integer;
   begin
-    p1 := t.HeightmapCoords3D(iX1, iY1);
-    p2 := t.HeightmapCoords3D(iX2, iY2);
-    p3 := t.HeightmapCoords3D(iX3, iY3);
+    p1 := GetHeightmapCoords3D(iX1, iY1);
+    p2 := GetHeightmapCoords3D(iX2, iY2);
+    p3 := GetHeightmapCoords3D(iX3, iY3);
     sec := AddSectorToWAD(0, defceilingheight);
     v1 := AddVertexToWAD(p1.X, -p1.Y);
     v2 := AddVertexToWAD(p2.X, -p2.Y);
@@ -278,13 +297,70 @@ var
       AddThingToWad(p3.X, -p3.Y, p3.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
   end;
 
+  procedure AddQuadToWAD(const iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4: integer);
+  var
+    v1, v2, v3, v4: integer;
+    p1, p2, p3, p4: point3d_t;
+    l1, l2, l3, l4: integer;
+    sec: integer;
+  begin
+    p1 := GetHeightmapCoords3D(iX1, iY1);
+    p2 := GetHeightmapCoords3D(iX2, iY2);
+    p3 := GetHeightmapCoords3D(iX3, iY3);
+    p4 := GetHeightmapCoords3D(iX4, iY4);
+    sec := AddSectorToWAD(p1.Z, defceilingheight);
+    v1 := AddVertexToWAD(p1.X, -p1.Y);
+    v2 := AddVertexToWAD(p2.X, -p2.Y);
+    v3 := AddVertexToWAD(p3.X, -p3.Y);
+    v4 := AddVertexToWAD(p4.X, -p4.Y);
+    l1 := AddLinedefToWAD(v1, v2);
+    l2 := AddLinedefToWAD(v2, v3);
+    l3 := AddLinedefToWAD(v3, v4);
+    l4 := AddLinedefToWAD(v4, v1);
+    if doomlinedefs[l1].sidenum[0] < 0 then
+      doomlinedefs[l1].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l1].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l1].flags := doomlinedefs[l1].flags or ML_TWOSIDED;
+    end;
+    if doomlinedefs[l2].sidenum[0] < 0 then
+      doomlinedefs[l2].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l2].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l2].flags := doomlinedefs[l2].flags or ML_TWOSIDED;
+    end;
+    if doomlinedefs[l3].sidenum[0] < 0 then
+      doomlinedefs[l3].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l3].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l3].flags := doomlinedefs[l3].flags or ML_TWOSIDED;
+    end;
+    if doomlinedefs[l4].sidenum[0] < 0 then
+      doomlinedefs[l4].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l4].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l4].flags := doomlinedefs[l4].flags or ML_TWOSIDED;
+    end;
+  end;
+
   procedure AddHeightmapitemToWAD(const iX, iY: integer);
   begin
-    AddTriangleToWAD(iX, iY, iX + 1, iY, iX, iY + 1);
-    AddTriangleToWAD(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+    if flags and ETF_SLOPED <> 0 then
+    begin
+      AddSlopedTriangleToWAD(iX, iY, iX + 1, iY, iX, iY + 1);
+      AddSlopedTriangleToWAD(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+    end
+    else
+      AddQuadToWAD(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1)
   end;
 
 begin
+  sidetex := stringtochar8(defsidetex);
+
   doomthings := nil;
   numdoomthings := 0;
   doomlinedefs := nil;
@@ -333,6 +409,18 @@ begin
   for x := 0 to t.heightmapsize - 2 do
     for y := 0 to t.heightmapsize - 2 do
       AddHeightmapitemToWAD(x, y);
+
+  // Add wall textures
+  for i := 0 to numdoomlinedefs - 1 do
+  begin
+    if doomlinedefs[i].flags and ML_TWOSIDED = 0 then
+      doomsidedefs[doomlinedefs[i].sidenum[0]].midtexture := sidetex
+    else
+    begin
+      doomsidedefs[doomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
+      doomsidedefs[doomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
+    end;
+  end;
 
   // Flash data to wad
   wadwriter.AddSeparator(levelname);

@@ -79,7 +79,7 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
     procedure Clear(const newt, newh: integer);
-    procedure SaveToStream(const strm: TStream; const compressed: boolean = true);
+    procedure SaveToStream(const strm: TStream; const compressed: boolean = true; const savebitmap: boolean = true);
     function LoadFromStream(const strm: TStream): boolean;
     procedure SaveToFile(const fname: string; const compressed: boolean = true);
     function LoadFromFile(const fname: string): boolean;
@@ -446,7 +446,7 @@ begin
   ClearHeightmap;
 end;
 
-procedure TTerrain.SaveToStream(const strm: TStream; const compressed: boolean = true);
+procedure TTerrain.SaveToStream(const strm: TStream; const compressed: boolean = true; const savebitmap: boolean = true);
 var
   magic: integer;
   foo: integer;
@@ -467,20 +467,26 @@ begin
   strm.Write(compressed, SizeOf(Boolean));
 
   m := TMemoryStream.Create;
-  if compressed then
+  if savebitmap then
   begin
-    z := TZBitmap.Create;
-    z.Assign(ftexture);
-    z.PixelFormat := pf24bit;
-    z.SaveToStream(m);
-    z.Free;
+    if compressed then
+    begin
+      z := TZBitmap.Create;
+      z.Assign(ftexture);
+      z.PixelFormat := pf24bit;
+      z.SaveToStream(m);
+      z.Free;
+    end
+    else
+      ftexture.SaveToStream(m);
+    sz := m.Size;
   end
   else
-    ftexture.SaveToStream(m);
-  sz := m.Size;
+    sz := 0;
   m.Position := 0;
   strm.Write(sz, SizeOf(Integer));
-  strm.CopyFrom(m, sz);
+  if sz > 0 then
+    strm.CopyFrom(m, sz);
   m.Free;
 
   for i := 0 to fheightmapsize - 1 do
@@ -519,20 +525,23 @@ begin
 
   strm.Read(compressed, SizeOf(Boolean));
   strm.Read(sz, SizeOf(Integer));
-  m := TMemoryStream.Create;
-  m.CopyFrom(strm, sz);
-  m.Position := 0;
-  if compressed then
+  if sz > 0 then
   begin
-    z := TZBitmap.Create;
-    z.LoadFromStream(m);
-    z.PixelFormat := pf32bit;
-    ftexture.Assign(z);
-    z.Free;
-  end
-  else
-    ftexture.LoadFromStream(m);
-  m.free;
+    m := TMemoryStream.Create;
+    m.CopyFrom(strm, sz);
+    m.Position := 0;
+    if compressed then
+    begin
+      z := TZBitmap.Create;
+      z.LoadFromStream(m);
+      z.PixelFormat := pf32bit;
+      ftexture.Assign(z);
+      z.Free;
+    end
+    else
+      ftexture.LoadFromStream(m);
+    m.free;
+  end;
 
   for i := 0 to fheightmapsize - 1 do
     for j := 0 to fheightmapsize - 1 do

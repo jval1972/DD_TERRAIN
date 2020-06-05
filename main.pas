@@ -267,6 +267,7 @@ type
     pen2mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     bitmapbuffer: TBitmap;
+    savebitmapundo: boolean;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNewTerrain(const tsize, hsize: integer);
@@ -275,7 +276,7 @@ type
     procedure SetFileName(const fname: string);
     procedure DoLoadTerrainBinaryUndo(s: TStream);
     procedure DoSaveTerrainBinaryUndo(s: TStream);
-    procedure SaveUndo;
+    procedure SaveUndo(const dosavebitmap: boolean);
     procedure UpdateStausbar;
     procedure UpdateEnable;
     procedure OnLoadTerrainFileMenuHistory(Sender: TObject; const fname: string);
@@ -362,6 +363,7 @@ begin
   fsmoothfactor := 50;
   foldopacity := -1;
   foldpensize := -1;
+  savebitmapundo := true;
 
   CalcPenMasks;
 
@@ -888,7 +890,7 @@ end;
 
 procedure TForm1.DoSaveTerrainBinaryUndo(s: TStream);
 begin
-  terrain.SaveToStream(s);
+  terrain.SaveToStream(s, true, savebitmapundo);
 end;
 
 procedure TForm1.DoLoadTerrainBinaryUndo(s: TStream);
@@ -899,9 +901,13 @@ begin
   glneedstexturerecalc := True;
 end;
 
-procedure TForm1.SaveUndo;
+procedure TForm1.SaveUndo(const dosavebitmap: boolean);
+var
+  oldm: boolean;
 begin
+  savebitmapundo := dosavebitmap;
   undoManager.SaveUndo;
+  savebitmapundo := true;
 end;
 
 procedure TForm1.FormPaint(Sender: TObject);
@@ -1475,7 +1481,7 @@ begin
   if button = mbLeft then
   begin
     CalcPenMasks;
-    SaveUndo;
+    SaveUndo(PenSpeedButton1.Down or PenSpeedButton2.Down or PenSpeedButton3.Down);
     lmousedown := True;
     lmousedownx := X;
     lmousedowny := Y;
@@ -1494,7 +1500,7 @@ begin
     it := terrain.Heightmap[iX, iY];
     if EditHeightmapItem(it) then
     begin
-      SaveUndo;
+      SaveUndo(false);
       terrain.Heightmap[iX, iY] := it;
       changed := True;
       PaintBox1.Invalidate;
@@ -1829,7 +1835,7 @@ begin
   // if there is an image on clipboard
   if Clipboard.HasFormat(CF_BITMAP) then
   begin
-    SaveUndo;
+    SaveUndo(true);
 
     tempBitmap := TBitmap.Create;
     tempBitmap.LoadFromClipboardFormat(CF_BITMAP, ClipBoard.GetAsHandle(cf_Bitmap), 0);
@@ -1859,7 +1865,7 @@ begin
   // if there is an image on clipboard
   if Clipboard.HasFormat(CF_BITMAP) then
   begin
-    SaveUndo;
+    SaveUndo(false);
 
     tempBitmap1 := TBitmap.Create;
     tempBitmap1.LoadFromClipboardFormat(CF_BITMAP, ClipBoard.GetAsHandle(cf_Bitmap), 0);
@@ -1902,7 +1908,7 @@ begin
   aadd := 0;
   if GetScaleHeightmapInfo(amul, adiv, aadd) then
   begin
-    SaveUndo;
+    SaveUndo(false);
     for hX := 0 to terrain.heightmapsize - 1 do
       for hY := 0 to terrain.heightmapsize - 1 do
       begin

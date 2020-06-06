@@ -3,7 +3,7 @@ object EditHeightmapItemForm: TEditHeightmapItemForm
   Top = 159
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = 'Edit heightmap item'
+  Caption = 'Edit Heightmap Item'
   ClientHeight = 198
   ClientWidth = 348
   Color = clBtnFace

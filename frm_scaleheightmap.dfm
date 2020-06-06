@@ -3,7 +3,7 @@ object ScaleHeightmapItemForm: TScaleHeightmapItemForm
   Top = 159
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = 'Scale heightmap item'
+  Caption = 'Scale Heightmap'
   ClientHeight = 180
   ClientWidth = 348
   Color = clBtnFace

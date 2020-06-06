@@ -173,7 +173,7 @@ type
     PasteHeightmap1: TMenuItem;
     PenSpeedButton4: TSpeedButton;
     ools1: TMenuItem;
-    Adjustheightmap1: TMenuItem;
+    Scaleheightmap1: TMenuItem;
     RadixWADFile1: TMenuItem;
     SaveWADDialog: TSaveDialog;
     procedure FormCreate(Sender: TObject);
@@ -228,7 +228,7 @@ type
     procedure PenSpeedButton6Click(Sender: TObject);
     procedure PasteTexture1Click(Sender: TObject);
     procedure PasteHeightmap1Click(Sender: TObject);
-    procedure Adjustheightmap1Click(Sender: TObject);
+    procedure Scaleheightmap1Click(Sender: TObject);
     procedure RadixWADFile1Click(Sender: TObject);
   private
     { Private declarations }
@@ -773,11 +773,11 @@ begin
   if glneedstexturerecalc then
     glneedsupdate := True;
 
+  UpdateStausbar;
+
   if not glneedsupdate then
     // jval: We don't need to render
     Exit;
-
-  UpdateStausbar;
 
   DoRenderGL;
 
@@ -1517,7 +1517,8 @@ begin
     lmousedownx := X;
     lmousedowny := Y;
     lmousedown := False;
-    glneedstexturerecalc := True;
+    glneedstexturerecalc := PenSpeedButton1.Down or PenSpeedButton2.Down or PenSpeedButton3.Down;
+    glneedsupdate := True; 
     lasthmouseheightmapx := -1;
     lasthmouseheightmapy := -1;
   end;
@@ -1895,7 +1896,7 @@ begin
   end;
 end;
 
-procedure TForm1.Adjustheightmap1Click(Sender: TObject);
+procedure TForm1.Scaleheightmap1Click(Sender: TObject);
 var
   amul, adiv, aadd: integer;
   hX, hY: integer;
@@ -1981,8 +1982,13 @@ procedure TForm1.RadixWADFile1Click(Sender: TObject);
 begin
   if SaveWADDialog.Execute then
   begin
-    BackupFile(SaveWADDialog.FileName);
-    ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
+    Screen.Cursor := crHourglass;
+    try
+      BackupFile(SaveWADDialog.FileName);
+      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
+    finally
+      Screen.Cursor := crDefault;
+    end;
   end;
 end;
 

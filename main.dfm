@@ -4469,9 +4469,9 @@ object Form1: TForm1
     end
     object ools1: TMenuItem
       Caption = 'Tools'
-      object Adjustheightmap1: TMenuItem
-        Caption = 'Adjust heightmap'
-        OnClick = Adjustheightmap1Click
+      object Scaleheightmap1: TMenuItem
+        Caption = 'Scale Heightmap'
+        OnClick = Scaleheightmap1Click
       end
     end
     object Options1: TMenuItem

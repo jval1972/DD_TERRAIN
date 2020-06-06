@@ -499,11 +499,11 @@ begin
   // Create Palette
   for i := 0 to 255 do
   begin
-    r := palette[3 * i + 2];
+    r := palette[3 * i];
     if r > 255 then r := 255;
     g := palette[3 * i + 1];
     if g > 255 then g := 255;
-    b := palette[3 * i];
+    b := palette[3 * i + 2];
     if b > 255 then b := 255;
     def_palL[i] := (r shl 16) + (g shl 8) + (b);
   end;

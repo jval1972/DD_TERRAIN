@@ -618,6 +618,7 @@ begin
   SetFileName(fname);
   glneedsupdate := True;
   glneedstexturerecalc := True;
+  changed := False;
   Result := True;
 end;
 

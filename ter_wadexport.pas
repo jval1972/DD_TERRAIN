@@ -89,6 +89,10 @@ begin
   end;
 end;
 
+type
+  TBooleanArray = packed array[0..$FFF] of boolean;
+  PBooleanArray = ^TBooleanArray;
+
 procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
@@ -102,14 +106,18 @@ var
   doomvertexes: Pmapvertex_tArray;
   numdoomvertexes: integer;
   doomsectors: Pmapsector_tArray;
+  slopedsectors: PBooleanArray;
   numdoomsectors: integer;
   wadwriter: TWadWriter;
   def_palL: array[0..255] of LongWord;
+  scanline: PLongWordArray;
   i, x, y: integer;
   c, r, g, b: LongWord;
-  flat: PByteArray;
+  flattexture: PByteArray;
   bm: TBitmap;
   sidetex: char8_t;
+  pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
 
   function AddThingToWad(const x, y: integer; const angle: smallint; const mtype: word; const options: smallint): integer;
   var
@@ -138,11 +146,27 @@ var
     inc(numdoomthings);
   end;
 
-  function AddSectorToWAD(const hfloor, hceiling: integer): integer;
+  function AddSectorToWAD(const hfloor, hceiling: integer; const sloped: boolean): integer;
   var
+    j: integer;
     dsec: Pmapsector_t;
   begin
+    if not sloped then
+    begin
+      for j := 0 to numdoomsectors - 1 do
+        if not slopedsectors[j] then
+        begin
+          dsec := @doomsectors[j];
+          if (dsec.floorheight = hfloor) and (dsec.ceilingheight = hceiling) then
+          begin
+            Result := j;
+            Exit;
+          end;
+        end;
+    end;
+
     ReallocMem(doomsectors, (numdoomsectors  + 1) * SizeOf(mapsector_t));
+    ReallocMem(slopedsectors, (numdoomsectors  + 1) * SizeOf(boolean));
     dsec := @doomsectors[numdoomsectors];
     dsec.floorheight := hfloor;
     dsec.ceilingheight := hceiling;
@@ -151,6 +175,7 @@ var
     dsec.lightlevel := 192;
     dsec.special := 0;
     dsec.tag := 0;
+    slopedsectors[numdoomsectors] := sloped;
 
     result := numdoomsectors;
     inc(numdoomsectors);
@@ -245,59 +270,7 @@ var
     end;
   end;
 
-  procedure AddSlopedTriangleToWAD(const iX1, iY1, iX2, iY2, iX3, iY3: integer);
-  var
-    v1, v2, v3: integer;
-    p1, p2, p3: point3d_t;
-    l1, l2, l3: integer;
-    sec: integer;
-  begin
-    p1 := GetHeightmapCoords3D(iX1, iY1);
-    p2 := GetHeightmapCoords3D(iX2, iY2);
-    p3 := GetHeightmapCoords3D(iX3, iY3);
-    sec := AddSectorToWAD(0, defceilingheight);
-    v1 := AddVertexToWAD(p1.X, -p1.Y);
-    v2 := AddVertexToWAD(p2.X, -p2.Y);
-    v3 := AddVertexToWAD(p3.X, -p3.Y);
-    l1 := AddLinedefToWAD(v1, v2);
-    l2 := AddLinedefToWAD(v2, v3);
-    l3 := AddLinedefToWAD(v3, v1);
-    if doomlinedefs[l1].sidenum[0] < 0 then
-      doomlinedefs[l1].sidenum[0] := AddSidedefToWAD(sec)
-    else
-    begin
-      doomlinedefs[l1].sidenum[1] := AddSidedefToWAD(sec);
-      doomlinedefs[l1].flags := doomlinedefs[l1].flags or ML_TWOSIDED;
-    end;
-    if doomlinedefs[l2].sidenum[0] < 0 then
-      doomlinedefs[l2].sidenum[0] := AddSidedefToWAD(sec)
-    else
-    begin
-      doomlinedefs[l2].sidenum[1] := AddSidedefToWAD(sec);
-      doomlinedefs[l2].flags := doomlinedefs[l2].flags or ML_TWOSIDED;
-    end;
-    if doomlinedefs[l3].sidenum[0] < 0 then
-      doomlinedefs[l3].sidenum[0] := AddSidedefToWAD(sec)
-    else
-    begin
-      doomlinedefs[l3].sidenum[1] := AddSidedefToWAD(sec);
-      doomlinedefs[l3].flags := doomlinedefs[l3].flags or ML_TWOSIDED;
-    end;
-    if p1.Z < 0 then
-      AddThingToWad(p1.X, -p1.Y, -p1.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-    else if p1.Z > 0 then
-      AddThingToWad(p1.X, -p1.Y, p1.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
-    if p2.Z < 0 then
-      AddThingToWad(p2.X, -p2.Y, -p2.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-    else if p1.Z > 0 then
-      AddThingToWad(p2.X, -p2.Y, p2.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
-    if p3.Z < 0 then
-      AddThingToWad(p3.X, -p3.Y, -p3.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-    else if p1.Z > 0 then
-      AddThingToWad(p3.X, -p3.Y, p3.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
-  end;
-
-  procedure AddQuadToWAD(const iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4: integer);
+  procedure AddFlatQuadToWAD(const iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4: integer);
   var
     v1, v2, v3, v4: integer;
     p1, p2, p3, p4: point3d_t;
@@ -308,7 +281,7 @@ var
     p2 := GetHeightmapCoords3D(iX2, iY2);
     p3 := GetHeightmapCoords3D(iX3, iY3);
     p4 := GetHeightmapCoords3D(iX4, iY4);
-    sec := AddSectorToWAD(p1.Z, defceilingheight);
+    sec := AddSectorToWAD((p1.Z + p2.Z + p3.Z + p4.Z) div 4, defceilingheight, False);
     v1 := AddVertexToWAD(p1.X, -p1.Y);
     v2 := AddVertexToWAD(p2.X, -p2.Y);
     v3 := AddVertexToWAD(p3.X, -p3.Y);
@@ -347,19 +320,167 @@ var
     end;
   end;
 
+  function TryFlatRange(const iX1, iY1: integer): boolean;
+  var
+    p1, p2, p3, p4: point3d_t;
+    iX2, iY2: integer;
+    iX3, iY3: integer;
+    iX4, iY4: integer;
+  begin
+    Result := False;
+
+    p1 := GetHeightmapCoords3D(iX1, iY1);
+    iX2 := iX1 + 1;
+    iY2 := iY1;
+    p2 := GetHeightmapCoords3D(iX2, iY2);
+    if p1.Z <> p2.Z then
+      Exit;
+    iX3 := iX1 + 1;
+    iY3 := iY1 + 1;
+    p3 := GetHeightmapCoords3D(iX3, iY3);
+    if p1.Z <> p3.Z then
+      Exit;
+    iX4 := iX1;
+    iY4 := iY1 + 1;
+    p4 := GetHeightmapCoords3D(iX4, iY4);
+    if p1.Z <> p4.Z then
+      Exit;
+    AddFlatQuadToWAD(iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4);
+    flat[iX1, iY1] := true;
+
+    Result := True;
+  end;
+
+  procedure AddSlopedTriangleToWAD(const iX1, iY1, iX2, iY2, iX3, iY3: integer);
+  var
+    v1, v2, v3: integer;
+    p1, p2, p3: point3d_t;
+    l1, l2, l3: integer;
+    sec: integer;
+    issloped: boolean;
+  begin
+    p1 := GetHeightmapCoords3D(iX1, iY1);
+    p2 := GetHeightmapCoords3D(iX2, iY2);
+    p3 := GetHeightmapCoords3D(iX3, iY3);
+    issloped := (p1.Z <> p2.Z) or (p1.Z <> p3.Z);
+    if issloped then
+      sec := AddSectorToWAD(0, defceilingheight, True)
+    else
+      sec := AddSectorToWAD(p1.Z, defceilingheight, False);
+    v1 := AddVertexToWAD(p1.X, -p1.Y);
+    v2 := AddVertexToWAD(p2.X, -p2.Y);
+    v3 := AddVertexToWAD(p3.X, -p3.Y);
+    l1 := AddLinedefToWAD(v1, v2);
+    l2 := AddLinedefToWAD(v2, v3);
+    l3 := AddLinedefToWAD(v3, v1);
+    if doomlinedefs[l1].sidenum[0] < 0 then
+      doomlinedefs[l1].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l1].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l1].flags := doomlinedefs[l1].flags or ML_TWOSIDED;
+    end;
+    if doomlinedefs[l2].sidenum[0] < 0 then
+      doomlinedefs[l2].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l2].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l2].flags := doomlinedefs[l2].flags or ML_TWOSIDED;
+    end;
+    if doomlinedefs[l3].sidenum[0] < 0 then
+      doomlinedefs[l3].sidenum[0] := AddSidedefToWAD(sec)
+    else
+    begin
+      doomlinedefs[l3].sidenum[1] := AddSidedefToWAD(sec);
+      doomlinedefs[l3].flags := doomlinedefs[l3].flags or ML_TWOSIDED;
+    end;
+    if issloped then
+    begin
+      if p1.Z < 0 then
+        AddThingToWad(p1.X, -p1.Y, -p1.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else if p1.Z > 0 then
+        AddThingToWad(p1.X, -p1.Y, p1.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+      if p2.Z < 0 then
+        AddThingToWad(p2.X, -p2.Y, -p2.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else if p1.Z > 0 then
+        AddThingToWad(p2.X, -p2.Y, p2.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+      if p3.Z < 0 then
+        AddThingToWad(p3.X, -p3.Y, -p3.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else if p1.Z > 0 then
+        AddThingToWad(p3.X, -p3.Y, p3.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+    end;
+  end;
+
   procedure AddHeightmapitemToWAD(const iX, iY: integer);
   begin
+    if pass[iX, iY] then
+      Exit;
     if flags and ETF_SLOPED <> 0 then
     begin
-      AddSlopedTriangleToWAD(iX, iY, iX + 1, iY, iX, iY + 1);
-      AddSlopedTriangleToWAD(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+      if not TryFlatRange(iX, iY) then
+      begin
+        AddSlopedTriangleToWAD(iX, iY, iX + 1, iY, iX, iY + 1);
+        AddSlopedTriangleToWAD(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+      end;
     end
     else
-      AddQuadToWAD(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1)
+      AddFlatQuadToWAD(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1);
+    pass[iX, iY] := True;
+  end;
+
+  procedure RemoveUnNeededLines;
+  var
+    j: integer;
+    pline: Pmaplinedef_t;
+    side0, side1: integer;
+  begin
+    for j := numdoomlinedefs - 2 downto 0 do
+    begin
+      pline := @doomlinedefs[j];
+      side0 := pline.sidenum[0];
+      side1 := pline.sidenum[1];
+      if (side0 >= 0) and (side1 >= 0) then
+        if doomsidedefs[side0].sector = doomsidedefs[side1].sector then
+        begin
+          doomlinedefs[j] := doomlinedefs[numdoomlinedefs - 1];
+          ReallocMem(doomlinedefs, (numdoomlinedefs  - 1) * SizeOf(maplinedef_t));
+          dec(numdoomlinedefs);
+        end;
+    end;
+  end;
+
+  procedure FixTrangleSectors;
+  var
+    j: integer;
+    pline: Pmaplinedef_t;
+    side0, side1: integer;
+    sectorlines: PIntegerArray;
+  begin
+    GetMem(sectorlines, numdoomsectors * SizeOf(integer));
+    FillChar(sectorlines^, numdoomsectors * SizeOf(integer), 0);
+    for j := 0 to numdoomlinedefs - 1 do
+    begin
+      pline := @doomlinedefs[j];
+      side0 := pline.sidenum[0];
+      side1 := pline.sidenum[1];
+      if side0 >= 0 then
+        inc(sectorlines[doomsidedefs[side0].sector]);
+      if side1 >= 0 then
+        inc(sectorlines[doomsidedefs[side1].sector]);
+    end;
+
+    for j := 0 to numdoomsectors - 1 do
+      if not slopedsectors[j] then
+        if sectorlines[j] = 3 then
+          doomsectors[j].floorheight := 0; // Height will be set by easy slope things
+
+    FreeMem(sectorlines, numdoomsectors * SizeOf(integer));
   end;
 
 begin
   sidetex := stringtochar8(defsidetex);
+  FillChar(pass, SizeOf(pass), 0);
+  FillChar(flat, SizeOf(flat), 0);
 
   doomthings := nil;
   numdoomthings := 0;
@@ -370,6 +491,7 @@ begin
   doomvertexes := nil;
   numdoomvertexes := 0;
   doomsectors := nil;
+  slopedsectors := nil;
   numdoomsectors := 0;
 
   wadwriter := TWadWriter.Create;
@@ -377,38 +499,50 @@ begin
   // Create Palette
   for i := 0 to 255 do
   begin
-    r := palette[3 * i];
+    r := palette[3 * i + 2];
     if r > 255 then r := 255;
     g := palette[3 * i + 1];
     if g > 255 then g := 255;
-    b := palette[3 * i + 2];
+    b := palette[3 * i];
     if b > 255 then b := 255;
     def_palL[i] := (r shl 16) + (g shl 8) + (b);
   end;
 
   // Create flat
   bm := t.Texture;
-  GetMem(flat, bm.Width * bm.Height);
+  GetMem(flattexture, bm.Width * bm.Height);
 
   i := 0;
   for y := 0 to t.texturesize - 1 do
+  begin
+    scanline := t.Texture.ScanLine[y];
     for x := 0 to t.texturesize - 1 do
     begin
-      c := bm.Canvas.Pixels[x, y];
-      flat[i] := V_FindAproxColorIndex(@def_palL, c);
+      c := scanline[x];
+      flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
       inc(i);
     end;
+  end;
 
   wadwriter.AddSeparator('F_START');
-  wadwriter.AddData(levelname + 'TER', flat, bm.Width * bm.Height);
+  wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
   wadwriter.AddSeparator('F_END');
 
-  FreeMem(flat, bm.Width * bm.Height);
+  FreeMem(flattexture, bm.Width * bm.Height);
 
   // Create Map
   for x := 0 to t.heightmapsize - 2 do
     for y := 0 to t.heightmapsize - 2 do
       AddHeightmapitemToWAD(x, y);
+
+  // Player start
+  AddThingToWad(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
+
+  // Remove unneeded lines
+  RemoveUnNeededLines;
+
+  // Fix flat triangle sectors
+  FixTrangleSectors;
 
   // Add wall textures
   for i := 0 to numdoomlinedefs - 1 do
@@ -446,6 +580,8 @@ begin
   FreeMem(doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
   FreeMem(doomvertexes, numdoomvertexes * SizeOf(mapvertex_t));
   FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));
+  FreeMem(slopedsectors, numdoomsectors * SizeOf(boolean));
+
 end;
 
 end.

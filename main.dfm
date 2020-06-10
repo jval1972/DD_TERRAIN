@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 102
-  Top = 113
-  Width = 1308
+  Left = -6
+  Top = 50
+  Width = 1038
   Height = 686
   Caption = 'Terrain Generator'
   Color = clBtnFace
@@ -1063,7 +1063,7 @@ object Form1: TForm1
   object StatusBar1: TStatusBar
     Left = 0
     Top = 608
-    Width = 1292
+    Width = 1022
     Height = 19
     Panels = <
       item
@@ -1082,7 +1082,7 @@ object Form1: TForm1
   object ToolBar1: TToolBar
     Left = 0
     Top = 0
-    Width = 1292
+    Width = 1022
     Height = 40
     ButtonHeight = 34
     Caption = 'ToolBar1'
@@ -4288,7 +4288,7 @@ object Form1: TForm1
   object MainPageControl: TPageControl
     Left = 253
     Top = 40
-    Width = 1039
+    Width = 769
     Height = 568
     ActivePage = TabSheet4
     Align = alClient
@@ -4298,7 +4298,7 @@ object Form1: TForm1
       object PaintScrollBox: TScrollBox
         Left = 0
         Top = 0
-        Width = 1031
+        Width = 761
         Height = 540
         Align = alClient
         BorderStyle = bsNone

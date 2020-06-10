@@ -1,6 +1,6 @@
 object ScaleHeightmapItemForm: TScaleHeightmapItemForm
-  Left = 360
-  Top = 159
+  Left = 1178
+  Top = 227
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Scale Heightmap'

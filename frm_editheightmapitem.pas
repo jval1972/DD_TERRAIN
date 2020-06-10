@@ -78,7 +78,7 @@ begin
   f := TEditHeightmapItemForm.Create(nil);
   try
     f.HeightSpinEdit.MinValue := -HEIGHTMAPRANGE;
-    f.HeightSpinEdit.MaxValue := -HEIGHTMAPRANGE;
+    f.HeightSpinEdit.MaxValue := HEIGHTMAPRANGE;
     f.DXSpinEdit.MinValue := -1024;
     f.DXSpinEdit.MaxValue := 1024;
     f.DYSpinEdit.MinValue := -1024;

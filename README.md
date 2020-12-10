@@ -11,7 +11,7 @@ Export screenshots to clipboard
 Multiple Undo/Redo
 
 ## Downloads
-[version 1.0.1.12 (20201210 - win32)](https://sourceforge.net/projects/fpcdoom/files/FPCDoom_1.12.6.127/FPCDoom_1.12.6.127_bin.zip/download)
+[version 1.0.1.12 (20201210 - win32)](https://sourceforge.net/projects/dd-terrain/files/DD_Terrain_1.0.1.12/DD_Terrain_1.0.1.12_win32.zip/download)
 
 ## Screenshots
 

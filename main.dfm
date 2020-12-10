@@ -4382,6 +4382,7 @@ object Form1: TForm1
         Caption = '&Export'
         object ExportObjModel1: TMenuItem
           Caption = 'Obj model'
+          Visible = False
           OnClick = ExportObjModel1Click
         end
         object ExportScreenshot1: TMenuItem

@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = -6
-  Top = 50
+  Left = 8
+  Top = 56
   Width = 1038
   Height = 686
   Caption = 'Terrain Generator'
@@ -4389,9 +4389,16 @@ object Form1: TForm1
           Caption = '3D View Screenshot'
           OnClick = ExportScreenshot1Click
         end
+        object N3: TMenuItem
+          Caption = '-'
+        end
         object RadixWADFile1: TMenuItem
-          Caption = 'Radix WAD File'
+          Caption = 'Radix WAD Map'
           OnClick = RadixWADFile1Click
+        end
+        object ZDoomUDMFMap1: TMenuItem
+          Caption = 'UDMF Map (GZDoom/K8Vavoom)'
+          OnClick = ZDoomUDMFMap1Click
         end
       end
       object N2: TMenuItem
@@ -4564,7 +4571,7 @@ object Form1: TForm1
     DefaultExt = 'WAD'
     Filter = 'wad files(*.wad)|*.wad|All files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
-    Left = 337
+    Left = 369
     Top = 224
   end
 end

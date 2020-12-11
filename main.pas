@@ -176,6 +176,8 @@ type
     Scaleheightmap1: TMenuItem;
     RadixWADFile1: TMenuItem;
     SaveWADDialog: TSaveDialog;
+    N3: TMenuItem;
+    ZDoomUDMFMap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -230,6 +232,7 @@ type
     procedure PasteHeightmap1Click(Sender: TObject);
     procedure Scaleheightmap1Click(Sender: TObject);
     procedure RadixWADFile1Click(Sender: TObject);
+    procedure ZDoomUDMFMap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -1978,6 +1981,61 @@ const
     $FC, $F8, $FC
   );
 
+  DoomPaletteRaw: array[0..767] of Byte = (
+    $00, $00, $00, $1F, $17, $0B, $17, $0F, $07, $4B, $4B, $4B, $FF, $FF, $FF,
+    $1B, $1B, $1B, $13, $13, $13, $0B, $0B, $0B, $07, $07, $07, $2F, $37, $1F,
+    $23, $2B, $0F, $17, $1F, $07, $0F, $17, $00, $4F, $3B, $2B, $47, $33, $23,
+    $3F, $2B, $1B, $FF, $B7, $B7, $F7, $AB, $AB, $F3, $A3, $A3, $EB, $97, $97,
+    $E7, $8F, $8F, $DF, $87, $87, $DB, $7B, $7B, $D3, $73, $73, $CB, $6B, $6B,
+    $C7, $63, $63, $BF, $5B, $5B, $BB, $57, $57, $B3, $4F, $4F, $AF, $47, $47,
+    $A7, $3F, $3F, $A3, $3B, $3B, $9B, $33, $33, $97, $2F, $2F, $8F, $2B, $2B,
+    $8B, $23, $23, $83, $1F, $1F, $7F, $1B, $1B, $77, $17, $17, $73, $13, $13,
+    $6B, $0F, $0F, $67, $0B, $0B, $5F, $07, $07, $5B, $07, $07, $53, $07, $07,
+    $4F, $00, $00, $47, $00, $00, $43, $00, $00, $FF, $EB, $DF, $FF, $E3, $D3,
+    $FF, $DB, $C7, $FF, $D3, $BB, $FF, $CF, $B3, $FF, $C7, $A7, $FF, $BF, $9B,
+    $FF, $BB, $93, $FF, $B3, $83, $F7, $AB, $7B, $EF, $A3, $73, $E7, $9B, $6B,
+    $DF, $93, $63, $D7, $8B, $5B, $CF, $83, $53, $CB, $7F, $4F, $BF, $7B, $4B,
+    $B3, $73, $47, $AB, $6F, $43, $A3, $6B, $3F, $9B, $63, $3B, $8F, $5F, $37,
+    $87, $57, $33, $7F, $53, $2F, $77, $4F, $2B, $6B, $47, $27, $5F, $43, $23,
+    $53, $3F, $1F, $4B, $37, $1B, $3F, $2F, $17, $33, $2B, $13, $2B, $23, $0F,
+    $EF, $EF, $EF, $E7, $E7, $E7, $DF, $DF, $DF, $DB, $DB, $DB, $D3, $D3, $D3,
+    $CB, $CB, $CB, $C7, $C7, $C7, $BF, $BF, $BF, $B7, $B7, $B7, $B3, $B3, $B3,
+    $AB, $AB, $AB, $A7, $A7, $A7, $9F, $9F, $9F, $97, $97, $97, $93, $93, $93,
+    $8B, $8B, $8B, $83, $83, $83, $7F, $7F, $7F, $77, $77, $77, $6F, $6F, $6F,
+    $6B, $6B, $6B, $63, $63, $63, $5B, $5B, $5B, $57, $57, $57, $4F, $4F, $4F,
+    $47, $47, $47, $43, $43, $43, $3B, $3B, $3B, $37, $37, $37, $2F, $2F, $2F,
+    $27, $27, $27, $23, $23, $23, $77, $FF, $6F, $6F, $EF, $67, $67, $DF, $5F,
+    $5F, $CF, $57, $5B, $BF, $4F, $53, $AF, $47, $4B, $9F, $3F, $43, $93, $37,
+    $3F, $83, $2F, $37, $73, $2B, $2F, $63, $23, $27, $53, $1B, $1F, $43, $17,
+    $17, $33, $0F, $13, $23, $0B, $0B, $17, $07, $BF, $A7, $8F, $B7, $9F, $87,
+    $AF, $97, $7F, $A7, $8F, $77, $9F, $87, $6F, $9B, $7F, $6B, $93, $7B, $63,
+    $8B, $73, $5B, $83, $6B, $57, $7B, $63, $4F, $77, $5F, $4B, $6F, $57, $43,
+    $67, $53, $3F, $5F, $4B, $37, $57, $43, $33, $53, $3F, $2F, $9F, $83, $63,
+    $8F, $77, $53, $83, $6B, $4B, $77, $5F, $3F, $67, $53, $33, $5B, $47, $2B,
+    $4F, $3B, $23, $43, $33, $1B, $7B, $7F, $63, $6F, $73, $57, $67, $6B, $4F,
+    $5B, $63, $47, $53, $57, $3B, $47, $4F, $33, $3F, $47, $2B, $37, $3F, $27,
+    $FF, $FF, $73, $EB, $DB, $57, $D7, $BB, $43, $C3, $9B, $2F, $AF, $7B, $1F,
+    $9B, $5B, $13, $87, $43, $07, $73, $2B, $00, $FF, $FF, $FF, $FF, $DB, $DB,
+    $FF, $BB, $BB, $FF, $9B, $9B, $FF, $7B, $7B, $FF, $5F, $5F, $FF, $3F, $3F,
+    $FF, $1F, $1F, $FF, $00, $00, $EF, $00, $00, $E3, $00, $00, $D7, $00, $00,
+    $CB, $00, $00, $BF, $00, $00, $B3, $00, $00, $A7, $00, $00, $9B, $00, $00,
+    $8B, $00, $00, $7F, $00, $00, $73, $00, $00, $67, $00, $00, $5B, $00, $00,
+    $4F, $00, $00, $43, $00, $00, $E7, $E7, $FF, $C7, $C7, $FF, $AB, $AB, $FF,
+    $8F, $8F, $FF, $73, $73, $FF, $53, $53, $FF, $37, $37, $FF, $1B, $1B, $FF,
+    $00, $00, $FF, $00, $00, $E3, $00, $00, $CB, $00, $00, $B3, $00, $00, $9B,
+    $00, $00, $83, $00, $00, $6B, $00, $00, $53, $FF, $FF, $FF, $FF, $EB, $DB,
+    $FF, $D7, $BB, $FF, $C7, $9B, $FF, $B3, $7B, $FF, $A3, $5B, $FF, $8F, $3B,
+    $FF, $7F, $1B, $F3, $73, $17, $EB, $6F, $0F, $DF, $67, $0F, $D7, $5F, $0B,
+    $CB, $57, $07, $C3, $4F, $00, $B7, $47, $00, $AF, $43, $00, $FF, $FF, $FF,
+    $FF, $FF, $D7, $FF, $FF, $B3, $FF, $FF, $8F, $FF, $FF, $6B, $FF, $FF, $47,
+    $FF, $FF, $23, $FF, $FF, $00, $A7, $3F, $00, $9F, $37, $00, $93, $2F, $00,
+    $87, $23, $00, $4F, $3B, $27, $43, $2F, $1B, $37, $23, $13, $2F, $1B, $0B,
+    $00, $00, $53, $00, $00, $47, $00, $00, $3B, $00, $00, $2F, $00, $00, $23,
+    $00, $00, $17, $00, $00, $0B, $00, $00, $00, $FF, $9F, $43, $FF, $E7, $4B,
+    $FF, $7B, $FF, $FF, $00, $FF, $CF, $00, $CF, $9F, $00, $9B, $6F, $00, $6B,
+    $A7, $6B, $6B
+  );
+
 
 procedure TForm1.RadixWADFile1Click(Sender: TObject);
 begin
@@ -1986,7 +2044,21 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
+      ExportTerrainToRADWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
+end;
+
+procedure TForm1.ZDoomUDMFMap1Click(Sender: TObject);
+begin
+  if SaveWADDialog.Execute then
+  begin
+    Screen.Cursor := crHourglass;
+    try
+      BackupFile(SaveWADDialog.FileName);
+      ExportTerrainToZDOOMUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', ETF_SLOPED or ETF_CALCDXDY);
     finally
       Screen.Cursor := crDefault;
     end;

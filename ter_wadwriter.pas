@@ -43,6 +43,7 @@ type
     procedure Clear; virtual;
     procedure AddData(const lumpname: string; const data: pointer; const size: integer);
     procedure AddString(const lumpname: string; const data: string);
+    procedure AddStringList(const lumpname: string; const lst: TStringList);
     procedure AddSeparator(const lumpname: string);
     procedure SaveToStream(const strm: TStream);
     procedure SaveToFile(const fname: string);
@@ -100,6 +101,14 @@ begin
   for i := 1 to Length(data) do
     m.Write(data[i], SizeOf(char));
   lumps.AddObject(UpperCase(lumpname), m);
+end;
+
+procedure TWadWriter.AddStringList(const lumpname: string; const lst: TStringList);
+var
+  stmp: string;
+begin
+  stmp := lst.Text;
+  AddString(lumpname, stmp);
 end;
 
 procedure TWadWriter.AddSeparator(const lumpname: string);

@@ -33,11 +33,16 @@ interface
 uses
   SysUtils,
   Classes,
+  pngimage1,
   ter_class,
   ter_utils,
   ter_wad;
 
-procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToRADWADFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const flags: LongWord; const defceilingheight: integer = 512);
+
+procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
@@ -93,7 +98,7 @@ type
   TBooleanArray = packed array[0..$FFF] of boolean;
   PBooleanArray = ^TBooleanArray;
 
-procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToRADWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
@@ -584,4 +589,530 @@ begin
 
 end;
 
+procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const flags: LongWord; const defceilingheight: integer = 512);
+var
+  zdoomlinedefs: Pmaplinedef_tArray;
+  numzdoomlinedefs: integer;
+  zdoomsidedefs: Pmapsidedef_tArray;
+  numzdoomsidedefs: integer;
+  zdoomvertexes: Pzmapvertex_tArray;
+  numzdoomvertexes: integer;
+  zdoomsectors: Pmapsector_tArray;
+  zslopedsectors: PBooleanArray;
+  numzdoomsectors: integer;
+  wadwriter: TWadWriter;
+  def_palL: array[0..255] of LongWord;
+  i, x, y: integer;
+  r, g, b: LongWord;
+  png: TPngObject;
+  ms: TMemoryStream;
+  sidetex: char8_t;
+  pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  udmfmap: TStringList;
+
+  procedure AddPlayerStartToUDMF(const x, y: integer; const angle: smallint; const pno: integer);
+  begin
+    udmfmap.Add('thing // ' + IntToStr(pno));
+    udmfmap.Add('{');
+    udmfmap.Add('x = ' + IntToStr(x) + ';');
+    udmfmap.Add('y = ' + IntToStr(y) + ';');
+    udmfmap.Add('angle = ' + IntToStr(angle) + ';');
+    udmfmap.Add('type = ' + IntToStr(pno) + ';');
+    udmfmap.Add('skill1 = true;');
+    udmfmap.Add('skill2 = true;');
+    udmfmap.Add('skill3 = true;');
+    udmfmap.Add('skill4 = true;');
+    udmfmap.Add('skill5 = true;');
+    udmfmap.Add('skill6 = true;');
+    udmfmap.Add('skill7 = true;');
+    udmfmap.Add('skill8 = true;');
+    udmfmap.Add('single = true;');
+    udmfmap.Add('coop = true;');
+    udmfmap.Add('dm = true;');
+    udmfmap.Add('class1 = true;');
+    udmfmap.Add('class2 = true;');
+    udmfmap.Add('class3 = true;');
+    udmfmap.Add('class4 = true;');
+    udmfmap.Add('class5 = true;');
+    udmfmap.Add('class6 = true;');
+    udmfmap.Add('class7 = true;');
+    udmfmap.Add('class8 = true;');
+    udmfmap.Add('}');
+    udmfmap.Add('');
+  end;
+
+  function AddSectorToUDMF(const hfloor, hceiling: integer; const sloped: boolean): integer;
+  var
+    j: integer;
+    dsec: Pmapsector_t;
+  begin
+    if not sloped then
+    begin
+      for j := 0 to numzdoomsectors - 1 do
+        if not zslopedsectors[j] then
+        begin
+          dsec := @zdoomsectors[j];
+          if (dsec.floorheight = hfloor) and (dsec.ceilingheight = hceiling) then
+          begin
+            Result := j;
+            Exit;
+          end;
+        end;
+    end;
+
+    ReallocMem(zdoomsectors, (numzdoomsectors  + 1) * SizeOf(mapsector_t));
+    ReallocMem(zslopedsectors, (numzdoomsectors  + 1) * SizeOf(boolean));
+    dsec := @zdoomsectors[numzdoomsectors];
+    dsec.floorheight := hfloor;
+    dsec.ceilingheight := hceiling;
+    dsec.floorpic := stringtochar8(levelname + 'TER');
+    dsec.ceilingpic := stringtochar8('F_SKY1');
+    dsec.lightlevel := 192;
+    dsec.special := 0;
+    dsec.tag := 0;
+    zslopedsectors[numzdoomsectors] := sloped;
+
+    result := numzdoomsectors;
+    inc(numzdoomsectors);
+  end;
+
+  function AddVertexToUDMF(const x, y: smallint): integer;
+  var
+    j: integer;
+  begin
+    for j := 0 to numzdoomvertexes - 1 do
+      if (zdoomvertexes[j].x = x) and (zdoomvertexes[j].y = y) then
+      begin
+        result := j;
+        exit;
+      end;
+    ReallocMem(zdoomvertexes, (numzdoomvertexes  + 1) * SizeOf(zmapvertex_t));
+    zdoomvertexes[numzdoomvertexes].x := x;
+    zdoomvertexes[numzdoomvertexes].y := y;
+    zdoomvertexes[numzdoomvertexes].z := 0;
+    result := numzdoomvertexes;
+    inc(numzdoomvertexes);
+  end;
+
+  function AddSidedefToUDMF(const sector: smallint; const force_new: boolean = true): integer;
+  var
+    j: integer;
+    pside: Pmapsidedef_t;
+  begin
+    if not force_new then // JVAL: 20200309 - If we pack sidedefs of radix level, the triggers may not work :(
+      for j := 0 to numzdoomsidedefs - 1 do
+        if zdoomsidedefs[j].sector = sector then
+        begin
+          result := j;
+          exit;
+        end;
+
+    ReallocMem(zdoomsidedefs, (numzdoomsidedefs  + 1) * SizeOf(mapsidedef_t));
+    pside := @zdoomsidedefs[numzdoomsidedefs];
+    pside.textureoffset := 0;
+    pside.rowoffset := 0;
+    pside.toptexture := stringtochar8('-');
+    pside.bottomtexture := stringtochar8('-');
+    pside.midtexture := stringtochar8('-');
+    pside.sector := sector;
+    result := numzdoomsidedefs;
+    inc(numzdoomsidedefs);
+  end;
+
+  function AddLinedefToUDMF(const v1, v2: integer): integer;
+  var
+    j: integer;
+    pline: Pmaplinedef_t;
+  begin
+    for j := 0 to numzdoomlinedefs - 1 do
+    begin
+      pline := @zdoomlinedefs[j];
+      if (pline.v1 = v1) and (pline.v2 = v2) then
+        if pline.sidenum[1] < 0 then
+        begin
+          result := j;
+          exit;
+        end;
+      if (pline.v1 = v2) and (pline.v2 = v1) then
+        if pline.sidenum[1] < 0 then
+        begin
+          result := j;
+          exit;
+        end;
+    end;
+
+    ReallocMem(zdoomlinedefs, (numzdoomlinedefs  + 1) * SizeOf(maplinedef_t));
+    pline := @zdoomlinedefs[numzdoomlinedefs];
+    pline.v1 := v1;
+    pline.v2 := v2;
+    pline.flags := 0;
+    pline.special := 0;
+    pline.tag := 0;
+    pline.sidenum[0] := -1;
+    pline.sidenum[1] := -1;
+    result := numzdoomlinedefs;
+    inc(numzdoomlinedefs);
+  end;
+
+  function GetHeightmapCoords3DUDMF(const iX, iY: integer): point3d_t;
+  begin
+    if flags and ETF_CALCDXDY <> 0 then
+      Result := t.HeightmapCoords3D(iX, iY)
+    else
+    begin
+      Result.X := t.HeightmapToCoord(iX);
+      Result.Y := t.HeightmapToCoord(iY);
+      Result.Z := t.Heightmap[iX, iY].height;
+    end;
+  end;
+
+  procedure AddFlatQuadToUDMF(const iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4: integer);
+  var
+    v1, v2, v3, v4: integer;
+    p1, p2, p3, p4: point3d_t;
+    l1, l2, l3, l4: integer;
+    sec: integer;
+  begin
+    p1 := GetHeightmapCoords3DUDMF(iX1, iY1);
+    p2 := GetHeightmapCoords3DUDMF(iX2, iY2);
+    p3 := GetHeightmapCoords3DUDMF(iX3, iY3);
+    p4 := GetHeightmapCoords3DUDMF(iX4, iY4);
+    sec := AddSectorToUDMF((p1.Z + p2.Z + p3.Z + p4.Z) div 4, defceilingheight, False);
+    v1 := AddVertexToUDMF(p1.X, -p1.Y);
+    v2 := AddVertexToUDMF(p2.X, -p2.Y);
+    v3 := AddVertexToUDMF(p3.X, -p3.Y);
+    v4 := AddVertexToUDMF(p4.X, -p4.Y);
+    l1 := AddLinedefToUDMF(v1, v2);
+    l2 := AddLinedefToUDMF(v2, v3);
+    l3 := AddLinedefToUDMF(v3, v4);
+    l4 := AddLinedefToUDMF(v4, v1);
+    if zdoomlinedefs[l1].sidenum[0] < 0 then
+      zdoomlinedefs[l1].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l1].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l1].flags := zdoomlinedefs[l1].flags or ML_TWOSIDED;
+    end;
+    if zdoomlinedefs[l2].sidenum[0] < 0 then
+      zdoomlinedefs[l2].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l2].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l2].flags := zdoomlinedefs[l2].flags or ML_TWOSIDED;
+    end;
+    if zdoomlinedefs[l3].sidenum[0] < 0 then
+      zdoomlinedefs[l3].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l3].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l3].flags := zdoomlinedefs[l3].flags or ML_TWOSIDED;
+    end;
+    if zdoomlinedefs[l4].sidenum[0] < 0 then
+      zdoomlinedefs[l4].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l4].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l4].flags := zdoomlinedefs[l4].flags or ML_TWOSIDED;
+    end;
+  end;
+
+  function TryFlatRangeUDMF(const iX1, iY1: integer): boolean;
+  var
+    p1, p2, p3, p4: point3d_t;
+    iX2, iY2: integer;
+    iX3, iY3: integer;
+    iX4, iY4: integer;
+  begin
+    Result := False;
+
+    p1 := GetHeightmapCoords3DUDMF(iX1, iY1);
+    iX2 := iX1 + 1;
+    iY2 := iY1;
+    p2 := GetHeightmapCoords3DUDMF(iX2, iY2);
+    if p1.Z <> p2.Z then
+      Exit;
+    iX3 := iX1 + 1;
+    iY3 := iY1 + 1;
+    p3 := GetHeightmapCoords3DUDMF(iX3, iY3);
+    if p1.Z <> p3.Z then
+      Exit;
+    iX4 := iX1;
+    iY4 := iY1 + 1;
+    p4 := GetHeightmapCoords3DUDMF(iX4, iY4);
+    if p1.Z <> p4.Z then
+      Exit;
+    AddFlatQuadToUDMF(iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4);
+    flat[iX1, iY1] := true;
+
+    Result := True;
+  end;
+
+  procedure AddSlopedTriangleToUDMF(const iX1, iY1, iX2, iY2, iX3, iY3: integer);
+  var
+    v1, v2, v3: integer;
+    p1, p2, p3: point3d_t;
+    l1, l2, l3: integer;
+    sec: integer;
+    issloped: boolean;
+  begin
+    p1 := GetHeightmapCoords3DUDMF(iX1, iY1);
+    p2 := GetHeightmapCoords3DUDMF(iX2, iY2);
+    p3 := GetHeightmapCoords3DUDMF(iX3, iY3);
+    issloped := (p1.Z <> p2.Z) or (p1.Z <> p3.Z);
+    if issloped then
+      sec := AddSectorToUDMF(0, defceilingheight, True)
+    else
+      sec := AddSectorToUDMF(p1.Z, defceilingheight, False);
+    v1 := AddVertexToUDMF(p1.X, -p1.Y);
+    v2 := AddVertexToUDMF(p2.X, -p2.Y);
+    v3 := AddVertexToUDMF(p3.X, -p3.Y);
+    l1 := AddLinedefToUDMF(v1, v2);
+    l2 := AddLinedefToUDMF(v2, v3);
+    l3 := AddLinedefToUDMF(v3, v1);
+    if zdoomlinedefs[l1].sidenum[0] < 0 then
+      zdoomlinedefs[l1].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l1].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l1].flags := zdoomlinedefs[l1].flags or ML_TWOSIDED;
+    end;
+    if zdoomlinedefs[l2].sidenum[0] < 0 then
+      zdoomlinedefs[l2].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l2].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l2].flags := zdoomlinedefs[l2].flags or ML_TWOSIDED;
+    end;
+    if zdoomlinedefs[l3].sidenum[0] < 0 then
+      zdoomlinedefs[l3].sidenum[0] := AddSidedefToUDMF(sec)
+    else
+    begin
+      zdoomlinedefs[l3].sidenum[1] := AddSidedefToUDMF(sec);
+      zdoomlinedefs[l3].flags := zdoomlinedefs[l3].flags or ML_TWOSIDED;
+    end;
+    if issloped then
+    begin
+      zdoomvertexes[v1].z := p1.Z;
+      zdoomvertexes[v2].z := p2.Z;
+      zdoomvertexes[v3].z := p3.Z;
+    end;
+  end;
+
+  procedure AddHeightmapitemToUDMF(const iX, iY: integer);
+  begin
+    if pass[iX, iY] then
+      Exit;
+    if flags and ETF_SLOPED <> 0 then
+    begin
+      if not TryFlatRangeUDMF(iX, iY) then
+      begin
+        AddSlopedTriangleToUDMF(iX, iY, iX + 1, iY, iX, iY + 1);
+        AddSlopedTriangleToUDMF(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+      end;
+    end
+    else
+      AddFlatQuadToUDMF(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1);
+    pass[iX, iY] := True;
+  end;
+
+  procedure FixTrangleSectorsUDMF;
+  var
+    j: integer;
+    pline: Pmaplinedef_t;
+    side0, side1: integer;
+    sectorlines: PIntegerArray;
+  begin
+    GetMem(sectorlines, numzdoomsectors * SizeOf(integer));
+    FillChar(sectorlines^, numzdoomsectors * SizeOf(integer), 0);
+    for j := 0 to numzdoomlinedefs - 1 do
+    begin
+      pline := @zdoomlinedefs[j];
+      side0 := pline.sidenum[0];
+      side1 := pline.sidenum[1];
+      if side0 >= 0 then
+        inc(sectorlines[zdoomsidedefs[side0].sector]);
+      if side1 >= 0 then
+        inc(sectorlines[zdoomsidedefs[side1].sector]);
+    end;
+
+    for j := 0 to numzdoomsectors - 1 do
+      if not zslopedsectors[j] then
+        if sectorlines[j] = 3 then
+          zdoomsectors[j].floorheight := 0; // Height will be set by easy slope things
+
+    FreeMem(sectorlines, numzdoomsectors * SizeOf(integer));
+  end;
+
+  procedure FlashUDMFVertext(const ii: integer);
+  begin
+    udmfmap.Add('vertex // ' + IntToStr(ii));
+    udmfmap.Add('{');
+    udmfmap.Add('x = ' + IntToStr(zdoomvertexes[ii].x) + ';');
+    udmfmap.Add('y = ' + IntToStr(zdoomvertexes[ii].y) + ';');
+    udmfmap.Add('zfloor = ' + IntToStr(zdoomvertexes[ii].z) + ';');
+    udmfmap.Add('}');
+    udmfmap.Add('');
+  end;
+
+  procedure FlashUDMFLinedef(const ii: integer);
+  begin
+    udmfmap.Add('linedef // ' + IntToStr(ii));
+    udmfmap.Add('{');
+    udmfmap.Add('v1 = ' + IntToStr(zdoomlinedefs[ii].v1) + ';');
+    udmfmap.Add('v2 = ' + IntToStr(zdoomlinedefs[ii].v2) + ';');
+    if zdoomlinedefs[ii].sidenum[0] >= 0 then
+      udmfmap.Add('sidefront = ' + IntToStr(zdoomlinedefs[ii].sidenum[0]) + ';');
+    if zdoomlinedefs[ii].sidenum[1] >= 0 then
+    begin
+      udmfmap.Add('sideback = ' + IntToStr(zdoomlinedefs[ii].sidenum[1]) + ';');
+      udmfmap.Add('twosided = true;');
+    end
+    else
+      udmfmap.Add('blocking = true;');
+    udmfmap.Add('}');
+    udmfmap.Add('');
+  end;
+
+  procedure FlashUDMFSidedef(const ii: integer);
+  begin
+    udmfmap.Add('sidedef // ' + IntToStr(ii));
+    udmfmap.Add('{');
+    udmfmap.Add('texturetop = "' + char8tostring(zdoomsidedefs[ii].toptexture) + '";');
+    udmfmap.Add('texturebottom = "' + char8tostring(zdoomsidedefs[ii].bottomtexture) + '";');
+    udmfmap.Add('texturemiddle = "' + char8tostring(zdoomsidedefs[ii].midtexture) + '";');
+    udmfmap.Add('sector = ' + IntToStr(zdoomsidedefs[ii].sector) + ';');
+    udmfmap.Add('}');
+    udmfmap.Add('');
+  end;
+
+  procedure FlashUDMFSector(const ii: integer);
+  begin
+    udmfmap.Add('sector // ' + IntToStr(ii));
+    udmfmap.Add('{');
+    udmfmap.Add('heightfloor = ' + IntToStr(zdoomsectors[ii].floorheight) + ';');
+    udmfmap.Add('heightceiling = ' + IntToStr(zdoomsectors[ii].ceilingheight) + ';');
+    udmfmap.Add('texturefloor = "' + char8tostring(zdoomsectors[ii].floorpic) + '";');
+    udmfmap.Add('textureceiling = "' + char8tostring(zdoomsectors[ii].ceilingpic) + '";');
+    udmfmap.Add('lightlevel = ' + IntToStr(zdoomsectors[ii].lightlevel) + ';');
+    udmfmap.Add('}');
+    udmfmap.Add('');
+  end;
+
+begin
+  sidetex := stringtochar8(defsidetex);
+  FillChar(pass, SizeOf(pass), 0);
+  FillChar(flat, SizeOf(flat), 0);
+
+  zdoomlinedefs := nil;
+  numzdoomlinedefs := 0;
+  zdoomsidedefs := nil;
+  numzdoomsidedefs := 0;
+  zdoomvertexes := nil;
+  numzdoomvertexes := 0;
+  zdoomsectors := nil;
+  zslopedsectors := nil;
+  numzdoomsectors := 0;
+
+  wadwriter := TWadWriter.Create;
+
+  // Create Palette
+  for i := 0 to 255 do
+  begin
+    r := palette[3 * i];
+    if r > 255 then r := 255;
+    g := palette[3 * i + 1];
+    if g > 255 then g := 255;
+    b := palette[3 * i + 2];
+    if b > 255 then b := 255;
+    def_palL[i] := (r shl 16) + (g shl 8) + (b);
+  end;
+
+  // Create flat
+
+  png := TPngObject.Create;
+  png.Assign(t.Texture);
+
+  ms := TMemoryStream.Create;
+
+  png.SaveToStream(ms);
+
+  wadwriter.AddString('TEXTURES',
+    'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
+    '{' + #13#10 +
+    '   XScale 1.0' + #13#10 +
+    '   YScale 1.0' + #13#10 +
+    '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
+    '}' + #13#10
+  );
+  wadwriter.AddSeparator('P_START');
+  wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+  wadwriter.AddSeparator('P_END');
+
+  ms.Free;
+  png.Free;
+
+  // Create Map
+  for x := 0 to t.heightmapsize - 2 do
+    for y := 0 to t.heightmapsize - 2 do
+      AddHeightmapitemToUDMF(x, y);
+
+  udmfmap := TStringList.Create;
+
+  // UDMF header
+  udmfmap.Add('// Generated by DD_TERRAIN');
+  udmfmap.Add('namespace="zdoom";');
+  udmfmap.Add('');
+
+  // Player start
+  AddPlayerStartToUDMF(64, -64, 0, 1);
+
+  // Fix flat triangle sectors
+  FixTrangleSectorsUDMF;
+
+  // Add wall textures
+  for i := 0 to numzdoomlinedefs - 1 do
+  begin
+    if zdoomlinedefs[i].flags and ML_TWOSIDED = 0 then
+      zdoomsidedefs[zdoomlinedefs[i].sidenum[0]].midtexture := sidetex
+    else
+    begin
+      zdoomsidedefs[zdoomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
+      zdoomsidedefs[zdoomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
+    end;
+  end;
+
+  // Flash data to wad
+  wadwriter.AddSeparator(levelname);
+
+  for i := 0 to numzdoomvertexes - 1 do
+    FlashUDMFVertext(i);
+  for i := 0 to numzdoomlinedefs - 1 do
+    FlashUDMFLinedef(i);
+  for i := 0 to numzdoomsidedefs - 1 do
+    FlashUDMFSidedef(i);
+  for i := 0 to numzdoomsectors - 1 do
+    FlashUDMFSector(i);
+
+  wadwriter.AddStringList('TEXTMAP', udmfmap);
+  wadwriter.AddSeparator('ENDMAP');
+
+  // Save wad to disk
+  wadwriter.SaveToFile(fname);
+
+  wadwriter.Free;
+  udmfmap.Free;
+
+  // Free data
+  FreeMem(zdoomlinedefs, numzdoomlinedefs * SizeOf(maplinedef_t));
+  FreeMem(zdoomsidedefs, numzdoomsidedefs * SizeOf(mapsidedef_t));
+  FreeMem(zdoomvertexes, numzdoomvertexes * SizeOf(zmapvertex_t));
+  FreeMem(zdoomsectors, numzdoomsectors * SizeOf(mapsector_t));
+  FreeMem(zslopedsectors, numzdoomsectors * SizeOf(boolean));
+
+end;
+
 end.
+

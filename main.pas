@@ -32,7 +32,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, xTGA, jpeg, zBitmap, pngimage1, ComCtrls, ExtCtrls, Buttons, Menus, 
+  Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, 
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1;
 
@@ -1127,15 +1127,26 @@ end;
 procedure TForm1.ExportScreenshot1Click(Sender: TObject);
 var
   b: TBitmap;
+  png: TPngObject;
+  imgfname: string;
 begin
   if SavePictureDialog1.Execute then
   begin
-    BackupFile(SavePictureDialog1.FileName);
+    imgfname := SavePictureDialog1.FileName;
+    BackupFile(imgfname);
     b := TBitmap.Create;
     try
       DoRenderGL;
       Get3dPreviewBitmap(b);
-      b.SaveToFile(SavePictureDialog1.FileName);
+      if UpperCase(ExtractFileExt(imgfname)) = '.PNG' then
+      begin
+        png := TPngObject.Create;
+        png.Assign(b);
+        png.SaveToFile(imgfname);
+        png.Free;
+      end
+      else
+        b.SaveToFile(imgfname);
     finally
       b.Free;
     end;

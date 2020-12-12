@@ -32,7 +32,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus,
+  Dialogs, xTGA, jpeg, zBitmap, pngimage1, ComCtrls, ExtCtrls, Buttons, Menus, 
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1;
 
@@ -1135,7 +1135,6 @@ begin
     try
       DoRenderGL;
       Get3dPreviewBitmap(b);
-      Clipboard.Assign(b);
       b.SaveToFile(SavePictureDialog1.FileName);
     finally
       b.Free;

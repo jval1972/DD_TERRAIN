@@ -118,6 +118,8 @@ var
   scanline: PLongWordArray;
   i, x, y: integer;
   c, r, g, b: LongWord;
+  png: TPngObject;
+  ms: TMemoryStream;
   flattexture: PByteArray;
   bm: TBitmap;
   sidetex: char8_t;
@@ -513,7 +515,22 @@ begin
     def_palL[i] := (r shl 16) + (g shl 8) + (b);
   end;
 
-  // Create flat
+  // Create flat - 32 bit color - inside HI_START - HI_END namespace
+  png := TPngObject.Create;
+  png.Assign(t.Texture);
+
+  ms := TMemoryStream.Create;
+
+  png.SaveToStream(ms);
+
+  wadwriter.AddSeparator('HI_START');
+  wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+  wadwriter.AddSeparator('HI_END');
+
+  ms.Free;
+  png.Free;
+
+  // Create flat - 8 bit
   bm := t.Texture;
   GetMem(flattexture, bm.Width * bm.Height);
 

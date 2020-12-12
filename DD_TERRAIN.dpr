@@ -55,7 +55,8 @@ uses
   ter_wadexport in 'ter_wadexport.pas',
   ter_wadwriter in 'ter_wadwriter.pas',
   ter_wad in 'ter_wad.pas',
-  ter_doomdata in 'ter_doomdata.pas';
+  ter_doomdata in 'ter_doomdata.pas',
+  ter_palettes in 'ter_palettes.pas';
 
 {$R *.res}
 

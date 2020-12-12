@@ -55,6 +55,7 @@ var
   opt_filemenuhistory8: bigstring_t;
   opt_filemenuhistory9: bigstring_t;
   opt_lastwadfile: bigstring_t;
+  opt_defaultpalette: bigstring_t;
 
 function bigstringtostring(const bs: bigstring_p): string;
 
@@ -75,7 +76,7 @@ type
   end;
 
 const
-  NUMSETTINGS = 16;
+  NUMSETTINGS = 17;
 
 var
   Settings: array[0..NUMSETTINGS - 1] of TSettingItem = (
@@ -158,6 +159,11 @@ var
       desc: 'WAD';
       typeof: tstBigString;
       location: @opt_lastwadfile;
+    ),
+    (
+      desc: 'PALETTE';
+      typeof: tstBigString;
+      location: @opt_defaultpalette;
     )
   );
 

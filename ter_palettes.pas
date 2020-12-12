@@ -30,6 +30,15 @@ unit ter_palettes;
 
 interface
 
+const
+  spalDEFAULT = 'DEFAULT';
+  spalDOOM = 'DOOM';
+  spalHERETIC = 'HERETIC';
+  spalHEXEN = 'HEXEN';
+  spalSTRIFE = 'STRIFE';
+  spalRADIX = 'RADIX';
+  spalGRAYSCALE = 'GRAYSCALE';
+
 type
   rawpalette_t = packed array[0..767] of Byte;
   rawpalette_p = ^rawpalette_t;
@@ -310,7 +319,24 @@ const
     $EB, $EB, $EB
   );
 
+function GetPaletteFromName(const spal: string): rawpalette_p;
+
 implementation
 
+function GetPaletteFromName(const spal: string): rawpalette_p;
+begin
+  if spal = spalDOOM then
+    Result := @DoomPaletteRaw
+  else if spal = spalHERETIC then
+    Result := @HereticPaletteRaw
+  else if spal = spalHEXEN then
+    Result := @HexenPaletteRaw
+  else if spal = spalSTRIFE then
+    Result := @StrifePaletteRaw
+  else if spal = spalRADIX then
+    Result := @RadixPaletteRaw
+  else
+    Result := nil;
+end;
+
 end.
- 

@@ -180,6 +180,18 @@ type
     N4: TMenuItem;
     Copy3dview1: TMenuItem;
     CopyHeightmap1: TMenuItem;
+    PalettePopupMenu1: TPopupMenu;
+    PaletteDoom1: TMenuItem;
+    PaletteHeretic1: TMenuItem;
+    PaletteHexen1: TMenuItem;
+    PaletteStrife1: TMenuItem;
+    PaletteRadix1: TMenuItem;
+    N18: TMenuItem;
+    PaletteGreyScale1: TMenuItem;
+    PaletteDefault1: TMenuItem;
+    N6: TMenuItem;
+    Panel12: TPanel;
+    PaletteSpeedButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -237,10 +249,20 @@ type
     procedure ZDoomUDMFMap1Click(Sender: TObject);
     procedure Copy3dview1Click(Sender: TObject);
     procedure CopyHeightmap1Click(Sender: TObject);
+    procedure PaletteSpeedButton1Click(Sender: TObject);
+    procedure PaletteDefault1Click(Sender: TObject);
+    procedure PaletteDoom1Click(Sender: TObject);
+    procedure PaletteHeretic1Click(Sender: TObject);
+    procedure PaletteHexen1Click(Sender: TObject);
+    procedure PaletteStrife1Click(Sender: TObject);
+    procedure PaletteRadix1Click(Sender: TObject);
+    procedure PaletteGreyScale1Click(Sender: TObject);
+    procedure PalettePopupMenu1Popup(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
     fwadfilename: string;
+    fpalettename: string;
     drawlayer: drawlayer_p;
     heightlayer: heightlayer_p;
     colorbuffersize: integer;
@@ -300,6 +322,7 @@ type
     procedure LLeftMousePaintTo(const X, Y: integer);
     procedure CalcPenMasks;
     procedure DoRefreshPaintBox(const r: TRect);
+    procedure CheckPaletteName;
   public
     { Public declarations }
   end;
@@ -341,6 +364,8 @@ begin
   ter_LoadSettingFromFile(ChangeFileExt(ParamStr(0), '.ini'));
 
   fwadfilename := bigstringtostring(@opt_lastwadfile);
+  fpalettename := bigstringtostring(@opt_defaultpalette);
+  CheckPaletteName;
 
   closing := False;
 
@@ -651,6 +676,7 @@ begin
   stringtobigstring(filemenuhistory.PathStringIdx(8), @opt_filemenuhistory8);
   stringtobigstring(filemenuhistory.PathStringIdx(9), @opt_filemenuhistory9);
   stringtobigstring(fwadfilename, @opt_lastwadfile);
+  stringtobigstring(fpalettename, @opt_defaultpalette);
   ter_SaveSettingsToFile(ChangeFileExt(ParamStr(0), '.ini'));
 
   filemenuhistory.Free;
@@ -1376,6 +1402,7 @@ var
   x, y: integer;
   b: byte;
   uEntry: string;
+  buildinrawpal: rawpalette_p;
 begin
   idx := -1;
   palidx := -1;
@@ -1418,9 +1445,25 @@ begin
     Exit;
   end;
 
-  palsize := 0;
-  if (palidx >= 0) and (wad.EntryInfo(palidx).size >= 768) then
-    wad.ReadEntry(palidx, pointer(wpal), palsize);
+  if fpalettename = spalDEFAULT then
+  begin
+    palsize := 0;
+    if (palidx >= 0) and (wad.EntryInfo(palidx).size >= 768) then
+      wad.ReadEntry(palidx, pointer(wpal), palsize);
+  end
+  else
+  begin
+    buildinrawpal := GetPaletteFromName(fpalettename);
+    if buildinrawpal <> nil then
+    begin
+      palsize := 768;
+      GetMem(wpal, palsize);
+      for i := 0 to 767 do
+        wpal[i] := buildinrawpal[i];
+    end
+    else
+      palsize := 0;
+  end;
 
   if palsize = 0 then
   begin
@@ -1995,6 +2038,80 @@ begin
   finally
     b.Free;
   end;
+end;
+
+procedure TForm1.PaletteSpeedButton1Click(Sender: TObject);
+var
+  p: TPoint;
+begin
+  p := PaletteSpeedButton1.ClientToScreen(Point(0, PaletteSpeedButton1.Height));
+  PalettePopupMenu1.Popup(p.X, p.Y);
+  PaletteSpeedButton1.Down := False;
+end;
+
+procedure TForm1.PaletteDefault1Click(Sender: TObject);
+begin
+  fpalettename := spalDEFAULT;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteDoom1Click(Sender: TObject);
+begin
+  fpalettename := spalDOOM;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteHeretic1Click(Sender: TObject);
+begin
+  fpalettename := spalHERETIC;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteHexen1Click(Sender: TObject);
+begin
+  fpalettename := spalHEXEN;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteStrife1Click(Sender: TObject);
+begin
+  fpalettename := spalSTRIFE;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteRadix1Click(Sender: TObject);
+begin
+  fpalettename := spalRADIX;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.PaletteGreyScale1Click(Sender: TObject);
+begin
+  fpalettename := spalGRAYSCALE;
+  NotifyFlatsListBox;
+end;
+
+procedure TForm1.CheckPaletteName;
+begin
+  if fpalettename <> spalDEFAULT then
+    if fpalettename <> spalDOOM then
+      if fpalettename <> spalHERETIC then
+        if fpalettename <> spalHEXEN then
+          if fpalettename <> spalSTRIFE then
+            if fpalettename <> spalRADIX then
+              if fpalettename <> spalGRAYSCALE then
+                fpalettename := spalDEFAULT;
+end;
+
+procedure TForm1.PalettePopupMenu1Popup(Sender: TObject);
+begin
+  PaletteDoom1.Checked := fpalettename = spalDOOM;
+  PaletteHeretic1.Checked := fpalettename = spalHERETIC;
+  PaletteHexen1.Checked := fpalettename = spalHEXEN;
+  PaletteStrife1.Checked := fpalettename = spalSTRIFE;
+  PaletteRadix1.Checked := fpalettename = spalRADIX;
+  PaletteGreyScale1.Checked := fpalettename = spalGRAYSCALE;
+  PaletteDefault1.Checked := fpalettename = spalDEFAULT;
 end;
 
 end.

@@ -2609,41 +2609,98 @@ object Form1: TForm1
             Left = 0
             Top = 0
             Width = 242
-            Height = 40
+            Height = 73
             Align = alTop
             BevelOuter = bvNone
             Caption = ' '
             TabOrder = 0
             object Label23: TLabel
               Left = 8
-              Top = 8
+              Top = 40
               Width = 23
               Height = 13
               Caption = 'File: '
             end
             object SelectWADFileButton: TSpeedButton
-              Left = 208
-              Top = 8
+              Left = 200
+              Top = 40
               Width = 23
               Height = 22
+              Hint = 'Open WAD file'
               Caption = '...'
               Flat = True
               OnClick = SelectWADFileButtonClick
             end
             object WADFileNameEdit: TEdit
               Left = 40
-              Top = 8
+              Top = 40
               Width = 153
               Height = 21
               ReadOnly = True
               TabOrder = 0
             end
+            object Panel12: TPanel
+              Left = 0
+              Top = 0
+              Width = 242
+              Height = 33
+              Align = alTop
+              BevelOuter = bvNone
+              Caption = ' '
+              TabOrder = 1
+              object PaletteSpeedButton1: TSpeedButton
+                Left = 12
+                Top = 3
+                Width = 29
+                Height = 22
+                Hint = 'Select Palette'
+                AllowAllUp = True
+                GroupIndex = 2
+                Flat = True
+                Glyph.Data = {
+                  26040000424D2604000000000000360000002800000012000000120000000100
+                  180000000000F0030000130B0000130B00000000000000000000FFFFFFFFFFFF
+                  FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+                  FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFF0000000000000000000000
+                  0000000000000000000000000000000000000000000000000000000000000000
+                  0000000000FFFFFF0000FFFFFF00000000FF0000FF0000FF0000FF00000000FF
+                  FF00FFFF00FFFF00FFFF00000000FF00FFFF00FFFF00FFFF00FF000000FFFFFF
+                  0000FFFFFF00000000FF0000FF0000FF0000FF00000000FFFF00FFFF00FFFF00
+                  FFFF00000000FF00FFFF00FFFF00FFFF00FF000000FFFFFF0000FFFFFF000000
+                  00FF0000FF0000FF0000FF00000000FFFF00FFFF00FFFF00FFFF00000000FF00
+                  FFFF00FFFF00FFFF00FF000000FFFFFF0000FFFFFF00000000FF0000FF0000FF
+                  0000FF00000000FFFF00FFFF00FFFF00FFFF00000000FF00FFFF00FFFF00FFFF
+                  00FF000000FFFFFF0000FFFFFF00000000000000000000000000000000000000
+                  0000000000000000000000000000000000000000000000000000000000FFFFFF
+                  0000FFFFFF000000A0A0A0A0A0A0A0A0A0A0A0A0000000FFFFFFFFFFFFFFFFFF
+                  FFFFFF0000003A3A3A3A3A3A3A3A3A3A3A3A000000FFFFFF0000FFFFFF000000
+                  A0A0A0A0A0A0A0A0A0A0A0A0000000FFFFFFFFFFFFFFFFFFFFFFFF0000003A3A
+                  3A3A3A3A3A3A3A3A3A3A000000FFFFFF0000FFFFFF000000A0A0A0A0A0A0A0A0
+                  A0A0A0A0000000FFFFFFFFFFFFFFFFFFFFFFFF0000003A3A3A3A3A3A3A3A3A3A
+                  3A3A000000FFFFFF0000FFFFFF000000A0A0A0A0A0A0A0A0A0A0A0A0000000FF
+                  FFFFFFFFFFFFFFFFFFFFFF0000003A3A3A3A3A3A3A3A3A3A3A3A000000FFFFFF
+                  0000FFFFFF000000000000000000000000000000000000000000000000000000
+                  000000000000000000000000000000000000000000FFFFFF0000FFFFFF000000
+                  0000FF0000FF0000FF0000FF00000000FFFF00FFFF00FFFF00FFFF000000FF00
+                  00FF0000FF0000FF0000000000FFFFFF0000FFFFFF0000000000FF0000FF0000
+                  FF0000FF00000000FFFF00FFFF00FFFF00FFFF000000FF0000FF0000FF0000FF
+                  0000000000FFFFFF0000FFFFFF0000000000FF0000FF0000FF0000FF00000000
+                  FFFF00FFFF00FFFF00FFFF000000FF0000FF0000FF0000FF0000000000FFFFFF
+                  0000FFFFFF0000000000FF0000FF0000FF0000FF00000000FFFF00FFFF00FFFF
+                  00FFFF000000FF0000FF0000FF0000FF0000000000FFFFFF0000FFFFFF000000
+                  0000000000000000000000000000000000000000000000000000000000000000
+                  00000000000000000000000000FFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+                  FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+                  FFFFFFFFFFFFFFFF0000}
+                OnClick = PaletteSpeedButton1Click
+              end
+            end
           end
           object Panel3: TPanel
             Left = 0
-            Top = 40
+            Top = 73
             Width = 97
-            Height = 500
+            Height = 467
             Align = alLeft
             BevelOuter = bvNone
             Caption = ' '
@@ -2661,7 +2718,7 @@ object Form1: TForm1
               Left = 0
               Top = 25
               Width = 97
-              Height = 475
+              Height = 442
               Align = alClient
               BorderWidth = 2
               Caption = ' '
@@ -2670,7 +2727,7 @@ object Form1: TForm1
                 Left = 3
                 Top = 3
                 Width = 91
-                Height = 469
+                Height = 436
                 Align = alClient
                 BorderStyle = bsNone
                 ItemHeight = 13
@@ -2681,9 +2738,9 @@ object Form1: TForm1
           end
           object Panel5: TPanel
             Left = 97
-            Top = 40
+            Top = 73
             Width = 145
-            Height = 500
+            Height = 467
             Align = alClient
             BevelOuter = bvNone
             Caption = ' '
@@ -2701,7 +2758,7 @@ object Form1: TForm1
               Left = 0
               Top = 25
               Width = 145
-              Height = 475
+              Height = 442
               Align = alClient
               Caption = 'Panel8'
               TabOrder = 1
@@ -2709,7 +2766,7 @@ object Form1: TForm1
                 Left = 1
                 Top = 1
                 Width = 143
-                Height = 473
+                Height = 440
                 Align = alClient
                 BorderWidth = 2
                 Caption = ' '
@@ -4265,7 +4322,7 @@ object Form1: TForm1
                   Left = 3
                   Top = 131
                   Width = 137
-                  Height = 339
+                  Height = 306
                   Align = alClient
                   BevelOuter = bvNone
                   Caption = ' '
@@ -4581,5 +4638,44 @@ object Form1: TForm1
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 369
     Top = 224
+  end
+  object PalettePopupMenu1: TPopupMenu
+    OnPopup = PalettePopupMenu1Popup
+    Left = 289
+    Top = 328
+    object PaletteDefault1: TMenuItem
+      Caption = 'Default'
+      OnClick = PaletteDefault1Click
+    end
+    object N6: TMenuItem
+      Caption = '-'
+    end
+    object PaletteDoom1: TMenuItem
+      Caption = 'Doom/Doom2'
+      OnClick = PaletteDoom1Click
+    end
+    object PaletteHeretic1: TMenuItem
+      Caption = 'Heretic'
+      OnClick = PaletteHeretic1Click
+    end
+    object PaletteHexen1: TMenuItem
+      Caption = 'Hexen'
+      OnClick = PaletteHexen1Click
+    end
+    object PaletteStrife1: TMenuItem
+      Caption = 'Strife'
+      OnClick = PaletteStrife1Click
+    end
+    object PaletteRadix1: TMenuItem
+      Caption = 'Radix'
+      OnClick = PaletteRadix1Click
+    end
+    object N18: TMenuItem
+      Caption = '-'
+    end
+    object PaletteGreyScale1: TMenuItem
+      Caption = 'Grey Scale'
+      OnClick = PaletteGreyScale1Click
+    end
   end
 end

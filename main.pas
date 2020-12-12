@@ -192,6 +192,7 @@ type
     N6: TMenuItem;
     Panel12: TPanel;
     PaletteSpeedButton1: TSpeedButton;
+    N9: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);

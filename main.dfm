@@ -4432,6 +4432,32 @@ object Form1: TForm1
         Caption = '&Save &As'
         OnClick = SaveAsButton1Click
       end
+      object N9: TMenuItem
+        Caption = '-'
+      end
+      object MNExport1: TMenuItem
+        Caption = '&Export'
+        object ExportObjModel1: TMenuItem
+          Caption = 'Obj model'
+          Visible = False
+          OnClick = ExportObjModel1Click
+        end
+        object ExportScreenshot1: TMenuItem
+          Caption = 'Screenshot (3D View)'
+          OnClick = ExportScreenshot1Click
+        end
+        object N3: TMenuItem
+          Caption = '-'
+        end
+        object RadixWADFile1: TMenuItem
+          Caption = 'Radix WAD Map'
+          OnClick = RadixWADFile1Click
+        end
+        object ZDoomUDMFMap1: TMenuItem
+          Caption = 'UDMF Map (GZDoom/K8Vavoom)'
+          OnClick = ZDoomUDMFMap1Click
+        end
+      end
       object N2: TMenuItem
         Caption = '-'
       end
@@ -4515,29 +4541,6 @@ object Form1: TForm1
       object PasteHeightmap1: TMenuItem
         Caption = 'Paste (Heightmap)'
         OnClick = PasteHeightmap1Click
-      end
-    end
-    object MNExport1: TMenuItem
-      Caption = '&Export'
-      object ExportObjModel1: TMenuItem
-        Caption = 'Obj model'
-        Visible = False
-        OnClick = ExportObjModel1Click
-      end
-      object ExportScreenshot1: TMenuItem
-        Caption = 'Screenshot (3D View)'
-        OnClick = ExportScreenshot1Click
-      end
-      object N3: TMenuItem
-        Caption = '-'
-      end
-      object RadixWADFile1: TMenuItem
-        Caption = 'Radix WAD Map'
-        OnClick = RadixWADFile1Click
-      end
-      object ZDoomUDMFMap1: TMenuItem
-        Caption = 'UDMF Map (GZDoom/K8Vavoom)'
-        OnClick = ZDoomUDMFMap1Click
       end
     end
     object MNTools1: TMenuItem

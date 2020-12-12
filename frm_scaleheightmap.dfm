@@ -1,6 +1,6 @@
 object ScaleHeightmapItemForm: TScaleHeightmapItemForm
-  Left = 1178
-  Top = 227
+  Left = 504
+  Top = 295
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Scale Heightmap'
@@ -1045,6 +1045,7 @@ object ScaleHeightmapItemForm: TScaleHeightmapItemForm
     0000000000000000000000000000000000000000000000000000000000000000
     00000000000000000000000000000000000000000000000000000000}
   OldCreateOrder = False
+  Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel

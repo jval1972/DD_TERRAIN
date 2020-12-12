@@ -1,6 +1,6 @@
 object NewForm: TNewForm
-  Left = 1178
-  Top = 227
+  Left = 592
+  Top = 209
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'New Terrain'

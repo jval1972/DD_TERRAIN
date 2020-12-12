@@ -1,6 +1,6 @@
 object EditHeightmapItemForm: TEditHeightmapItemForm
-  Left = 1178
-  Top = 227
+  Left = 360
+  Top = 244
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Edit Heightmap Item'

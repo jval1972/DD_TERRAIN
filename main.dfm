@@ -4375,32 +4375,6 @@ object Form1: TForm1
         Caption = '&Save &As'
         OnClick = SaveAsButton1Click
       end
-      object N4: TMenuItem
-        Caption = '-'
-      end
-      object Export1: TMenuItem
-        Caption = '&Export'
-        object ExportObjModel1: TMenuItem
-          Caption = 'Obj model'
-          Visible = False
-          OnClick = ExportObjModel1Click
-        end
-        object ExportScreenshot1: TMenuItem
-          Caption = '3D View Screenshot'
-          OnClick = ExportScreenshot1Click
-        end
-        object N3: TMenuItem
-          Caption = '-'
-        end
-        object RadixWADFile1: TMenuItem
-          Caption = 'Radix WAD Map'
-          OnClick = RadixWADFile1Click
-        end
-        object ZDoomUDMFMap1: TMenuItem
-          Caption = 'UDMF Map (GZDoom/K8Vavoom)'
-          OnClick = ZDoomUDMFMap1Click
-        end
-      end
       object N2: TMenuItem
         Caption = '-'
       end
@@ -4458,24 +4432,58 @@ object Form1: TForm1
       object N8: TMenuItem
         Caption = '-'
       end
-      object Copy1: TMenuItem
-        Caption = 'Copy'
-        ShortCut = 16451
-        OnClick = Copy1Click
+      object Copy3dview1: TMenuItem
+        Caption = 'Copy (3D View)'
+        OnClick = Copy3dview1Click
       end
       object N1: TMenuItem
         Caption = '-'
       end
+      object CopyTexture1: TMenuItem
+        Caption = 'Copy (Texture)'
+        ShortCut = 16451
+        OnClick = CopyTexture1Click
+      end
       object PasteTexture1: TMenuItem
-        Caption = 'Paste Texture'
+        Caption = 'Paste (Texture)'
         OnClick = PasteTexture1Click
       end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object CopyHeightmap1: TMenuItem
+        Caption = 'Copy (Heightmap)'
+        OnClick = CopyHeightmap1Click
+      end
       object PasteHeightmap1: TMenuItem
-        Caption = 'Paste Heightmap'
+        Caption = 'Paste (Heightmap)'
         OnClick = PasteHeightmap1Click
       end
     end
-    object ools1: TMenuItem
+    object MNExport1: TMenuItem
+      Caption = '&Export'
+      object ExportObjModel1: TMenuItem
+        Caption = 'Obj model'
+        Visible = False
+        OnClick = ExportObjModel1Click
+      end
+      object ExportScreenshot1: TMenuItem
+        Caption = 'Screenshot (3D View)'
+        OnClick = ExportScreenshot1Click
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object RadixWADFile1: TMenuItem
+        Caption = 'Radix WAD Map'
+        OnClick = RadixWADFile1Click
+      end
+      object ZDoomUDMFMap1: TMenuItem
+        Caption = 'UDMF Map (GZDoom/K8Vavoom)'
+        OnClick = ZDoomUDMFMap1Click
+      end
+    end
+    object MNTools1: TMenuItem
       Caption = 'Tools'
       object Scaleheightmap1: TMenuItem
         Caption = 'Scale Heightmap'

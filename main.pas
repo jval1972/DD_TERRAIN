@@ -83,13 +83,12 @@ type
     StatusBar1: TStatusBar;
     Options1: TMenuItem;
     SavePictureDialog1: TSavePictureDialog;
-    N4: TMenuItem;
-    Export1: TMenuItem;
+    MNExport1: TMenuItem;
     ExportObjModel1: TMenuItem;
     SaveDialog1: TSaveDialog;
     N5: TMenuItem;
     N8: TMenuItem;
-    Copy1: TMenuItem;
+    CopyTexture1: TMenuItem;
     OpenPictureDialog2: TOpenPictureDialog;
     ToolBar1: TToolBar;
     PropertiesPanel: TPanel;
@@ -172,12 +171,15 @@ type
     PasteTexture1: TMenuItem;
     PasteHeightmap1: TMenuItem;
     PenSpeedButton4: TSpeedButton;
-    ools1: TMenuItem;
+    MNTools1: TMenuItem;
     Scaleheightmap1: TMenuItem;
     RadixWADFile1: TMenuItem;
     SaveWADDialog: TSaveDialog;
     N3: TMenuItem;
     ZDoomUDMFMap1: TMenuItem;
+    N4: TMenuItem;
+    Copy3dview1: TMenuItem;
+    CopyHeightmap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -206,7 +208,7 @@ type
     procedure FormPaint(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure File1Click(Sender: TObject);
-    procedure Copy1Click(Sender: TObject);
+    procedure CopyTexture1Click(Sender: TObject);
     procedure Options1Click(Sender: TObject);
     procedure Wireframe1Click(Sender: TObject);
     procedure TrunkImageDblClick(Sender: TObject);
@@ -233,6 +235,8 @@ type
     procedure Scaleheightmap1Click(Sender: TObject);
     procedure RadixWADFile1Click(Sender: TObject);
     procedure ZDoomUDMFMap1Click(Sender: TObject);
+    procedure Copy3dview1Click(Sender: TObject);
+    procedure CopyHeightmap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -1003,23 +1007,9 @@ begin
   FreeMem(L, w * h * SizeOf(LongWord));
 end;
 
-procedure TForm1.Copy1Click(Sender: TObject);
-var
-  b: TBitmap;
+procedure TForm1.CopyTexture1Click(Sender: TObject);
 begin
-  if MainPageControl.ActivePageIndex = 1 then
-  begin
-    b := TBitmap.Create;
-    try
-      DoRenderGL; // JVAL: For some unknown reason this must be called before glReadPixels
-      Get3dPreviewBitmap(b);
-      Clipboard.Assign(b);
-    finally
-      b.Free;
-    end;
-  end
-  else
-    Clipboard.Assign(terrain.Texture);
+  Clipboard.Assign(terrain.Texture);
 end;
 
 procedure TForm1.Options1Click(Sender: TObject);
@@ -2072,6 +2062,45 @@ begin
     finally
       Screen.Cursor := crDefault;
     end;
+  end;
+end;
+
+procedure TForm1.Copy3dview1Click(Sender: TObject);
+var
+  b: TBitmap;
+begin
+  b := TBitmap.Create;
+  try
+    DoRenderGL; // JVAL: For some unknown reason this must be called before glReadPixels
+    Get3dPreviewBitmap(b);
+    Clipboard.Assign(b);
+  finally
+    b.Free;
+  end;
+end;
+
+procedure TForm1.CopyHeightmap1Click(Sender: TObject);
+var
+  b: TBitmap;
+  hX, hY: integer;
+  h: integer;
+  g: byte;
+begin
+  b := TBitmap.Create;
+  try
+    b.Width := terrain.heightmapsize;
+    b.Height := terrain.heightmapsize;
+    b.PixelFormat := pf24bit;
+    for hX := 0 to terrain.heightmapsize - 1 do
+      for hY := 0 to terrain.heightmapsize - 1 do
+      begin
+        h := terrain.Heightmap[hX, hY].height;
+        g := GetIntInRange(Round((h + HEIGHTMAPRANGE) * 256 / (2 * HEIGHTMAPRANGE)), 0, 255);
+        b.Canvas.Pixels[hX, hY] := RGB(g, g, g);
+      end;
+    Clipboard.Assign(b);
+  finally
+    b.Free;
   end;
 end;
 

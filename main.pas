@@ -925,7 +925,7 @@ end;
 procedure TForm1.UpdateStausbar;
 begin
   StatusBar1.Panels[2].Text := Format('Camera(x=%2.2f, y=%2.2f, z=%2.2f)', [camera.x, camera.y, camera.z]);
-  StatusBar1.Panels[3].Text := Format('Rendered triangles = %d', [pt_rendredtriangles]);
+  StatusBar1.Panels[3].Text := Format('Rendered triangles = %d', [t_rendredtriangles]);
 end;
 
 procedure TForm1.UpdateEnable;

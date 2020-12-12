@@ -60,7 +60,7 @@ var
   camera: TCDCamera;
 
 var
-  pt_rendredtriangles: integer = 0;
+  t_rendredtriangles: integer = 0;
 
 var
   terraintexture: TGLuint = 0;
@@ -258,9 +258,9 @@ end;
 procedure glRenderTerrain(const t: TTerrain);
 begin
   if opt_renderwireframe then
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
   else
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -271,9 +271,7 @@ begin
 
   glBindTexture(GL_TEXTURE_2D, terraintexture);
 
-  pt_rendredtriangles := 0;
-
-  t.RenderMeshGL(10);
+  t_rendredtriangles := t.RenderMeshGL(10);
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);

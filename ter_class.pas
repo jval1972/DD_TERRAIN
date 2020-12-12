@@ -90,7 +90,7 @@ type
     function HeightmapCoords3D(const x, y: integer): point3d_t;
     function SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;
     function heightmapblocksize: integer;
-    procedure RenderMeshGL(const sz: single);
+    function RenderMeshGL(const sz: single): integer;
     property Texture: TBitmap read GetTexture;
     property Heightmap[x, y: integer]: heightbufferitem_t read GetHeightmap write SetHeightmap;
     property texturesize: integer read ftexturesize;
@@ -695,9 +695,10 @@ begin
   Result := ftexturesize div (fheightmapsize - 1);
 end;
 
-procedure TTerrain.RenderMeshGL(const sz: single);
+function TTerrain.RenderMeshGL(const sz: single): integer;
 var
   iX, iY: integer;
+  numTris: integer;
 
   procedure vertexGL(const hX, hY: integer);
   var
@@ -726,6 +727,7 @@ var
   end;
 
 begin
+  numTris := 0;
   glDisable(GL_CULL_FACE);
 
   glBegin(GL_TRIANGLES);
@@ -739,9 +741,12 @@ begin
         vertexGL(iX + 1, iY);
         vertexGL(iX, iY + 1);
         vertexGL(iX + 1, iY + 1);
+        inc(numTris);
       end;
-      
+
   glEnd;
+
+  Result := numTris;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

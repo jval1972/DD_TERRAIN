@@ -53,6 +53,7 @@ const
 implementation
 
 uses
+  Windows,
   Graphics,
   ter_doomdata,
   ter_wadwriter;
@@ -935,6 +936,106 @@ var
     pass[iX, iY] := True;
   end;
 
+  procedure RemoveUnNeededLinesUDMF;
+  var
+    j, k: integer;
+    pline: Pmaplinedef_t;
+    side0, side1: integer;
+    sidedefhit: PIntegerArray;
+    vertexhit: PIntegerArray;
+  begin
+    for j := numzdoomlinedefs - 2 downto 0 do
+    begin
+      pline := @zdoomlinedefs[j];
+      side0 := pline.sidenum[0];
+      side1 := pline.sidenum[1];
+      if (side0 >= 0) and (side1 >= 0) then
+        if zdoomsidedefs[side0].sector = zdoomsidedefs[side1].sector then
+        begin
+          zdoomlinedefs[j] := zdoomlinedefs[numzdoomlinedefs - 1];
+          ReallocMem(zdoomlinedefs, (numzdoomlinedefs  - 1) * SizeOf(maplinedef_t));
+          dec(numzdoomlinedefs);
+        end;
+    end;
+    // UDMF maps seeps to dislike unassigned sidedefs
+    GetMem(sidedefhit, numzdoomsidedefs * SizeOf(Integer));
+    ZeroMemory(sidedefhit, numzdoomsidedefs * SizeOf(Integer));
+    // Mark unused sidedefs
+    for j := 0 to numzdoomlinedefs - 1 do
+    begin
+      pline := @zdoomlinedefs[j];
+      side0 := pline.sidenum[0];
+      if side0 >= 0 then
+        inc(sidedefhit[side0]);
+      side1 := pline.sidenum[1];
+      if side1 >= 0 then
+        inc(sidedefhit[side1]);
+    end;
+    // Remove unused sidedefs
+    for k := numzdoomsidedefs - 1 downto 0 do
+    begin
+      if sidedefhit[k] = 0 then
+      begin
+        if k < numzdoomsidedefs - 1 then
+        begin
+          for j := 0 to numzdoomlinedefs - 1 do
+          begin
+            pline := @zdoomlinedefs[j];
+            if pline.sidenum[0] = numzdoomsidedefs - 1 then
+            begin
+              pline.sidenum[0] := k;
+              inc(sidedefhit[k]); // mark as used
+            end;
+            if pline.sidenum[1] = numzdoomsidedefs - 1 then
+            begin
+              pline.sidenum[1] := k;
+              inc(sidedefhit[k]); // mark as used
+            end;
+          end;
+        end;
+        dec(numzdoomsidedefs);
+        zdoomsidedefs[k] := zdoomsidedefs[numzdoomsidedefs];
+      end;
+    end;
+    ReallocMem(zdoomsidedefs, numzdoomsidedefs * SizeOf(mapsidedef_t));
+    FreeMem(sidedefhit, numzdoomsidedefs * SizeOf(Integer));
+    // Mark unused vertexes
+    GetMem(vertexhit, numzdoomvertexes * SizeOf(Integer));
+    ZeroMemory(vertexhit, numzdoomvertexes * SizeOf(Integer));
+    for j := 0 to numzdoomlinedefs - 1 do
+    begin
+      inc(vertexhit[zdoomlinedefs[j].v1]);
+      inc(vertexhit[zdoomlinedefs[j].v2]);
+    end;
+    // Remove unused vertexes
+    for k := numzdoomvertexes - 1 downto 0 do
+    begin
+      if vertexhit[k] = 0 then
+      begin
+        if k < numzdoomvertexes - 1 then
+        begin
+          for j := 0 to numzdoomlinedefs - 1 do
+          begin
+            if zdoomlinedefs[j].v1 = numzdoomvertexes - 1 then
+            begin
+              zdoomlinedefs[j].v1 := k;
+              inc(vertexhit[k]); // mark as used
+            end;
+            if zdoomlinedefs[j].v2 = numzdoomvertexes - 1 then
+            begin
+              zdoomlinedefs[j].v2 := k;
+              inc(vertexhit[k]); // mark as used
+            end;
+          end;
+        end;
+        dec(numzdoomvertexes);
+        zdoomvertexes[k] := zdoomvertexes[numzdoomvertexes];
+      end;
+    end;
+    ReallocMem(zdoomvertexes, numzdoomvertexes * SizeOf(zmapvertex_t));
+    FreeMem(vertexhit, numzdoomvertexes * SizeOf(Integer));
+  end;
+
   procedure FixTrangleSectorsUDMF;
   var
     j: integer;
@@ -1085,6 +1186,9 @@ begin
 
   // Player start
   AddPlayerStartToUDMF(64, -64, 0, 1);
+
+  // Remove unneeded lines
+  RemoveUnNeededLinesUDMF;
 
   // Fix flat triangle sectors
   FixTrangleSectorsUDMF;

@@ -34,7 +34,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, 
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
-  ter_filemenuhistory, ter_slider, PngImage1;
+  ter_filemenuhistory, ter_slider, PngImage1, ter_pk3;
 
 type
   drawlayeritem_t = packed record
@@ -194,6 +194,24 @@ type
     Panel11: TPanel;
     FlatSizeLabel: TLabel;
     PaletteSpeedButton1: TSpeedButton;
+    Pk3TabSheet: TTabSheet;
+    Panel12: TPanel;
+    Panel13: TPanel;
+    Label5: TLabel;
+    SelectPK3FileButton: TSpeedButton;
+    PK3FileNameEdit: TEdit;
+    Panel14: TPanel;
+    Panel15: TPanel;
+    Panel16: TPanel;
+    PK3TexListBox: TListBox;
+    Panel17: TPanel;
+    Panel18: TPanel;
+    Panel19: TPanel;
+    Panel20: TPanel;
+    PK3TexPreviewImage: TImage;
+    Panel21: TPanel;
+    PK3TexSizeLabel: TLabel;
+    OpenPK3Dialog: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -262,11 +280,15 @@ type
     procedure PalettePopupMenu1Popup(Sender: TObject);
     procedure MNTools1Click(Sender: TObject);
     procedure MNResampleHeightmapX2Click(Sender: TObject);
+    procedure SelectPK3FileButtonClick(Sender: TObject);
+    procedure PK3TexListBoxClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
     fwadfilename: string;
     fpalettename: string;
+    fpk3filename: string;
+    fpk3reader: TZipFile;
     drawlayer: drawlayer_p;
     heightlayer: heightlayer_p;
     colorbuffersize: integer;
@@ -322,6 +344,9 @@ type
     procedure PopulateFlatsListBox(const wadname: string);
     procedure NotifyFlatsListBox;
     function GetWADFlatAsBitmap(const fwad: string; const flat: string): TBitmap;
+    procedure PopulatePK3ListBox(const pk3name: string);
+    procedure NotifyPK3ListBox;
+    function GetPK3TexAsBitmap(const tname: string): TBitmap;
     procedure LLeftMousePaintAt(const X, Y: integer);
     procedure LLeftMousePaintTo(const X, Y: integer);
     procedure CalcPenMasks;
@@ -371,9 +396,13 @@ begin
   fpalettename := bigstringtostring(@opt_defaultpalette);
   CheckPaletteName;
 
+  fpk3filename := bigstringtostring(@opt_lastpk3file);
+  fpk3reader := TZipFile.Create(opt_lastpk3file);
+
   closing := False;
 
   EditPageControl.ActivePageIndex := 0;
+  TexturePageControl.ActivePageIndex := 0;
   MainPageControl.ActivePageIndex := 0;
 
   GetMem(drawlayer, SizeOf(drawlayer_t));
@@ -405,6 +434,7 @@ begin
   CalcPenMasks;
 
   NotifyFlatsListBox;
+  NotifyPK3ListBox;
 
   undoManager := TUndoRedoManager.Create;
   undoManager.UndoLimit := 100;
@@ -681,6 +711,7 @@ begin
   stringtobigstring(filemenuhistory.PathStringIdx(9), @opt_filemenuhistory9);
   stringtobigstring(fwadfilename, @opt_lastwadfile);
   stringtobigstring(fpalettename, @opt_defaultpalette);
+  stringtobigstring(fpk3filename, @opt_lastpk3file);
   ter_SaveSettingsToFile(ChangeFileExt(ParamStr(0), '.ini'));
 
   filemenuhistory.Free;
@@ -693,8 +724,10 @@ begin
   Freemem(drawlayer, SizeOf(drawlayer_t));
   Freemem(heightlayer, SizeOf(heightlayer_t));
   Freemem(colorbuffer, SizeOf(colorbuffer_t));
-  
+
   bitmapbuffer.Free;
+
+  fpk3reader.Free;
 end;
 
 resourcestring
@@ -2134,6 +2167,125 @@ begin
     PaintBox1.Invalidate;
     glneedsupdate := True;
   end;
+end;
+
+procedure TForm1.SelectPK3FileButtonClick(Sender: TObject);
+begin
+  if OpenPK3Dialog.Execute then
+  begin
+    fpk3filename := ExpandFilename(OpenPK3Dialog.FileName);
+    PK3FileNameEdit.Text := ExtractFileName(OpenPK3Dialog.FileName);
+    PopulatePK3ListBox(fpk3filename);
+  end;
+end;
+
+procedure TForm1.PopulatePK3ListBox(const pk3name: string);
+var
+  i: integer;
+  uEntry: string;
+  uExt: string;
+begin
+  fpk3reader.FileName := fpk3filename;
+  PK3TexListBox.Items.Clear;
+  for i := 0 to fpk3reader.FileCount - 1 do
+  begin
+    uEntry := UpperCase(fpk3reader.Files[i]);
+    uExt := ExtractFileExt(uEntry);
+    if (uExt = '.PNG') or (uExt = '.JPG') then
+      PK3TexListBox.Items.Add(uEntry);
+  end;
+  if PK3TexListBox.Count > 0 then
+    PK3TexListBox.ItemIndex := 0
+  else
+    PK3TexListBox.ItemIndex := -1;
+  NotifyPK3ListBox;
+end;
+
+procedure TForm1.NotifyPK3ListBox;
+var
+  idx: integer;
+  bm: TBitmap;
+  i, j: integer;
+begin
+  idx := PK3TexListBox.ItemIndex;
+  if (idx < 0) or (fpk3filename = '') or not FileExists(fpk3filename) then
+  begin
+    PK3TexPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
+    PK3TexPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
+    PK3TexPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
+    PK3TexSizeLabel.Caption := Format('Texture Size (%d, %d)', [128, 128]);
+    colorbuffersize := 128;
+    FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
+    exit;
+  end;
+
+  bm := GetPK3TexAsBitmap(PK3TexListBox.Items[idx]);
+
+  for j := 0 to MinI(bm.Height - 1, MAXTEXTURESIZE - 1) do
+    for i := 0 to MinI(bm.Width - 1, MAXTEXTURESIZE - 1) do
+      colorbuffer[i, j] := bm.Canvas.Pixels[i, j];
+  colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
+  PK3TexPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
+  PK3TexSizeLabel.Caption := Format('Texture Size (%d, %d)', [bm.Width, bm.Height]);
+  bm.Free;
+end;
+
+function TForm1.GetPK3TexAsBitmap(const tname: string): TBitmap;
+var
+  p: pointer;
+  psize: integer;
+  jpg: TJpegImage;
+  png: TPNGObject;
+  uExt: string;
+  m: TMemoryStream;
+begin
+  if fpk3reader.GetZipFileData(tname, p, psize) then
+  begin
+    m := TMemoryStream.Create;
+    m.Write(p^, psize);
+    FreeMem(p, psize);
+
+    m.Position := 0;
+
+    uExt := UpperCase(ExtractFileExt(tname));
+
+    if uExt = '.JPG' then
+    begin
+      jpg := TJpegImage.Create;
+      jpg.LoadFromStream(m);
+      Result := TBitmap.Create;
+      Result.Assign(jpg);
+      jpg.Free;
+      m.Free;
+      Exit;
+    end;
+
+    if uExt = '.PNG' then
+    begin
+      png := TPNGObject.Create;
+      png.LoadFromStream(m);
+      Result := TBitmap.Create;
+      Result.Assign(png);
+      png.Free;
+      m.Free;
+      Exit;
+    end;
+    m.Free;
+  end;
+
+  // Not supported extension ???
+  Result := TBitmap.Create;
+  Result.Width := 64;
+  Result.Height := 64;
+  Result.Canvas.Brush.Style := bsSolid;
+  Result.Canvas.Brush.Color := RGB(255, 255, 255);
+  Result.Canvas.FillRect(Rect(0, 0, 64, 64));
+  Exit;
+end;
+
+procedure TForm1.PK3TexListBoxClick(Sender: TObject);
+begin
+  NotifyPK3ListBox;
 end;
 
 end.

@@ -56,6 +56,7 @@ var
   opt_filemenuhistory9: bigstring_t;
   opt_lastwadfile: bigstring_t;
   opt_defaultpalette: bigstring_t;
+  opt_lastpk3file: bigstring_t;
 
 function bigstringtostring(const bs: bigstring_p): string;
 
@@ -76,7 +77,7 @@ type
   end;
 
 const
-  NUMSETTINGS = 17;
+  NUMSETTINGS = 18;
 
 var
   Settings: array[0..NUMSETTINGS - 1] of TSettingItem = (
@@ -164,6 +165,11 @@ var
       desc: 'PALETTE';
       typeof: tstBigString;
       location: @opt_defaultpalette;
+    ),
+    (
+      desc: 'PK3';
+      typeof: tstBigString;
+      location: @opt_lastpk3file;
     )
   );
 

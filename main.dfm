@@ -2599,7 +2599,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 343
-        ActivePage = WADTabSheet1
+        ActivePage = Pk3TabSheet
         Align = alClient
         TabOrder = 0
         object WADTabSheet1: TTabSheet
@@ -4367,7 +4367,7 @@ object Form1: TForm1
                 Caption = 'File: '
               end
               object SelectPK3FileButton: TSpeedButton
-                Left = 168
+                Left = 196
                 Top = 8
                 Width = 23
                 Height = 22
@@ -4379,7 +4379,7 @@ object Form1: TForm1
               object PK3FileNameEdit: TEdit
                 Left = 40
                 Top = 8
-                Width = 121
+                Width = 149
                 Height = 21
                 ReadOnly = True
                 TabOrder = 0

@@ -200,7 +200,7 @@ interface
 {$DEFINE ErrorOnUnknownCritical} //Error when finds an unknown critical chunk
 {$DEFINE CheckCRC}               //Enables CRC checking
 {$DEFINE RegisterGraphic}        //Registers TPNGObject to use with TPicture
-{$DEFINE PartialTransparentDraw} //Draws partial transparent images
+{.$DEFINE PartialTransparentDraw} //Draws partial transparent images
 {$DEFINE Store16bits}            //Stores the extra 8 bits from 16bits/sample
 {$RANGECHECKS OFF} {$J+}
 
@@ -2066,6 +2066,29 @@ end;
 
 {TChunkztXt implementation}
 
+function ischarbuffer(const p: PChar; const len: integer): boolean;
+var
+  i: integer;
+  p1: PChar;
+  c: char;
+begin
+  p1 := p;
+  for i := 0 to len - 1 do
+  begin
+    c := p1^;
+    if Pos(c, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+              'abcdefghijklmnopqrstuvwxyz' +
+              '0123456789' +
+              '~`!@#$%^&*()_-+=''"\|;:?/.>,<* []{}' + #13#10#7#10) = 0 then
+    begin
+      Result := False;
+      Exit;
+    end;
+    inc(p1);
+  end;
+  Result := True;
+end;
+
 {Loading the chunk from a stream}
 function TChunkzTXt.LoadFromStream(Stream: TStream;
   const ChunkName: TChunkName; Size: Integer): Boolean;
@@ -2074,6 +2097,9 @@ var
   CompressionMethod: Byte;
   Output: Pointer;
   OutputSize: Integer;
+  i, len: integer;
+  p1: PChar;
+  c: char;
 begin
   {Load data from stream and validate}
   Result := inherited LoadFromStream(Stream, ChunkName, Size);
@@ -2088,14 +2114,29 @@ begin
   {In case the compression is 0 (only one accepted by specs), reads it}
   if CompressionMethod = 0 then
   begin
-    Output := nil;
-    if DecompressZLIB(PChar(Longint(Data) + Length(fKeyword) + 2),
-      Size - Length(fKeyword) - 2, Output, OutputSize, ErrorOutput) then
+    // 20190907 JVAL Avoid problems with png
+    p1 := PChar(Longint(Data) + Length(fKeyword) + 2);
+    len := Size - Length(fKeyword) - 2;
+    if ischarbuffer(p1, len) then
     begin
-      SetLength(fText, OutputSize);
-      CopyMemory(@fText[1], Output, OutputSize);
-    end {if DecompressZLIB(...};
-    FreeMem(Output);
+      for i := 0 to len - 1 do
+      begin
+        c := p1^;
+        fText := fText + c;
+        inc(p1);
+      end;
+    end
+    else
+    begin
+      Output := nil;
+
+      if DecompressZLIB(p1, len, Output, OutputSize, ErrorOutput) then
+      begin
+        SetLength(fText, OutputSize);
+        CopyMemory(@fText[1], Output, OutputSize);
+      end {if DecompressZLIB(...};
+      FreeMem(Output);
+    end;
   end {if CompressionMethod = 0}
 
 end;

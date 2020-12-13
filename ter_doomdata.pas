@@ -41,17 +41,17 @@ const
 
 type
   mapvertex_t = record
-    x : smallint;
-    y : smallint;
+    x: smallint;
+    y: smallint;
   end;
   Pmapvertex_t = ^mapvertex_t;
   mapvertex_tArray = array[0..$FFF] of mapvertex_t;
   Pmapvertex_tArray = ^mapvertex_tArray;
 
   zmapvertex_t = record
-    x : smallint;
-    y : smallint;
-    z : smallint;
+    x: smallint;
+    y: smallint;
+    z: smallint;
   end;
   Pzmapvertex_t = ^zmapvertex_t;
   zmapvertex_tArray = array[0..$FFF] of zmapvertex_t;

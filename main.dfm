@@ -2599,7 +2599,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 343
-        ActivePage = Pk3TabSheet
+        ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
         object WADTabSheet1: TTabSheet

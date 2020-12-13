@@ -342,6 +342,7 @@ type
     procedure UpdateSliders;
     procedure UpdateFromSliders(Sender: TObject);
     procedure PopulateFlatsListBox(const wadname: string);
+    procedure BitmapToColorBuffer(const abitmap: TBitmap);
     procedure NotifyFlatsListBox;
     function GetWADFlatAsBitmap(const fwad: string; const flat: string): TBitmap;
     procedure PopulatePK3ListBox(const pk3name: string);
@@ -1398,11 +1399,38 @@ begin
   NotifyFlatsListBox;
 end;
 
+procedure TForm1.BitmapToColorBuffer(const abitmap: TBitmap);
+var
+  i, j: integer;
+  A: PLongWordArray;
+
+  function RGBSwap(buffer: LongWord): LongWord;
+  var
+    r, g, b: LongWord;
+  begin
+    Result := buffer;
+    b := Result and $FF;
+    Result := Result shr 8;
+    g := Result and $FF;
+    Result := Result shr 8;
+    r := Result and $FF;
+    Result := r + g shl 8 + b shl 16;
+  end;
+
+begin
+  abitmap.PixelFormat := pf32bit;
+  for j := 0 to MinI(abitmap.Height - 1, MAXTEXTURESIZE - 1) do
+  begin
+    A := abitmap.ScanLine[j];
+    for i := 0 to MinI(abitmap.Width - 1, MAXTEXTURESIZE - 1) do
+      colorbuffer[i, j] := RGBSwap(A[i]);
+  end;
+end;
+
 procedure TForm1.NotifyFlatsListBox;
 var
   idx: integer;
   bm: TBitmap;
-  i, j: integer;
 begin
   idx := FlatsListBox.ItemIndex;
   if (idx < 0) or (fwadfilename = '') or not FileExists(fwadfilename) then
@@ -1418,9 +1446,8 @@ begin
 
   bm := GetWADFlatAsBitmap(fwadfilename, FlatsListBox.Items[idx]);
 
-  for j := 0 to MinI(bm.Height - 1, MAXTEXTURESIZE - 1) do
-    for i := 0 to MinI(bm.Width - 1, MAXTEXTURESIZE - 1) do
-      colorbuffer[i, j] := bm.Canvas.Pixels[i, j];
+  BitmapToColorBuffer(bm);
+  
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   WADFlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
   FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [bm.Width, bm.Height]);
@@ -2206,7 +2233,6 @@ procedure TForm1.NotifyPK3ListBox;
 var
   idx: integer;
   bm: TBitmap;
-  i, j: integer;
 begin
   idx := PK3TexListBox.ItemIndex;
   if (idx < 0) or (fpk3filename = '') or not FileExists(fpk3filename) then
@@ -2227,9 +2253,8 @@ begin
     Screen.Cursor := crDefault;
   end;
 
-  for j := 0 to MinI(bm.Height - 1, MAXTEXTURESIZE - 1) do
-    for i := 0 to MinI(bm.Width - 1, MAXTEXTURESIZE - 1) do
-      colorbuffer[i, j] := bm.Canvas.Pixels[i, j];
+  BitmapToColorBuffer(bm);
+
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   PK3TexPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
   PK3TexSizeLabel.Caption := Format('Texture Size (%d, %d)', [bm.Width, bm.Height]);

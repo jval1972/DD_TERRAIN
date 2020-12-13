@@ -98,6 +98,20 @@ const
     ''
   );
 
+const
+  z_errmsg: Array [0..9] of String = (
+    'Need dictionary',      // Z_NEED_DICT      (2)
+    'Stream end',           // Z_STREAM_END     (1)
+    'OK',                   // Z_OK             (0)
+    'File error',           // Z_ERRNO          (-1)
+    'Stream error',         // Z_STREAM_ERROR   (-2)
+    'Data error',           // Z_DATA_ERROR     (-3)
+    'Insufficient memory',  // Z_MEM_ERROR      (-4)
+    'Buffer error',         // Z_BUF_ERROR      (-5)
+    'Incompatible version', // Z_VERSION_ERROR  (-6)
+    ''
+  );
+  
 type
   // Abstract ancestor class
   TCustomZlibStream = class(TStream)
@@ -215,15 +229,15 @@ implementation
 uses
   SysUtils;
 
-{$L obj\adler32.obj}
-{$L obj\deflate.obj}
-{$L obj\infback.obj}
-{$L obj\inffast.obj}
-{$L obj\inflate.obj}
-{$L obj\inftrees.obj}
-{$L obj\trees.obj}
-{$L obj\compress.obj}
-{$L obj\crc32.obj}
+{$L obj\z128_adler32.obj}
+{$L obj\z128_deflate.obj}
+{$L obj\z128_infback.obj}
+{$L obj\z128_inffast.obj}
+{$L obj\z128_inflate.obj}
+{$L obj\z128_inftrees.obj}
+{$L obj\z128_trees.obj}
+{$L obj\z128_compress.obj}
+{$L obj\z128_crc32.obj}
 
 resourcestring
  sTargetBufferTooSmall = 'ZLib error: target buffer may be too small';
@@ -243,6 +257,21 @@ begin
   Move(source^, dest^, count);
 end;
 
+procedure zcfree(opaque, block: Pointer);
+begin
+  FreeMem(block);
+end;
+
+procedure memcpy(dest, source: Pointer; count: Integer); cdecl;
+begin
+  Move(source^, dest^, count);
+end;
+
+function memset(p: Pointer; b: Byte; count: Integer): pointer; cdecl;
+begin
+  FillChar(p^, count, b);
+  Result := p;
+end;
 
 // deflate compresses data
 function deflateInit_(var strm: TZStreamRec; level: Integer; version: PChar;
@@ -263,11 +292,6 @@ function inflateReset(var strm: TZStreamRec): Integer; external;
 function zcalloc(opaque: Pointer; items, size: Integer): Pointer;
 begin
   GetMem(result, items * size);
-end;
-
-procedure zcfree(opaque, block: Pointer);
-begin
-  FreeMem(block);
 end;
 
 // deflate compresses data
@@ -565,6 +589,13 @@ begin
   Result := FZRec.total_out;
 end;
 
+{$ifndef WIN64}
+procedure _llmod;
+asm
+  jmp System.@_llmod;
+end;
+{$endif}
 
 end.
+
 

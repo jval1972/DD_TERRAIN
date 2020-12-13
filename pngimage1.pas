@@ -1256,7 +1256,7 @@ begin
 end;
 
 {Registering of common chunk classes}
-procedure RegisterCommonChunks;
+procedure RegisterCommonChunks(const onlyimportant: boolean);
 begin
   {Important chunks}
   RegisterChunk(TChunkIEND);
@@ -1266,11 +1266,14 @@ begin
   RegisterChunk(TChunkgAMA);
   RegisterChunk(TChunktRNS);
 
-  {Not so important chunks}
-  RegisterChunk(TChunkpHYs);
-  RegisterChunk(TChunktIME);
-  RegisterChunk(TChunktEXt);
-  RegisterChunk(TChunkzTXt);
+  if not onlyimportant then
+  begin
+    {Not so important chunks}
+    RegisterChunk(TChunkpHYs);
+    RegisterChunk(TChunktIME);
+    RegisterChunk(TChunktEXt);
+    RegisterChunk(TChunkzTXt);
+  end;
 end;
 
 {Creates a new chunk of this class}
@@ -5849,7 +5852,7 @@ initialization
   {crc table has not being computed yet}
   crc_table_computed := FALSE;
   {Register the necessary chunks for png}
-  RegisterCommonChunks;
+  RegisterCommonChunks(true);
   {Registers TPNGObject to use with TPicture}
   {$IFDEF UseDelphi}{$IFDEF RegisterGraphic}
     TPicture.RegisterFileFormat('PNG', 'Portable Network Graphics', TPNGObject);

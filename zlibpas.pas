@@ -40,6 +40,8 @@ type
 
 function inflateInit_(var strm: TZStreamRec; version: PChar;
   recsize: Integer): Integer; forward;
+function inflateInit2_(var strm: TZStreamRec; windowBits: Integer;
+  version: PChar; recsize: Integer): Integer; external;
 function inflate(var strm: TZStreamRec; flush: Integer): Integer; forward;
 function inflateEnd(var strm: TZStreamRec): Integer; forward;
 function deflateInit_(var strm: TZStreamRec; level: Integer; version: PChar;

@@ -2599,7 +2599,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 343
-        ActivePage = Pk3TabSheet
+        ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
         object WADTabSheet1: TTabSheet
@@ -2697,7 +2697,7 @@ object Form1: TForm1
             object Panel4: TPanel
               Left = 0
               Top = 41
-              Width = 97
+              Width = 103
               Height = 274
               Align = alLeft
               BevelOuter = bvNone
@@ -2706,7 +2706,7 @@ object Form1: TForm1
               object Panel5: TPanel
                 Left = 0
                 Top = 0
-                Width = 97
+                Width = 103
                 Height = 25
                 Align = alTop
                 Caption = 'Flats'
@@ -2715,7 +2715,7 @@ object Form1: TForm1
               object Panel10: TPanel
                 Left = 0
                 Top = 25
-                Width = 97
+                Width = 103
                 Height = 249
                 Align = alClient
                 BorderWidth = 2
@@ -2724,7 +2724,7 @@ object Form1: TForm1
                 object FlatsListBox: TListBox
                   Left = 3
                   Top = 3
-                  Width = 91
+                  Width = 97
                   Height = 243
                   Align = alClient
                   BorderStyle = bsNone
@@ -2735,9 +2735,9 @@ object Form1: TForm1
               end
             end
             object Panel6: TPanel
-              Left = 97
+              Left = 103
               Top = 41
-              Width = 145
+              Width = 139
               Height = 274
               Align = alClient
               BevelOuter = bvNone
@@ -2746,7 +2746,7 @@ object Form1: TForm1
               object Panel7: TPanel
                 Left = 0
                 Top = 0
-                Width = 145
+                Width = 139
                 Height = 25
                 Align = alTop
                 Caption = 'Preview'
@@ -2755,7 +2755,7 @@ object Form1: TForm1
               object Panel8: TPanel
                 Left = 0
                 Top = 25
-                Width = 145
+                Width = 139
                 Height = 249
                 Align = alClient
                 Caption = 'Panel8'
@@ -2763,7 +2763,7 @@ object Form1: TForm1
                 object Panel9: TPanel
                   Left = 1
                   Top = 1
-                  Width = 143
+                  Width = 137
                   Height = 247
                   Align = alClient
                   BorderWidth = 2
@@ -2772,7 +2772,7 @@ object Form1: TForm1
                   object WADFlatPreviewImage: TImage
                     Left = 3
                     Top = 3
-                    Width = 137
+                    Width = 131
                     Height = 128
                     Align = alTop
                     Picture.Data = {
@@ -4319,7 +4319,7 @@ object Form1: TForm1
                   object Panel11: TPanel
                     Left = 3
                     Top = 131
-                    Width = 137
+                    Width = 131
                     Height = 113
                     Align = alClient
                     BevelOuter = bvNone
@@ -4388,7 +4388,7 @@ object Form1: TForm1
             object Panel14: TPanel
               Left = 0
               Top = 41
-              Width = 97
+              Width = 103
               Height = 274
               Align = alLeft
               BevelOuter = bvNone
@@ -4397,7 +4397,7 @@ object Form1: TForm1
               object Panel15: TPanel
                 Left = 0
                 Top = 0
-                Width = 97
+                Width = 103
                 Height = 25
                 Align = alTop
                 Caption = 'Textures'
@@ -4406,7 +4406,7 @@ object Form1: TForm1
               object Panel16: TPanel
                 Left = 0
                 Top = 25
-                Width = 97
+                Width = 103
                 Height = 249
                 Align = alClient
                 BorderWidth = 2
@@ -4415,7 +4415,7 @@ object Form1: TForm1
                 object PK3TexListBox: TListBox
                   Left = 3
                   Top = 3
-                  Width = 91
+                  Width = 97
                   Height = 243
                   Align = alClient
                   BorderStyle = bsNone
@@ -4426,9 +4426,9 @@ object Form1: TForm1
               end
             end
             object Panel17: TPanel
-              Left = 97
+              Left = 103
               Top = 41
-              Width = 145
+              Width = 139
               Height = 274
               Align = alClient
               BevelOuter = bvNone
@@ -4437,7 +4437,7 @@ object Form1: TForm1
               object Panel18: TPanel
                 Left = 0
                 Top = 0
-                Width = 145
+                Width = 139
                 Height = 25
                 Align = alTop
                 Caption = 'Preview'
@@ -4446,7 +4446,7 @@ object Form1: TForm1
               object Panel19: TPanel
                 Left = 0
                 Top = 25
-                Width = 145
+                Width = 139
                 Height = 249
                 Align = alClient
                 Caption = 'Panel8'
@@ -4454,7 +4454,7 @@ object Form1: TForm1
                 object Panel20: TPanel
                   Left = 1
                   Top = 1
-                  Width = 143
+                  Width = 137
                   Height = 247
                   Align = alClient
                   BorderWidth = 2
@@ -4463,7 +4463,7 @@ object Form1: TForm1
                   object PK3TexPreviewImage: TImage
                     Left = 3
                     Top = 3
-                    Width = 137
+                    Width = 131
                     Height = 128
                     Align = alTop
                     Picture.Data = {
@@ -6010,7 +6010,7 @@ object Form1: TForm1
                   object Panel21: TPanel
                     Left = 3
                     Top = 131
-                    Width = 137
+                    Width = 131
                     Height = 113
                     Align = alClient
                     BevelOuter = bvNone

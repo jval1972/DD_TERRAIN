@@ -117,7 +117,6 @@ type
     HistoryItem9: TMenuItem;
     EditPageControl: TPageControl;
     TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
     ExportScreenshot1: TMenuItem;
     Wireframe1: TMenuItem;
     Renderenviroment1: TMenuItem;
@@ -129,24 +128,7 @@ type
     TabSheet5: TTabSheet;
     OpenGLScrollBox: TScrollBox;
     OpenGLPanel: TPanel;
-    OpenWADMainPanel: TPanel;
-    Panel2: TPanel;
-    Panel6: TPanel;
-    Panel3: TPanel;
-    Label23: TLabel;
-    WADFileNameEdit: TEdit;
-    SelectWADFileButton: TSpeedButton;
-    Panel4: TPanel;
     OpenWADDialog: TOpenDialog;
-    Panel5: TPanel;
-    Panel7: TPanel;
-    Panel8: TPanel;
-    Panel9: TPanel;
-    FlatPreviewImage: TImage;
-    Panel10: TPanel;
-    FlatsListBox: TListBox;
-    Panel11: TPanel;
-    FlatSizeLabel: TLabel;
     Panel1: TPanel;
     Label3: TLabel;
     PenSizePaintBox: TPaintBox;
@@ -190,10 +172,28 @@ type
     PaletteGreyScale1: TMenuItem;
     PaletteDefault1: TMenuItem;
     N6: TMenuItem;
-    Panel12: TPanel;
-    PaletteSpeedButton1: TSpeedButton;
     N9: TMenuItem;
     MNResampleHeightmapX2: TMenuItem;
+    Panel2: TPanel;
+    TexturePageControl: TPageControl;
+    WADTabSheet1: TTabSheet;
+    OpenWADMainPanel: TPanel;
+    Panel3: TPanel;
+    Label23: TLabel;
+    SelectWADFileButton: TSpeedButton;
+    WADFileNameEdit: TEdit;
+    Panel4: TPanel;
+    Panel5: TPanel;
+    Panel10: TPanel;
+    FlatsListBox: TListBox;
+    Panel6: TPanel;
+    Panel7: TPanel;
+    Panel8: TPanel;
+    Panel9: TPanel;
+    WADFlatPreviewImage: TImage;
+    Panel11: TPanel;
+    FlatSizeLabel: TLabel;
+    PaletteSpeedButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -1373,9 +1373,9 @@ begin
   idx := FlatsListBox.ItemIndex;
   if (idx < 0) or (fwadfilename = '') or not FileExists(fwadfilename) then
   begin
-    FlatPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
-    FlatPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
-    FlatPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
+    WADFlatPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
+    WADFlatPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
+    WADFlatPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
     FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [128, 128]);
     colorbuffersize := 128;
     FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
@@ -1388,7 +1388,7 @@ begin
     for i := 0 to MinI(bm.Width - 1, MAXTEXTURESIZE - 1) do
       colorbuffer[i, j] := bm.Canvas.Pixels[i, j];
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
-  FlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
+  WADFlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
   FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [bm.Width, bm.Height]);
   bm.Free;
 end;

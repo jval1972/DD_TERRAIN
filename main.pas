@@ -397,7 +397,7 @@ begin
   CheckPaletteName;
 
   fpk3filename := bigstringtostring(@opt_lastpk3file);
-  fpk3reader := TZipFile.Create(opt_lastpk3file);
+  fpk3reader := TZipFile.Create(fpk3filename);
 
   closing := False;
 
@@ -434,7 +434,8 @@ begin
   CalcPenMasks;
 
   NotifyFlatsListBox;
-  NotifyPK3ListBox;
+  PK3FileNameEdit.Text := ExtractFileName(fpk3filename);
+  PopulatePK3ListBox(fpk3filename);
 
   undoManager := TUndoRedoManager.Create;
   undoManager.UndoLimit := 100;
@@ -2219,7 +2220,12 @@ begin
     exit;
   end;
 
-  bm := GetPK3TexAsBitmap(PK3TexListBox.Items[idx]);
+  Screen.Cursor := crHourglass;
+  try
+    bm := GetPK3TexAsBitmap(PK3TexListBox.Items[idx]);
+  finally
+    Screen.Cursor := crDefault;
+  end;
 
   for j := 0 to MinI(bm.Height - 1, MAXTEXTURESIZE - 1) do
     for i := 0 to MinI(bm.Width - 1, MAXTEXTURESIZE - 1) do

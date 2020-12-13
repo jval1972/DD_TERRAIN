@@ -89,6 +89,8 @@ type
     function HeightmapCoords(const x, y: integer): TPoint;
     function HeightmapCoords3D(const x, y: integer): point3d_t;
     function SmoothHeightmap(const x, y: integer; const factorpct: integer): boolean;
+    function ResampleHeightMapX2: boolean;
+    function CanResampleHeightMapX2: boolean;
     function heightmapblocksize: integer;
     function RenderMeshGL(const sz: single): integer;
     property Texture: TBitmap read GetTexture;
@@ -688,6 +690,112 @@ begin
   oldh := fheightmap[x, y].height;
   fheightmap[x, y].height := Round(fheightmap[x, y].height * (100 - factorpct) / 100 + mean * factorpct / 100);
   Result := fheightmap[x, y].height <> oldh;
+end;
+
+function TTerrain.ResampleHeightMapX2: boolean;
+var
+  fnewheightmap: heightbuffer_p;
+  fnewheightmapsize: integer;
+  oX, oY: integer;  // Old heightmap x & y
+  nX, nY: integer;  // New heightmap x & y
+begin
+  Result := CanResampleHeightMapX2;
+  if not Result then
+    Exit;
+
+  GetMem(fnewheightmap, SizeOf(heightbuffer_t));
+  ZeroMemory(fnewheightmap, SizeOf(heightbuffer_t));
+
+  for oX := 0 to fheightmapsize - 1 do
+    for oY := 0 to fheightmapsize - 1 do
+      fnewheightmap[2 * oX, 2 * oY] := fheightmap[oX, oY];
+
+  fnewheightmapsize := fheightmapsize * 2 - 1;
+
+  for nX := 0 to fnewheightmapsize - 1 do
+  begin
+    oX := nX div 2;
+    for nY := 0 to fnewheightmapsize - 1 do
+    begin
+      oY := nY div 2;
+      if Odd(nX) and Odd(nY) then
+      begin
+        fnewheightmap[nX, nY].height :=
+          (
+            fheightmap[oX + 1, oY + 1].height +
+            fheightmap[oX + 1, oY    ].height +
+            fheightmap[oX    , oY    ].height +
+            fheightmap[oX    , oY + 1].height
+          ) div 4;
+        fnewheightmap[nX, nY].dx :=
+          (
+            fheightmap[oX + 1, oY + 1].dx +
+            fheightmap[oX + 1, oY    ].dx +
+            fheightmap[oX    , oY    ].dx +
+            fheightmap[oX    , oY + 1].dx
+          ) div 4;
+        fnewheightmap[nX, nY].dy :=
+          (
+            fheightmap[oX + 1, oY + 1].dy +
+            fheightmap[oX + 1, oY    ].dy +
+            fheightmap[oX    , oY    ].dy +
+            fheightmap[oX    , oY + 1].dy
+          ) div 4;
+      end
+      else if Odd(nX) and not Odd(nY) then
+      begin
+        fnewheightmap[nX, nY].height :=
+          (
+            fheightmap[oX + 1, oY    ].height +
+            fheightmap[oX    , oY    ].height
+          ) div 2;
+        fnewheightmap[nX, nY].dx :=
+          (
+            fheightmap[oX + 1, oY    ].dx +
+            fheightmap[oX    , oY    ].dx
+          ) div 2;
+        fnewheightmap[nX, nY].dy :=
+          (
+            fheightmap[oX + 1, oY    ].dy +
+            fheightmap[oX    , oY    ].dy
+          ) div 2;
+      end
+      else if not Odd(nX) and Odd(nY) then
+      begin
+        fnewheightmap[nX, nY].height :=
+          (
+            fheightmap[oX    , oY + 1].height +
+            fheightmap[oX    , oY    ].height
+          ) div 2;
+        fnewheightmap[nX, nY].dx :=
+          (
+            fheightmap[oX    , oY + 1].dx +
+            fheightmap[oX    , oY    ].dx
+          ) div 2;
+        fnewheightmap[nX, nY].dy :=
+          (
+            fheightmap[oX    , oY + 1].dy +
+            fheightmap[oX    , oY    ].dy
+          ) div 2;
+      end
+    end;
+  end;
+
+  SetHeightMapSize(fnewheightmapsize);
+  for nX := 0 to fheightmapsize - 1 do
+    for nY := 0 to fheightmapsize - 1 do
+      fheightmap[nX, nY] := fnewheightmap[nX, nY];
+
+  for nX := 0 to fheightmapsize - 1 do
+    for nY := 0 to fheightmapsize - 1 do
+      ValidateHeightmapItem(nX, nY);
+
+  FreeMem(fnewheightmap, SizeOf(heightbuffer_t));
+end;
+
+function TTerrain.CanResampleHeightMapX2: boolean;
+begin
+  Result := fheightmapsize <= 33;
 end;
 
 function TTerrain.heightmapblocksize: integer;

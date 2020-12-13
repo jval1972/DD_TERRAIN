@@ -1916,7 +1916,7 @@ object Form1: TForm1
       Top = 0
       Width = 250
       Height = 568
-      ActivePage = TabSheet2
+      ActivePage = TabSheet1
       Align = alClient
       TabOrder = 0
       object TabSheet1: TTabSheet
@@ -4545,9 +4545,14 @@ object Form1: TForm1
     end
     object MNTools1: TMenuItem
       Caption = 'Tools'
+      OnClick = MNTools1Click
       object Scaleheightmap1: TMenuItem
-        Caption = 'Scale Heightmap'
+        Caption = 'Scale Heightmap Elevation'
         OnClick = Scaleheightmap1Click
+      end
+      object MNResampleHeightmapX2: TMenuItem
+        Caption = 'Resample Heightmap (x2)'
+        OnClick = MNResampleHeightmapX2Click
       end
     end
     object Options1: TMenuItem

@@ -193,6 +193,7 @@ type
     Panel12: TPanel;
     PaletteSpeedButton1: TSpeedButton;
     N9: TMenuItem;
+    MNResampleHeightmapX2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -259,6 +260,8 @@ type
     procedure PaletteRadix1Click(Sender: TObject);
     procedure PaletteGreyScale1Click(Sender: TObject);
     procedure PalettePopupMenu1Popup(Sender: TObject);
+    procedure MNTools1Click(Sender: TObject);
+    procedure MNResampleHeightmapX2Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -2113,6 +2116,24 @@ begin
   PaletteRadix1.Checked := fpalettename = spalRADIX;
   PaletteGreyScale1.Checked := fpalettename = spalGRAYSCALE;
   PaletteDefault1.Checked := fpalettename = spalDEFAULT;
+end;
+
+procedure TForm1.MNTools1Click(Sender: TObject);
+begin
+  MNResampleHeightmapX2.Enabled := terrain.CanResampleHeightMapX2;
+end;
+
+procedure TForm1.MNResampleHeightmapX2Click(Sender: TObject);
+begin
+  if terrain.CanResampleHeightMapX2 then
+  begin
+    SaveUndo(false);
+    terrain.ResampleHeightMapX2;
+    TerrainToControls;
+    changed := True;
+    PaintBox1.Invalidate;
+    glneedsupdate := True;
+  end;
 end;
 
 end.

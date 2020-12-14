@@ -5,6 +5,8 @@ object Form1: TForm1
   Height = 756
   Caption = 'Terrain Generator'
   Color = clBtnFace
+  Constraints.MinHeight = 680
+  Constraints.MinWidth = 680
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

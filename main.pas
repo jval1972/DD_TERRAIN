@@ -239,6 +239,9 @@ type
     Label7: TLabel;
     TextureScalePaintBox: TPaintBox;
     TextureScaleLabel: TLabel;
+    WAADFlatNameLabel: TLabel;
+    PK3TextureNameLabel: TLabel;
+    DIRTextureNameLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -1554,7 +1557,8 @@ begin
     WADFlatPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
     WADFlatPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
     WADFlatPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
-    FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [128, 128]);
+    WAADFlatNameLabel.Caption := '(None)';
+    FlatSizeLabel.Caption := Format('(%dx%d)', [128, 128]);
     colorbuffersize := 128;
     FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
     exit;
@@ -1566,7 +1570,8 @@ begin
 
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   WADFlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
-  FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [bm.Width, bm.Height]);
+  WAADFlatNameLabel.Caption := FlatsListBox.Items[idx];
+  FlatSizeLabel.Caption := Format('(%dx%d)', [bm.Width, bm.Height]);
   bm.Free;
 end;
 
@@ -2369,7 +2374,8 @@ begin
     PK3TexPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
     PK3TexPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
     PK3TexPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
-    PK3TexSizeLabel.Caption := Format('Texture Size (%d, %d)', [128, 128]);
+    PK3TextureNameLabel.Caption := '(none)';
+    PK3TexSizeLabel.Caption := Format('(%dx%d)', [128, 128]);
     colorbuffersize := 128;
     FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
     exit;
@@ -2386,7 +2392,8 @@ begin
 
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   PK3TexPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
-  PK3TexSizeLabel.Caption := Format('Texture Size (%d, %d)', [bm.Width, bm.Height]);
+  PK3TextureNameLabel.Caption := ExtractFileName(PK3TexListBox.Items[idx]);
+  PK3TexSizeLabel.Caption := Format('(%dx%d)', [bm.Width, bm.Height]);
   bm.Free;
 end;
 
@@ -2542,7 +2549,8 @@ begin
     DIRTexPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
     DIRTexPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
     DIRTexPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
-    DIRTexSizeLabel.Caption := Format('Texture Size (%d, %d)', [128, 128]);
+    DIRTextureNameLabel.Caption := '(none)';
+    DIRTexSizeLabel.Caption := Format('(%dx%d)', [128, 128]);
     colorbuffersize := 128;
     FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
     exit;
@@ -2568,7 +2576,8 @@ begin
 
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   DIRTexPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
-  DIRTexSizeLabel.Caption := Format('Texture Size (%d, %d)', [bm.Width, bm.Height]);
+  DIRTextureNameLabel.Caption := ExtractFileName((fdirlist.Objects[idx] as TString).str);
+  DIRTexSizeLabel.Caption := Format('(%dx%d)', [bm.Width, bm.Height]);
   bm.Free;
 end;
 

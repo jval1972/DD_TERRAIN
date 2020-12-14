@@ -1984,35 +1984,35 @@ object Form1: TForm1
           end
           object Label1: TLabel
             Left = 8
-            Top = 152
+            Top = 160
             Width = 38
             Height = 13
             Caption = 'Height: '
           end
           object HeightPaintBox: TPaintBox
             Left = 56
-            Top = 152
+            Top = 160
             Width = 153
             Height = 12
             Hint = 'Heightmap elevation'
           end
           object HeightLabel: TLabel
             Left = 213
-            Top = 152
+            Top = 160
             Width = 12
             Height = 13
             Caption = '...'
           end
           object Bevel1: TBevel
             Left = 8
-            Top = 104
+            Top = 112
             Width = 225
             Height = 40
             Style = bsRaised
           end
           object PenSpeedButton5: TSpeedButton
             Left = 50
-            Top = 106
+            Top = 114
             Width = 36
             Height = 36
             Hint = 'Edit heightmap'
@@ -2354,7 +2354,7 @@ object Form1: TForm1
           end
           object PenSpeedButton6: TSpeedButton
             Left = 90
-            Top = 106
+            Top = 114
             Width = 36
             Height = 36
             Hint = 'Smooth heightmap'
@@ -2462,28 +2462,28 @@ object Form1: TForm1
           end
           object Label4: TLabel
             Left = 8
-            Top = 168
+            Top = 176
             Width = 43
             Height = 13
             Caption = 'Smooth: '
           end
           object SmoothPaintBox: TPaintBox
             Left = 56
-            Top = 168
+            Top = 176
             Width = 153
             Height = 12
             Hint = 'Smooth factor'
           end
           object SmoothLabel: TLabel
             Left = 213
-            Top = 168
+            Top = 176
             Width = 12
             Height = 13
             Caption = '...'
           end
           object PenSpeedButton4: TSpeedButton
             Left = 10
-            Top = 106
+            Top = 114
             Width = 36
             Height = 36
             Hint = 'Edit mesh'
@@ -2627,7 +2627,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 405
-        ActivePage = WADTabSheet1
+        ActivePage = DirTabSheet
         Align = alClient
         TabOrder = 0
         OnChange = TexturePageControlChange
@@ -4358,10 +4358,17 @@ object Form1: TForm1
                   TabOrder = 1
                   object FlatSizeLabel: TLabel
                     Left = 8
-                    Top = 8
+                    Top = 24
                     Width = 62
                     Height = 13
                     Caption = 'FlatSizeLabel'
+                  end
+                  object WAADFlatNameLabel: TLabel
+                    Left = 8
+                    Top = 8
+                    Width = 101
+                    Height = 13
+                    Caption = 'WAADFlatNameLabel'
                   end
                 end
               end
@@ -6050,10 +6057,17 @@ object Form1: TForm1
                   TabOrder = 1
                   object PK3TexSizeLabel: TLabel
                     Left = 8
-                    Top = 8
+                    Top = 24
                     Width = 80
                     Height = 13
                     Caption = 'PK3TexSizeLabel'
+                  end
+                  object PK3TextureNameLabel: TLabel
+                    Left = 8
+                    Top = 8
+                    Width = 108
+                    Height = 13
+                    Caption = 'PK3TextureNameLabel'
                   end
                 end
               end
@@ -7742,10 +7756,17 @@ object Form1: TForm1
                   TabOrder = 1
                   object DIRTexSizeLabel: TLabel
                     Left = 8
-                    Top = 8
+                    Top = 24
                     Width = 80
                     Height = 13
                     Caption = 'DIRTexSizeLabel'
+                  end
+                  object DIRTextureNameLabel: TLabel
+                    Left = 8
+                    Top = 8
+                    Width = 108
+                    Height = 13
+                    Caption = 'DIRTextureNameLabel'
                   end
                 end
               end

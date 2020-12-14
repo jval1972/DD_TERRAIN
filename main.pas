@@ -449,7 +449,8 @@ uses
   ter_wadexport,
   ter_palettes,
   frm_loadimagehelper,
-  ter_colorpalettebmz;
+  ter_colorpalettebmz,
+  ter_cursors;
 
 {$R *.dfm}
 
@@ -473,6 +474,9 @@ var
   doCreate: boolean;
 begin
   Randomize;
+
+  CreateCustomCursors;
+  PaintBox1.Cursor := crPaint;
 
   colorbuffer := nil;
 
@@ -854,6 +858,10 @@ begin
   fdirlist.Free;
 
   ColorPickerButton1.Free;
+
+  PaintBox1.Cursor := crDefault;
+
+  DeleteCustomCursors;
 end;
 
 resourcestring
@@ -2081,31 +2089,37 @@ end;
 
 procedure TForm1.PenSpeedButton1Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crPaint;
   PaintBox1.Invalidate;
 end;
 
 procedure TForm1.PenSpeedButton2Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crPaint;
   PaintBox1.Invalidate;
 end;
 
 procedure TForm1.PenSpeedButton3Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crPaint;
   PaintBox1.Invalidate;
 end;
 
 procedure TForm1.PenSpeedButton4Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crEditMesh;
   PaintBox1.Invalidate;
 end;
 
 procedure TForm1.PenSpeedButton5Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crElevateMesh;
   PaintBox1.Invalidate;
 end;
 
 procedure TForm1.PenSpeedButton6Click(Sender: TObject);
 begin
+  PaintBox1.Cursor := crSmoothMesh;
   PaintBox1.Invalidate;
 end;
 
@@ -2707,7 +2721,11 @@ begin
   0: NotifyFlatsListBox;
   1: NotifyPK3ListBox;
   2: NotifyDIRListBox;
-  3: RecreateColorPickPalette;
+  3:
+    begin
+      RecreateColorPickPalette;
+      NotifyColor;
+    end;
   end;
 end;
 

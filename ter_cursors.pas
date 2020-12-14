@@ -30,14 +30,27 @@ unit ter_cursors;
 
 interface
 
+const
+  crEditMesh = 1;
+  crElevateMesh = 2;
+  crSmoothMesh = 3;
+  crPaint = 4;
+
+procedure CreateCustomCursors;
+
+procedure DeleteCustomCursors;
+
 implementation
+
+uses
+  Windows, Forms, Classes, Graphics;
 
 const
 
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_editmesh.bmp (14/12/2020 5:57:26 μμ)
     StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
-  cursor_editmesh: array[0..3125] of Byte = (
+  cursor_editmesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $18, $00,
     $00, $00, $00, $00, $00, $0C, $00, $00, $33, $0B, $00, $00, $33, $0B, $00,
@@ -252,7 +265,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_editmesh_mask.bmp (14/12/2020 5:57:22 μμ)
     StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
 
-  cursor_editmesh_mask: array[0..629] of Byte = (
+  cursor_editmesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
     $00, $00, $00, $00, $00, $02, $00, $00, $43, $0B, $00, $00, $43, $0B, $00,
@@ -300,7 +313,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_elevatemesh.bmp (14/12/2020 5:57:36 μμ)
     StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
-  cursor_elevatemesh: array[0..3125] of Byte = (
+  cursor_elevatemesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $18, $00,
     $00, $00, $00, $00, $00, $0C, $00, $00, $33, $0B, $00, $00, $33, $0B, $00,
@@ -515,7 +528,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_elevatemesh_mask.bmp (14/12/2020 5:58:06 μμ)
     StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
 
-  cursor_elevatemesh_mask: array[0..629] of Byte = (
+  cursor_elevatemesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
     $00, $00, $00, $00, $00, $02, $00, $00, $43, $0B, $00, $00, $43, $0B, $00,
@@ -563,7 +576,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_paint.bmp (14/12/2020 5:57:46 μμ)
     StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
-  cursor_paint: array[0..3125] of Byte = (
+  cursor_paint: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $18, $00,
     $00, $00, $00, $00, $00, $0C, $00, $00, $23, $0B, $00, $00, $23, $0B, $00,
@@ -778,7 +791,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_paint_mask.bmp (14/12/2020 5:59:42 μμ)
     StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
 
-  cursor_paint_mask: array[0..629] of Byte = (
+  cursor_paint_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
     $00, $00, $00, $00, $00, $02, $00, $00, $33, $0B, $00, $00, $33, $0B, $00,
@@ -826,7 +839,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_smoothmesh.bmp (14/12/2020 5:57:52 μμ)
     StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
-  cursor_smoothmesh: array[0..3125] of Byte = (
+  cursor_smoothmesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $18, $00,
     $00, $00, $00, $00, $00, $0C, $00, $00, $23, $0B, $00, $00, $23, $0B, $00,
@@ -1041,7 +1054,7 @@ const
   { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_smoothmesh_mask.bmp (14/12/2020 5:59:52 μμ)
     StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
 
-  cursor_smoothmesh_mask: array[0..629] of Byte = (
+  cursor_smoothmesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
     $00, $00, $00, $00, $00, $02, $00, $00, $33, $0B, $00, $00, $33, $0B, $00,
@@ -1086,5 +1099,65 @@ const
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   );
 
+procedure CreateCursor(const cur: pointer; const cursize: integer;
+  const curmask: pointer; const curmasksize: integer; const curid: integer; const spotx, spoty: integer);
+var
+   m: TMemoryStream;
+   bColor, bMask: TBitmap;
+   iconInfo: TIconInfo;
+begin
+   m := TMemoryStream.Create;
+   m.Write(cur^, cursize);
+   m.Position := 0;
+   bColor := TBitmap.Create;
+   bColor.LoadFromStream(m);
+   m.Free;
+
+   m := TMemoryStream.Create;
+   m.Write(curmask^, curmasksize);
+   m.Position := 0;
+   bMask := TBitmap.Create;
+   bMask.LoadFromStream(m);
+   m.Free;
+
+   iconInfo.fIcon := false;
+   iconInfo.xHotspot := spotx;
+   iconInfo.yHotspot := spoty;
+   iconInfo.hbmMask := bMask.Handle;
+   iconInfo.hbmColor := bColor.Handle;
+
+   Screen.Cursors[curid] := CreateIconIndirect(iconInfo);
+
+   bMask.Free;
+   bColor.Free;
+end;
+
+procedure CreateCustomCursors;
+begin
+  CreateCursor(
+    @cursor_editmesh, SizeOf(cursor_editmesh),
+    @cursor_editmesh_mask, SizeOf(cursor_editmesh_mask),
+    crEditMesh, 15, 15);
+  CreateCursor(
+    @cursor_elevatemesh, SizeOf(cursor_elevatemesh),
+    @cursor_elevatemesh_mask, SizeOf(cursor_elevatemesh_mask),
+    crElevateMesh, 15, 15);
+  CreateCursor(
+    @cursor_smoothmesh, SizeOf(cursor_smoothmesh),
+    @cursor_smoothmesh_mask, SizeOf(cursor_smoothmesh_mask),
+    crSmoothMesh, 15, 15);
+  CreateCursor(
+    @cursor_paint, SizeOf(cursor_paint),
+    @cursor_paint_mask, SizeOf(cursor_paint_mask),
+    crPaint, 4, 26);
+end;
+
+procedure DeleteCustomCursors;
+begin
+  DestroyIcon(Screen.Cursors[crPaint]);
+  DestroyIcon(Screen.Cursors[crSmoothMesh]);
+  DestroyIcon(Screen.Cursors[crElevateMesh]);
+  DestroyIcon(Screen.Cursors[crEditMesh]);
+end;
+
 end.
- 

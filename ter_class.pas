@@ -794,8 +794,30 @@ begin
 end;
 
 function TTerrain.CanResampleHeightMapX2: boolean;
+var
+  iX, iY: integer;
+  testedgedxdy: integer;
+  item: heightbufferitem_p;
 begin
   Result := fheightmapsize <= 33;
+
+  if Result then
+  begin
+    testedgedxdy := (ftexturesize div (fheightmapsize - 1)) div 4 - 1;
+    for iX := 0 to fheightmapsize - 1 do
+      for iY := 0 to fheightmapsize - 1 do
+      begin
+        item := @fheightmap[iX, iY];
+        if (item.dx > testedgedxdy) or
+           (item.dx < -testedgedxdy) or
+           (item.dy > testedgedxdy) or
+           (item.dy < -testedgedxdy) then
+        begin
+          Result := False;
+          Exit;
+        end;
+      end;
+  end;
 end;
 
 function TTerrain.heightmapblocksize: integer;

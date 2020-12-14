@@ -57,7 +57,8 @@ uses
   ter_wad in 'ter_wad.pas',
   ter_doomdata in 'ter_doomdata.pas',
   ter_palettes in 'ter_palettes.pas',
-  ter_pk3 in 'ter_pk3.pas';
+  ter_pk3 in 'ter_pk3.pas',
+  frm_loadimagehelper in 'frm_loadimagehelper.pas' {LoadImageHelperForm};
 
 {$R *.res}
 

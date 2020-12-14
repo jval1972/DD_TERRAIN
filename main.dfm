@@ -7814,6 +7814,16 @@ object Form1: TForm1
       object N9: TMenuItem
         Caption = '-'
       end
+      object Import1: TMenuItem
+        Caption = 'Import'
+        object MNImportTexture1: TMenuItem
+          Caption = 'Texture'
+          OnClick = MNImportTexture1Click
+        end
+        object MNImportHeightmap1: TMenuItem
+          Caption = 'Heightmap'
+        end
+      end
       object MNExport1: TMenuItem
         Caption = '&Export'
         object ExportObjModel1: TMenuItem

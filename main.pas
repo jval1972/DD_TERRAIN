@@ -229,6 +229,9 @@ type
     DIRTexPreviewImage: TImage;
     Panel25: TPanel;
     DIRTexSizeLabel: TLabel;
+    Import1: TMenuItem;
+    MNImportTexture1: TMenuItem;
+    MNImportHeightmap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -299,6 +302,7 @@ type
     procedure MNResampleHeightmapX2Click(Sender: TObject);
     procedure SelectPK3FileButtonClick(Sender: TObject);
     procedure PK3TexListBoxClick(Sender: TObject);
+    procedure MNImportTexture1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -388,7 +392,8 @@ uses
   frm_editheightmapitem,
   frm_scaleheightmap,
   ter_wadexport,
-  ter_palettes;
+  ter_palettes,
+  frm_loadimagehelper;
 
 {$R *.dfm}
 
@@ -2035,6 +2040,7 @@ begin
     tempBitmap1.PixelFormat := pf32bit;
 
     tempBitmap2 := TBitmap.Create;
+    tempBitmap2.PixelFormat := pf32bit;
     tempBitmap2.Width := terrain.texturesize;
     tempBitmap2.Height := terrain.texturesize;
     tempBitmap2.Canvas.StretchDraw(Rect(0, 0, tempBitmap2.Width, tempBitmap2.Height), tempBitmap1);
@@ -2363,6 +2369,27 @@ end;
 procedure TForm1.PK3TexListBoxClick(Sender: TObject);
 begin
   NotifyPK3ListBox;
+end;
+
+procedure TForm1.MNImportTexture1Click(Sender: TObject);
+var
+  f: TLoadImageHelperForm;
+begin
+  if OpenPictureDialog1.Execute then
+  begin
+    f := TLoadImageHelperForm.Create(nil);
+    try
+      f.Image1.Picture.LoadFromFile(OpenPictureDialog1.FileName);
+      SaveUndo(True);
+      terrain.Texture.Canvas.StretchDraw(Rect(0, 0, terrain.texturesize, terrain.texturesize), f.Image1.Picture.Graphic);
+      glneedstexturerecalc := True;
+      glneedsupdate := True;
+      changed := True;
+      PaintBox1.Invalidate;
+    finally
+      f.Free;
+    end;
+  end;
 end;
 
 end.

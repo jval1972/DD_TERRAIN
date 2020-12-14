@@ -1061,6 +1061,7 @@ object Form1: TForm1
     Left = 250
     Top = 40
     Height = 638
+    OnMoved = Splitter1Moved
   end
   object StatusBar1: TStatusBar
     Left = 0
@@ -6055,18 +6056,19 @@ object Form1: TForm1
               object Label6: TLabel
                 Left = 8
                 Top = 8
-                Width = 23
+                Width = 29
                 Height = 13
-                Caption = 'File: '
+                Caption = 'Path: '
               end
               object SelectDIRFileButton: TSpeedButton
                 Left = 196
                 Top = 8
                 Width = 23
                 Height = 22
-                Hint = 'Open DIR file'
+                Hint = 'Select directory'
                 Caption = '...'
                 Flat = True
+                OnClick = SelectDIRFileButtonClick
               end
               object DIRFileNameEdit: TEdit
                 Left = 40
@@ -6113,6 +6115,7 @@ object Form1: TForm1
                   BorderStyle = bsNone
                   ItemHeight = 13
                   TabOrder = 0
+                  OnClick = DIRTexListBoxClick
                 end
               end
             end

@@ -32,7 +32,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, 
+  Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, FileCtrl,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1, ter_pk3;
 
@@ -304,6 +304,9 @@ type
     procedure PK3TexListBoxClick(Sender: TObject);
     procedure MNImportTexture1Click(Sender: TObject);
     procedure MNImportHeightmap1Click(Sender: TObject);
+    procedure DIRTexListBoxClick(Sender: TObject);
+    procedure SelectDIRFileButtonClick(Sender: TObject);
+    procedure Splitter1Moved(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -311,6 +314,8 @@ type
     fpalettename: string;
     fpk3filename: string;
     fpk3reader: TZipFile;
+    fdirdirectory: string;
+    fdirlist: TStringList;
     drawlayer: drawlayer_p;
     heightlayer: heightlayer_p;
     colorbuffersize: integer;
@@ -370,6 +375,10 @@ type
     procedure PopulatePK3ListBox(const pk3name: string);
     procedure NotifyPK3ListBox;
     function GetPK3TexAsBitmap(const tname: string): TBitmap;
+    procedure PopulateDirListBox;
+    procedure NotifyDIRListBox;
+    function DIRTexListBoxNameSize: integer;
+    function DIRTexEditNameSize: integer;
     procedure LLeftMousePaintAt(const X, Y: integer);
     procedure LLeftMousePaintTo(const X, Y: integer);
     procedure CalcPenMasks;
@@ -402,6 +411,16 @@ uses
 resourcestring
   rsTitle = 'Terrain Generator';
 
+// Helper function
+procedure ClearList(const lst: TStringList);
+var
+  i: integer;
+begin
+  for i := 0 to lst.Count - 1 do
+    lst.Objects[i].Free;
+  lst.Clear;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 var
   pfd: TPIXELFORMATDESCRIPTOR;
@@ -417,13 +436,6 @@ begin
 
   ter_LoadSettingFromFile(ChangeFileExt(ParamStr(0), '.ini'));
 
-  fwadfilename := bigstringtostring(@opt_lastwadfile);
-  fpalettename := bigstringtostring(@opt_defaultpalette);
-  CheckPaletteName;
-
-  fpk3filename := bigstringtostring(@opt_lastpk3file);
-  fpk3reader := TZipFile.Create(fpk3filename);
-
   closing := False;
 
   EditPageControl.ActivePageIndex := 0;
@@ -435,6 +447,28 @@ begin
   GetMem(colorbuffer, SizeOf(colorbuffer_t));
   FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
   colorbuffersize := 128;
+
+  // Set palette
+  fpalettename := bigstringtostring(@opt_defaultpalette);
+  CheckPaletteName;
+
+  // Open WAD resource
+  fwadfilename := bigstringtostring(@opt_lastwadfile);
+  WADFileNameEdit.Text := ExtractFileName(fwadfilename);
+  PopulateFlatsListBox(fwadfilename);
+
+  // Open PK3 resource
+  fpk3filename := bigstringtostring(@opt_lastpk3file);
+  fpk3reader := TZipFile.Create(fpk3filename);
+  PK3FileNameEdit.Text := ExtractFileName(fpk3filename);
+  PopulatePK3ListBox(fpk3filename);
+
+  // Open Directory resource
+  fdirdirectory := bigstringtostring(@opt_lastdirectory);
+  fdirlist := TStringList.Create;
+//  DIRFileNameEdit.Text := MkShortName(fdirdirectory, DIRTexEditNameSize);
+  DIRFileNameEdit.Text := fdirdirectory;
+  PopulateDirListBox;
 
   lmousedown := False;
   lmousedownx := 0;
@@ -457,10 +491,6 @@ begin
   savebitmapundo := true;
 
   CalcPenMasks;
-
-  NotifyFlatsListBox;
-  PK3FileNameEdit.Text := ExtractFileName(fpk3filename);
-  PopulatePK3ListBox(fpk3filename);
 
   undoManager := TUndoRedoManager.Create;
   undoManager.UndoLimit := 100;
@@ -568,9 +598,6 @@ begin
     glneedstexturerecalc := True;
     undoManager.Clear;
   end;
-
-  WADFileNameEdit.Text := ExtractFileName(fwadfilename);
-  PopulateFlatsListBox(fwadfilename);
 
   // when the app has spare time, render the GL scene
   Application.OnIdle := Idle;
@@ -738,6 +765,8 @@ begin
   stringtobigstring(fwadfilename, @opt_lastwadfile);
   stringtobigstring(fpalettename, @opt_defaultpalette);
   stringtobigstring(fpk3filename, @opt_lastpk3file);
+  stringtobigstring(fdirdirectory, @opt_lastdirectory);
+
   ter_SaveSettingsToFile(ChangeFileExt(ParamStr(0), '.ini'));
 
   filemenuhistory.Free;
@@ -754,6 +783,9 @@ begin
   bitmapbuffer.Free;
 
   fpk3reader.Free;
+  
+  ClearList(fdirlist);
+  fdirlist.Free;
 end;
 
 resourcestring
@@ -2431,6 +2463,124 @@ begin
       f.Free;
     end;
   end;
+end;
+
+procedure TForm1.PopulateDirListBox;
+var
+  Rec: TSearchRec;
+  uName, uExt: string;
+  i: integer;
+begin
+  if (fdirdirectory = '') or not DirectoryExists(fdirdirectory) then
+    fdirdirectory := ExtractFileDir(ParamStr(0));
+  if fdirdirectory[Length(fdirdirectory)] <> '\' then
+    fdirdirectory := fdirdirectory + '\';
+  ClearList(fdirlist);
+  if FindFirst(fdirdirectory + '*.*', faAnyFile - faDirectory, Rec) = 0 then
+  try
+    repeat
+      uName := UpperCase(fdirdirectory + Rec.Name);
+      uExt := ExtractFileExt(uName);
+      if (uExt = '.JPG') or (uExt = '.JPEG') or (uExt = '.BMP') or (uExt = '.TGA') or (uExt = '.PNG') then
+        fdirlist.AddObject(MkShortName(fdirdirectory + Rec.Name, DIRTexListBoxNameSize), TString.Create(fdirdirectory + Rec.Name));
+    until FindNext(Rec) <> 0;
+  finally
+    FindClose(Rec);
+  end;
+  DIRTexListBox.Items.Clear;
+  for i := 0 to fdirlist.Count - 1 do
+    DIRTexListBox.Items.Add(fdirlist.Strings[i]);
+  if DIRTexListBox.Items.Count > 0 then
+    DIRTexListBox.ItemIndex := 0;
+  NotifyDIRListBox;
+end;
+
+procedure TForm1.NotifyDIRListBox;
+var
+  idx: integer;
+  bm: TBitmap;
+  f: TLoadImageHelperForm;
+begin
+  idx := DIRTexListBox.ItemIndex;
+  if (idx < 0) or (idx >= fdirlist.Count) or not FileExists((fdirlist.Objects[idx] as TString).str) then
+  begin
+    DIRTexPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
+    DIRTexPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
+    DIRTexPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
+    DIRTexSizeLabel.Caption := Format('Texture Size (%d, %d)', [128, 128]);
+    colorbuffersize := 128;
+    FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
+    exit;
+  end;
+
+  Screen.Cursor := crHourglass;
+
+  f := TLoadImageHelperForm.Create(nil);
+  bm := TBitmap.Create;
+  bm.PixelFormat := pf32bit;
+  bm.Width := 128;
+  bm.Height := 128;
+  try
+    f.Image1.Picture.LoadFromFile((fdirlist.Objects[idx] as TString).str);
+    bm.Assign(f.Image1.Picture.Graphic);
+  finally
+    f.Free;
+  end;
+
+  Screen.Cursor := crDefault;
+
+  BitmapToColorBuffer(bm);
+
+  colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
+  DIRTexPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
+  DIRTexSizeLabel.Caption := Format('Texture Size (%d, %d)', [bm.Width, bm.Height]);
+  bm.Free;
+end;
+
+function TForm1.DIRTexListBoxNameSize: integer;
+begin
+  Result := 32 + (DIRTexListBox.Width - 236) div 7;
+end;
+
+function TForm1.DIRTexEditNameSize: integer;
+begin
+  Result := DIRFileNameEdit.Width div 7;
+end;
+
+procedure TForm1.DIRTexListBoxClick(Sender: TObject);
+begin
+  NotifyDIRListBox;
+end;
+
+procedure TForm1.SelectDIRFileButtonClick(Sender: TObject);
+var
+  newdir: string;
+begin
+  newdir := fdirdirectory;
+  if SelectDirectory('Select textures folder', '', newdir) then
+  begin
+    if newdir <> '' then
+      if newdir[Length(newdir)] <> '\' then
+        newdir := newdir + '\';
+    if newdir <> fdirdirectory then
+    begin
+      fdirdirectory := newdir;
+//      DIRFileNameEdit.Text := MkShortName(fdirdirectory, DIRTexEditNameSize);
+      DIRFileNameEdit.Text := fdirdirectory;
+      PopulateDirListBox;
+    end;
+  end;
+end;
+
+procedure TForm1.Splitter1Moved(Sender: TObject);
+var
+  i, idx: integer;
+begin
+  idx := DIRTexListBox.ItemIndex;
+  DIRTexListBox.Items.Clear;
+  for i := 0 to fdirlist.Count - 1 do
+    DIRTexListBox.Items.Add(mkshortname((fdirlist.Objects[i] as TString).str, DIRTexListBoxNameSize));
+  DIRTexListBox.ItemIndex := idx;
 end;
 
 end.

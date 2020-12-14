@@ -57,6 +57,7 @@ var
   opt_lastwadfile: bigstring_t;
   opt_defaultpalette: bigstring_t;
   opt_lastpk3file: bigstring_t;
+  opt_lastdirectory: bigstring_t;
 
 function bigstringtostring(const bs: bigstring_p): string;
 
@@ -77,7 +78,7 @@ type
   end;
 
 const
-  NUMSETTINGS = 18;
+  NUMSETTINGS = 19;
 
 var
   Settings: array[0..NUMSETTINGS - 1] of TSettingItem = (
@@ -170,6 +171,11 @@ var
       desc: 'PK3';
       typeof: tstBigString;
       location: @opt_lastpk3file;
+    ),
+    (
+      desc: 'DIRECTORY';
+      typeof: tstBigString;
+      location: @opt_lastdirectory;
     )
   );
 

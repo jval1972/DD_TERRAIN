@@ -54,7 +54,7 @@ function CopyFile(const sname, dname: string): boolean;
 
 procedure BackupFile(const fname: string);
 
-function MkShortName(const fname: string): string;
+function MkShortName(const fname: string; const sz: integer = 30): string;
 
 function I_VersionBuilt(fname: string = ''): string;
 
@@ -219,19 +219,17 @@ begin
   CopyFile(fname, fbck);
 end;
 
-function MkShortName(const fname: string): string;
-const
-  MAXDISPFNAME = 30;
+function MkShortName(const fname: string; const sz: integer = 30): string;
 var
   i: integer;
 begin
-  if Length(fname) < MAXDISPFNAME then
+  if Length(fname) < sz then
   begin
     Result := fname;
     Exit;
   end;
   Result := '';
-  for i := Length(fname) downto Length(fname) - (MAXDISPFNAME - 6) do
+  for i := Length(fname) downto Length(fname) - (sz - 6) do
     Result := fname[i] + Result;
   Result := '...' + Result;
   for i := 3 downto 1 do

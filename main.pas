@@ -182,17 +182,15 @@ type
     Label23: TLabel;
     SelectWADFileButton: TSpeedButton;
     WADFileNameEdit: TEdit;
-    Panel4: TPanel;
+    WADTextureListPanel: TPanel;
     Panel5: TPanel;
     Panel10: TPanel;
     FlatsListBox: TListBox;
-    Panel6: TPanel;
+    WADPreviewTexturePanel: TPanel;
     Panel7: TPanel;
     Panel8: TPanel;
     Panel9: TPanel;
     WADFlatPreviewImage: TImage;
-    Panel11: TPanel;
-    FlatSizeLabel: TLabel;
     PaletteSpeedButton1: TSpeedButton;
     Pk3TabSheet: TTabSheet;
     Panel12: TPanel;
@@ -200,18 +198,37 @@ type
     Label5: TLabel;
     SelectPK3FileButton: TSpeedButton;
     PK3FileNameEdit: TEdit;
-    Panel14: TPanel;
+    PK3TextureListPanel: TPanel;
     Panel15: TPanel;
     Panel16: TPanel;
     PK3TexListBox: TListBox;
-    Panel17: TPanel;
+    PK3PreviewTexturePanel: TPanel;
     Panel18: TPanel;
     Panel19: TPanel;
     Panel20: TPanel;
     PK3TexPreviewImage: TImage;
+    OpenPK3Dialog: TOpenDialog;
+    Panel11: TPanel;
+    FlatSizeLabel: TLabel;
     Panel21: TPanel;
     PK3TexSizeLabel: TLabel;
-    OpenPK3Dialog: TOpenDialog;
+    DirTabSheet: TTabSheet;
+    Panel4: TPanel;
+    Panel6: TPanel;
+    Label6: TLabel;
+    SelectDIRFileButton: TSpeedButton;
+    DIRFileNameEdit: TEdit;
+    DIRTextureListPanel: TPanel;
+    Panel14: TPanel;
+    Panel17: TPanel;
+    DIRTexListBox: TListBox;
+    DIRPreviewTexturePanel: TPanel;
+    Panel22: TPanel;
+    Panel23: TPanel;
+    Panel24: TPanel;
+    DIRTexPreviewImage: TImage;
+    Panel25: TPanel;
+    DIRTexSizeLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -1402,7 +1419,8 @@ end;
 procedure TForm1.BitmapToColorBuffer(const abitmap: TBitmap);
 var
   i, j: integer;
-  A: PLongWordArray;
+  A, B: PLongWordArray;
+  oldw, oldh: integer;
 
   function RGBSwap(buffer: LongWord): LongWord;
   var
@@ -1419,6 +1437,34 @@ var
 
 begin
   abitmap.PixelFormat := pf32bit;
+  if abitmap.Width <> abitmap.Height then // Make rectangular
+  begin
+    if abitmap.Width > abitmap.Height then
+    begin
+      oldh := abitmap.Height;
+      abitmap.Height := abitmap.Width;
+      for j := oldh to abitmap.Height - 1 do
+      begin
+        A := abitmap.ScanLine[j];
+        B := abitmap.ScanLine[j - oldh];
+        for i := 0 to abitmap.Width - 1 do
+          A[i] := B[i];
+      end;
+    end
+    else
+    begin
+      oldw := abitmap.Width;
+      abitmap.Width := abitmap.Height;
+      for j := 0 to abitmap.Height - 1 do
+      begin
+        A := abitmap.ScanLine[j];
+        for i := oldw to abitmap.Width - 1 do
+          A[i] := A[i - oldw];
+      end;
+    end;
+  end;
+
+  // Copy to colorbuffer
   for j := 0 to MinI(abitmap.Height - 1, MAXTEXTURESIZE - 1) do
   begin
     A := abitmap.ScanLine[j];

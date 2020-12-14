@@ -303,6 +303,7 @@ type
     procedure SelectPK3FileButtonClick(Sender: TObject);
     procedure PK3TexListBoxClick(Sender: TObject);
     procedure MNImportTexture1Click(Sender: TObject);
+    procedure MNImportHeightmap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -374,6 +375,7 @@ type
     procedure CalcPenMasks;
     procedure DoRefreshPaintBox(const r: TRect);
     procedure CheckPaletteName;
+    procedure GetHeighmapFromBitmap(const tempBitmap1: TBitmap);
   public
     { Public declarations }
   end;
@@ -2020,14 +2022,38 @@ begin
   end;
 end;
 
-procedure TForm1.PasteHeightmap1Click(Sender: TObject);
+procedure TForm1.GetHeighmapFromBitmap(const tempBitmap1: TBitmap);
 var
-  tempBitmap1, tempBitmap2: TBitmap;
+  tempBitmap2: TBitmap;
   hX, hY: integer;
   c: LongWord;
   pt: TPoint;
   h: integer;
   it: heightbufferitem_t;
+begin
+  tempBitmap2 := TBitmap.Create;
+  tempBitmap2.PixelFormat := pf32bit;
+  tempBitmap2.Width := terrain.texturesize;
+  tempBitmap2.Height := terrain.texturesize;
+  tempBitmap2.Canvas.StretchDraw(Rect(0, 0, tempBitmap2.Width, tempBitmap2.Height), tempBitmap1);
+
+  for hX := 0 to terrain.heightmapsize - 1 do
+    for hY := 0 to terrain.heightmapsize - 1 do
+    begin
+      pt := terrain.HeightmapCoords(hX, hY);
+      c := tempBitmap2.Canvas.Pixels[GetIntInRange(pt.X, 0, tempBitmap2.Width - 1), GetIntInRange(pt.Y, 0, tempBitmap2.Height - 1)];
+      h := GetIntInRange(Round((GetRValue(c) + GetGValue(c) + GetBValue(c)) / 768 * 2 * HEIGHTMAPRANGE) - HEIGHTMAPRANGE, -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
+      it := terrain.Heightmap[hX, hY];
+      it.height := h;
+      terrain.Heightmap[hX, hY] := it;
+    end;
+
+  tempBitmap2.Free;
+end;
+
+procedure TForm1.PasteHeightmap1Click(Sender: TObject);
+var
+  tempBitmap1: TBitmap;
 begin
   // if there is an image on clipboard
   if Clipboard.HasFormat(CF_BITMAP) then
@@ -2038,26 +2064,11 @@ begin
     tempBitmap1.LoadFromClipboardFormat(CF_BITMAP, ClipBoard.GetAsHandle(cf_Bitmap), 0);
 
     tempBitmap1.PixelFormat := pf32bit;
-
-    tempBitmap2 := TBitmap.Create;
-    tempBitmap2.PixelFormat := pf32bit;
-    tempBitmap2.Width := terrain.texturesize;
-    tempBitmap2.Height := terrain.texturesize;
-    tempBitmap2.Canvas.StretchDraw(Rect(0, 0, tempBitmap2.Width, tempBitmap2.Height), tempBitmap1);
-
-    for hX := 0 to terrain.heightmapsize - 1 do
-      for hY := 0 to terrain.heightmapsize - 1 do
-      begin
-        pt := terrain.HeightmapCoords(hX, hY);
-        c := tempBitmap2.Canvas.Pixels[GetIntInRange(pt.X, 0, tempBitmap2.Width - 1), GetIntInRange(pt.Y, 0, tempBitmap2.Height - 1)];
-        h := GetIntInRange(Round((GetRValue(c) + GetGValue(c) + GetBValue(c)) / 768 * 2 * HEIGHTMAPRANGE) - HEIGHTMAPRANGE, -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
-        it := terrain.Heightmap[hX, hY];
-        it.height := h;
-        terrain.Heightmap[hX, hY] := it;
-      end;
-
-    tempBitmap1.Free;
-    tempBitmap2.Free;
+    try
+      GetHeighmapFromBitmap(tempBitmap1);
+    finally
+      tempBitmap1.Free;
+    end;
 
     changed := True;
     PaintBox1.Invalidate;
@@ -2386,6 +2397,36 @@ begin
       glneedsupdate := True;
       changed := True;
       PaintBox1.Invalidate;
+    finally
+      f.Free;
+    end;
+  end;
+end;
+
+procedure TForm1.MNImportHeightmap1Click(Sender: TObject);
+var
+  tempBitmap1: TBitmap;
+  f: TLoadImageHelperForm;
+begin
+  if OpenPictureDialog2.Execute then
+  begin
+    f := TLoadImageHelperForm.Create(nil);
+    try
+      f.Image1.Picture.LoadFromFile(OpenPictureDialog2.FileName);
+      SaveUndo(false);
+
+      tempBitmap1 := TBitmap.Create;
+      tempBitmap1.Assign(f.Image1.Picture.Graphic);
+      tempBitmap1.PixelFormat := pf32bit;
+      try
+        GetHeighmapFromBitmap(tempBitmap1);
+      finally
+        tempBitmap1.Free;
+      end;
+
+      changed := True;
+      PaintBox1.Invalidate;
+      glneedsupdate := True;
     finally
       f.Free;
     end;

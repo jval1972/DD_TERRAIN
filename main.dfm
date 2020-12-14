@@ -7817,11 +7817,12 @@ object Form1: TForm1
       object Import1: TMenuItem
         Caption = 'Import'
         object MNImportTexture1: TMenuItem
-          Caption = 'Texture'
+          Caption = 'Terrain Texture'
           OnClick = MNImportTexture1Click
         end
         object MNImportHeightmap1: TMenuItem
           Caption = 'Heightmap'
+          OnClick = MNImportHeightmap1Click
         end
       end
       object MNExport1: TMenuItem

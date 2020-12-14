@@ -2015,7 +2015,7 @@ object Form1: TForm1
             Top = 114
             Width = 36
             Height = 36
-            Hint = 'Edit heightmap'
+            Hint = 'Elevate heightmap'
             GroupIndex = 1
             Glyph.Data = {
               360C0000424D360C000000000000360000002800000020000000200000000100

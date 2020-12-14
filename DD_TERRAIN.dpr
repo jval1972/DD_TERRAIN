@@ -60,7 +60,8 @@ uses
   ter_pk3 in 'ter_pk3.pas',
   frm_loadimagehelper in 'frm_loadimagehelper.pas' {LoadImageHelperForm},
   ter_colorpickerbutton in 'ter_colorpickerbutton.pas',
-  ter_colorpalettebmz in 'ter_colorpalettebmz.pas';
+  ter_colorpalettebmz in 'ter_colorpalettebmz.pas',
+  ter_cursors in 'ter_cursors.pas';
 
 {$R *.res}
 

@@ -34,7 +34,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, FileCtrl,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
-  ter_filemenuhistory, ter_slider, PngImage1, ter_pk3;
+  ter_filemenuhistory, ter_slider, PngImage1, ter_pk3, ter_colorpickerbutton,
+  ImgList;
 
 type
   drawlayeritem_t = packed record
@@ -242,6 +243,16 @@ type
     WAADFlatNameLabel: TLabel;
     PK3TextureNameLabel: TLabel;
     DIRTextureNameLabel: TLabel;
+    ImageList1: TImageList;
+    TabSheet2: TTabSheet;
+    SelectColorBackPanel: TPanel;
+    Panel26: TPanel;
+    Panel27: TPanel;
+    PickColorPalettePanel: TPanel;
+    Panel29: TPanel;
+    ColorPanel1: TPanel;
+    ColorPaletteImage: TImage;
+    PickColorRGBLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -321,6 +332,14 @@ type
     procedure PK3FileNameEditChange(Sender: TObject);
     procedure DIRFileNameEditChange(Sender: TObject);
     procedure TexturePageControlChange(Sender: TObject);
+    procedure PickColorPalettePanelCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
+    procedure ColorPaletteImageMouseDown(Sender: TObject;
+      Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ColorPaletteImageMouseMove(Sender: TObject;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ColorPaletteImageMouseUp(Sender: TObject;
+      Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     { Private declarations }
     ffilename: string;
@@ -330,6 +349,8 @@ type
     fpk3reader: TZipFile;
     fdirdirectory: string;
     fdirlist: TStringList;
+    fdrawcolor: TColor;
+    lpickcolormousedown: boolean;
     drawlayer: drawlayer_p;
     heightlayer: heightlayer_p;
     colorbuffersize: integer;
@@ -366,6 +387,7 @@ type
     pen3mask: array[-MAXPENSIZE div 2..MAXPENSIZE div 2, -MAXPENSIZE div 2..MAXPENSIZE div 2] of integer;
     bitmapbuffer: TBitmap;
     savebitmapundo: boolean;
+    ColorPickerButton1: TColorPickerButton;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNewTerrain(const tsize, hsize: integer);
@@ -402,6 +424,11 @@ type
     procedure CheckPaletteName;
     procedure GetHeighmapFromBitmap(const tempBitmap1: TBitmap);
     procedure ChangeListHint(const lst: TListBox; const def: string);
+    procedure ColorPickerButton1Click(Sender: TObject);
+    procedure ColorPickerButton1Change(Sender: TObject);
+    procedure NotifyColor;
+    procedure RecreateColorPickPalette;
+    procedure PickColorPalette(const X, Y: integer);
   public
     { Public declarations }
   end;
@@ -421,7 +448,8 @@ uses
   frm_scaleheightmap,
   ter_wadexport,
   ter_palettes,
-  frm_loadimagehelper;
+  frm_loadimagehelper,
+  ter_colorpalettebmz;
 
 {$R *.dfm}
 
@@ -446,10 +474,22 @@ var
 begin
   Randomize;
 
+  colorbuffer := nil;
+
   DoubleBuffered := True;
 
   bitmapbuffer := TBitmap.Create;
   bitmapbuffer.PixelFormat := pf32bit;
+
+  ColorPickerButton1 := TColorPickerButton.Create(nil);
+  ColorPickerButton1.Parent := ColorPanel1;
+  ColorPickerButton1.Align := alClient;
+  ColorPickerButton1.OnClick := ColorPickerButton1Click;
+  ColorPickerButton1.OnChange := ColorPickerButton1Change;
+  fdrawcolor := RGB(255, 255, 255);
+  lpickcolormousedown := False;
+  NotifyColor;
+  RecreateColorPickPalette;
 
   ter_LoadSettingFromFile(ChangeFileExt(ParamStr(0), '.ini'));
 
@@ -809,9 +849,11 @@ begin
   bitmapbuffer.Free;
 
   fpk3reader.Free;
-  
+
   ClearList(fdirlist);
   fdirlist.Free;
+
+  ColorPickerButton1.Free;
 end;
 
 resourcestring
@@ -2625,6 +2667,7 @@ begin
   for i := 0 to fdirlist.Count - 1 do
     DIRTexListBox.Items.AddObject(mkshortname((fdirlist.Objects[i] as TString).str, DIRTexListBoxNameSize), fdirlist.Objects[i]);
   DIRTexListBox.ItemIndex := idx;
+  RecreateColorPickPalette;
 end;
 
 procedure TForm1.WADFileNameEditChange(Sender: TObject);
@@ -2664,6 +2707,101 @@ begin
   0: NotifyFlatsListBox;
   1: NotifyPK3ListBox;
   2: NotifyDIRListBox;
+  3: RecreateColorPickPalette;
+  end;
+end;
+
+procedure TForm1.ColorPickerButton1Click(Sender: TObject);
+begin
+  ColorDialog1.Color := ColorPickerButton1.Color;
+  if ColorDialog1.Execute then
+  begin
+    fdrawcolor := ColorDialog1.Color;
+    NotifyColor;
+  end;
+end;
+
+procedure TForm1.ColorPickerButton1Change(Sender: TObject);
+begin
+  fdrawcolor := ColorPickerButton1.Color;
+  NotifyColor;
+end;
+
+procedure TForm1.NotifyColor;
+var
+  x, y: integer;
+begin
+  ColorPickerButton1.Color := fdrawcolor;
+  PickColorRGBLabel.Caption := Format('RGB(%d, %d, %d)', [GetRValue(fdrawcolor), GetGValue(fdrawcolor), GetBValue(fdrawcolor)]);
+  if colorbuffer = nil then
+    Exit;
+  colorbuffersize := 64;
+  for x := 0 to 63 do
+    for y := 0 to 63 do
+      colorbuffer[x, y] := fdrawcolor;
+end;
+
+procedure TForm1.RecreateColorPickPalette;
+var
+  m: TMemoryStream;
+  bmz: TZBitmap;
+  w, h: integer;
+begin
+  m := TMemoryStream.Create;
+  m.Write(ColorPaletteBMZ, SizeOf(ColorPaletteBMZ));
+  m.Position := 0;
+  bmz := TZBitmap.Create;
+  bmz.LoadFromStream(m);
+  m.Free;
+  w := ColorPaletteImage.Width;
+  h := ColorPaletteImage.Height;
+  ColorPaletteImage.Picture.Bitmap.Width := w;
+  ColorPaletteImage.Picture.Bitmap.Height := h;
+  ColorPaletteImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, w, h), bmz);
+  bmz.Free;
+end;
+
+procedure TForm1.PickColorPalettePanelCanResize(Sender: TObject;
+  var NewWidth, NewHeight: Integer; var Resize: Boolean);
+begin
+  RecreateColorPickPalette;
+end;
+
+procedure TForm1.PickColorPalette(const X, Y: integer);
+var
+  x2, y2: integer;
+begin
+  x2 := GetIntInRange(X, 0, ColorPaletteImage.Picture.Bitmap.Width - 1);
+  y2 := GetIntInRange(Y, 0, ColorPaletteImage.Picture.Bitmap.Height - 1);
+  fdrawcolor := ColorPaletteImage.Picture.Bitmap.Canvas.Pixels[x2, y2];
+  NotifyColor;
+end;
+
+procedure TForm1.ColorPaletteImageMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if button = mbLeft then
+  begin
+    lpickcolormousedown := True;
+    PickColorPalette(X, Y);
+  end;
+end;
+
+
+procedure TForm1.ColorPaletteImageMouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if lpickcolormousedown then
+    PickColorPalette(X, Y);
+end;
+
+procedure TForm1.ColorPaletteImageMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if button = mbLeft then
+  begin
+    lpickcolormousedown := False;
+    PickColorPalette(X, Y);
   end;
 end;
 

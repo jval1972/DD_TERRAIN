@@ -58,7 +58,9 @@ uses
   ter_doomdata in 'ter_doomdata.pas',
   ter_palettes in 'ter_palettes.pas',
   ter_pk3 in 'ter_pk3.pas',
-  frm_loadimagehelper in 'frm_loadimagehelper.pas' {LoadImageHelperForm};
+  frm_loadimagehelper in 'frm_loadimagehelper.pas' {LoadImageHelperForm},
+  ter_colorpickerbutton in 'ter_colorpickerbutton.pas',
+  ter_colorpalettebmz in 'ter_colorpalettebmz.pas';
 
 {$R *.res}
 

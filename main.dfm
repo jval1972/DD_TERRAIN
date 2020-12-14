@@ -1918,7 +1918,7 @@ object Form1: TForm1
       Left = 0
       Top = 0
       Width = 250
-      Height = 225
+      Height = 233
       ActivePage = TabSheet1
       Align = alTop
       TabOrder = 0
@@ -1937,68 +1937,68 @@ object Form1: TForm1
             Left = 8
             Top = 8
             Width = 225
-            Height = 49
+            Height = 40
             Style = bsRaised
           end
           object Label3: TLabel
             Left = 8
-            Top = 64
+            Top = 56
             Width = 26
             Height = 13
             Caption = 'Size: '
           end
           object PenSizePaintBox: TPaintBox
             Left = 56
-            Top = 64
+            Top = 56
             Width = 153
             Height = 12
             Hint = 'Select drawing pen size'
           end
           object PenSizeLabel: TLabel
             Left = 213
-            Top = 64
+            Top = 56
             Width = 12
             Height = 13
             Caption = '...'
           end
           object OpacityLabel: TLabel
             Left = 213
-            Top = 80
+            Top = 72
             Width = 12
             Height = 13
             Caption = '...'
           end
           object OpacityPaintBox: TPaintBox
             Left = 56
-            Top = 80
+            Top = 72
             Width = 153
             Height = 12
             Hint = 'Select drawing opacity'
           end
           object Label2: TLabel
             Left = 8
-            Top = 80
+            Top = 72
             Width = 44
             Height = 13
             Caption = 'Opacity: '
           end
           object Label1: TLabel
             Left = 8
-            Top = 160
+            Top = 152
             Width = 38
             Height = 13
             Caption = 'Height: '
           end
           object HeightPaintBox: TPaintBox
             Left = 56
-            Top = 160
+            Top = 152
             Width = 153
             Height = 12
             Hint = 'Heightmap elevation'
           end
           object HeightLabel: TLabel
             Left = 213
-            Top = 160
+            Top = 152
             Width = 12
             Height = 13
             Caption = '...'
@@ -2007,12 +2007,12 @@ object Form1: TForm1
             Left = 8
             Top = 104
             Width = 225
-            Height = 49
+            Height = 40
             Style = bsRaised
           end
           object PenSpeedButton5: TSpeedButton
-            Left = 56
-            Top = 109
+            Left = 50
+            Top = 106
             Width = 36
             Height = 36
             Hint = 'Edit heightmap'
@@ -2119,8 +2119,8 @@ object Form1: TForm1
             OnClick = PenSpeedButton5Click
           end
           object PenSpeedButton1: TSpeedButton
-            Left = 16
-            Top = 13
+            Left = 10
+            Top = 10
             Width = 36
             Height = 36
             Hint = 'Quad'
@@ -2228,8 +2228,8 @@ object Form1: TForm1
             OnClick = PenSpeedButton1Click
           end
           object PenSpeedButton2: TSpeedButton
-            Left = 56
-            Top = 13
+            Left = 50
+            Top = 10
             Width = 36
             Height = 36
             Hint = 'Circle'
@@ -2245,8 +2245,8 @@ object Form1: TForm1
             OnClick = PenSpeedButton2Click
           end
           object PenSpeedButton3: TSpeedButton
-            Left = 96
-            Top = 13
+            Left = 90
+            Top = 10
             Width = 36
             Height = 36
             Hint = 'Round edge'
@@ -2353,8 +2353,8 @@ object Form1: TForm1
             OnClick = PenSpeedButton3Click
           end
           object PenSpeedButton6: TSpeedButton
-            Left = 96
-            Top = 109
+            Left = 90
+            Top = 106
             Width = 36
             Height = 36
             Hint = 'Smooth heightmap'
@@ -2462,28 +2462,28 @@ object Form1: TForm1
           end
           object Label4: TLabel
             Left = 8
-            Top = 176
+            Top = 168
             Width = 43
             Height = 13
             Caption = 'Smooth: '
           end
           object SmoothPaintBox: TPaintBox
             Left = 56
-            Top = 176
+            Top = 168
             Width = 153
             Height = 12
             Hint = 'Smooth factor'
           end
           object SmoothLabel: TLabel
             Left = 213
-            Top = 176
+            Top = 168
             Width = 12
             Height = 13
             Caption = '...'
           end
           object PenSpeedButton4: TSpeedButton
-            Left = 16
-            Top = 109
+            Left = 10
+            Top = 106
             Width = 36
             Height = 36
             Hint = 'Edit mesh'
@@ -2589,14 +2589,35 @@ object Form1: TForm1
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
             OnClick = PenSpeedButton4Click
           end
+          object Label7: TLabel
+            Left = 8
+            Top = 88
+            Width = 32
+            Height = 13
+            Caption = 'Scale: '
+          end
+          object TextureScalePaintBox: TPaintBox
+            Left = 56
+            Top = 88
+            Width = 153
+            Height = 12
+            Hint = 'Texture scale percentage'
+          end
+          object TextureScaleLabel: TLabel
+            Left = 213
+            Top = 88
+            Width = 12
+            Height = 13
+            Caption = '...'
+          end
         end
       end
     end
     object Panel2: TPanel
       Left = 0
-      Top = 225
+      Top = 233
       Width = 250
-      Height = 413
+      Height = 405
       Align = alClient
       BevelOuter = bvNone
       Caption = ' '
@@ -2605,17 +2626,18 @@ object Form1: TForm1
         Left = 0
         Top = 0
         Width = 250
-        Height = 413
+        Height = 405
         ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
+        OnChange = TexturePageControlChange
         object WADTabSheet1: TTabSheet
           Caption = 'WAD file'
           object OpenWADMainPanel: TPanel
             Left = 0
             Top = 0
             Width = 242
-            Height = 385
+            Height = 377
             Align = alClient
             BevelOuter = bvNone
             Caption = ' '
@@ -2706,7 +2728,7 @@ object Form1: TForm1
               Left = 0
               Top = 41
               Width = 242
-              Height = 181
+              Height = 173
               Align = alClient
               BevelOuter = bvNone
               Caption = ' '
@@ -2724,7 +2746,7 @@ object Form1: TForm1
                 Left = 0
                 Top = 25
                 Width = 242
-                Height = 156
+                Height = 148
                 Align = alClient
                 BorderWidth = 2
                 Caption = ' '
@@ -2733,7 +2755,7 @@ object Form1: TForm1
                   Left = 3
                   Top = 3
                   Width = 236
-                  Height = 150
+                  Height = 142
                   Align = alClient
                   BorderStyle = bsNone
                   ItemHeight = 13
@@ -2744,7 +2766,7 @@ object Form1: TForm1
             end
             object WADPreviewTexturePanel: TPanel
               Left = 0
-              Top = 222
+              Top = 214
               Width = 242
               Height = 163
               Align = alBottom
@@ -4353,7 +4375,7 @@ object Form1: TForm1
             Left = 0
             Top = 0
             Width = 242
-            Height = 385
+            Height = 377
             Align = alClient
             BevelOuter = bvNone
             Caption = ' '
@@ -4398,7 +4420,7 @@ object Form1: TForm1
               Left = 0
               Top = 41
               Width = 242
-              Height = 181
+              Height = 173
               Align = alClient
               BevelOuter = bvNone
               Caption = ' '
@@ -4416,7 +4438,7 @@ object Form1: TForm1
                 Left = 0
                 Top = 25
                 Width = 242
-                Height = 156
+                Height = 148
                 Align = alClient
                 BorderWidth = 2
                 Caption = ' '
@@ -4425,7 +4447,7 @@ object Form1: TForm1
                   Left = 3
                   Top = 3
                   Width = 236
-                  Height = 150
+                  Height = 142
                   Align = alClient
                   BorderStyle = bsNone
                   ItemHeight = 13
@@ -4436,7 +4458,7 @@ object Form1: TForm1
             end
             object PK3PreviewTexturePanel: TPanel
               Left = 0
-              Top = 222
+              Top = 214
               Width = 242
               Height = 163
               Align = alBottom
@@ -6045,7 +6067,7 @@ object Form1: TForm1
             Left = 0
             Top = 0
             Width = 242
-            Height = 385
+            Height = 377
             Align = alClient
             BevelOuter = bvNone
             Caption = ' '
@@ -6090,7 +6112,7 @@ object Form1: TForm1
               Left = 0
               Top = 41
               Width = 242
-              Height = 181
+              Height = 173
               Align = alClient
               BevelOuter = bvNone
               Caption = ' '
@@ -6108,7 +6130,7 @@ object Form1: TForm1
                 Left = 0
                 Top = 25
                 Width = 242
-                Height = 156
+                Height = 148
                 Align = alClient
                 BorderWidth = 2
                 Caption = ' '
@@ -6117,7 +6139,7 @@ object Form1: TForm1
                   Left = 3
                   Top = 3
                   Width = 236
-                  Height = 150
+                  Height = 142
                   Align = alClient
                   BorderStyle = bsNone
                   ItemHeight = 13
@@ -6128,7 +6150,7 @@ object Form1: TForm1
             end
             object DIRPreviewTexturePanel: TPanel
               Left = 0
-              Top = 222
+              Top = 214
               Width = 242
               Height = 163
               Align = alBottom

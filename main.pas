@@ -61,6 +61,10 @@ const
   MAXPENSIZE = 128;
   MAXHEIGHTSIZE = 128;
 
+const
+  MINTEXTURESCALE = 10;
+  MAXTEXTURESCALE = 400;
+
 type
   TForm1 = class(TForm)
     ColorDialog1: TColorDialog;
@@ -232,6 +236,9 @@ type
     Import1: TMenuItem;
     MNImportTexture1: TMenuItem;
     MNImportHeightmap1: TMenuItem;
+    Label7: TLabel;
+    TextureScalePaintBox: TPaintBox;
+    TextureScaleLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -310,6 +317,7 @@ type
     procedure WADFileNameEditChange(Sender: TObject);
     procedure PK3FileNameEditChange(Sender: TObject);
     procedure DIRFileNameEditChange(Sender: TObject);
+    procedure TexturePageControlChange(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -335,11 +343,13 @@ type
     glneedstexturerecalc: boolean;
     fopacity: integer;
     fpensize: integer;
+    ftexturescale: integer;
     fheightsize: integer;
     fsmoothfactor: integer;
     foldopacity: integer;
     foldpensize: integer;
     OpacitySlider: TSliderHook;
+    TextureScaleSlider: TSliderHook;
     PenSizeSlider: TSliderHook;
     HeightSlider: TSliderHook;
     SmoothSlider: TSliderHook;
@@ -488,6 +498,7 @@ begin
 
   fopacity := 100;
   fpensize := 64;
+  ftexturescale := 100;
   fheightsize := 64;
   fsmoothfactor := 50;
   foldopacity := -1;
@@ -581,6 +592,10 @@ begin
   PenSizeSlider.Min := 1;
   PenSizeSlider.Max := MAXPENSIZE;
 
+  TextureScaleSlider := TSliderHook.Create(TextureScalePaintBox);
+  TextureScaleSlider.Min := MINTEXTURESCALE;
+  TextureScaleSlider.Max := MAXTEXTURESCALE;
+
   HeightSlider := TSliderHook.Create(HeightPaintBox);
   HeightSlider.Min := -MAXHEIGHTSIZE;
   HeightSlider.Max := MAXHEIGHTSIZE;
@@ -602,6 +617,8 @@ begin
     glneedstexturerecalc := True;
     undoManager.Clear;
   end;
+
+  NotifyFlatsListBox; // This must be placed here to use the flats for drawing at startup.
 
   // when the app has spare time, render the GL scene
   Application.OnIdle := Idle;
@@ -776,7 +793,9 @@ begin
   filemenuhistory.Free;
 
   OpacitySlider.Free;
+  TextureScaleSlider.Free;
   PenSizeSlider.Free;
+
   HeightSlider.Free;
   SmoothSlider.Free;
   terrain.Free;
@@ -1178,6 +1197,11 @@ begin
   PenSizePaintBox.Invalidate;
   PenSizeSlider.OnSliderHookChange := UpdateFromSliders;
 
+  TextureScaleSlider.OnSliderHookChange := nil;
+  TextureScaleSlider.Position := ftexturescale;
+  TextureScalePaintBox.Invalidate;
+  TextureScaleSlider.OnSliderHookChange := UpdateFromSliders;
+
   HeightSlider.OnSliderHookChange := nil;
   HeightSlider.Position := fheightsize;
   HeightPaintBox.Invalidate;
@@ -1193,6 +1217,7 @@ procedure TForm1.SlidersToLabels;
 begin
   OpacityLabel.Caption := Format('%d', [Round(OpacitySlider.Position)]);
   PenSizeLabel.Caption := Format('%d', [Round(PenSizeSlider.Position)]);
+  TextureScaleLabel.Caption := Format('%d', [Round(TextureScaleSlider.Position)]);
   HeightLabel.Caption := Format('%d', [Round(HeightSlider.Position)]);
   SmoothLabel.Caption := Format('%d', [Round(SmoothSlider.Position)]);
 end;
@@ -1217,6 +1242,7 @@ begin
   SlidersToLabels;
   fopacity := Round(OpacitySlider.Position);
   fpensize := Round(PenSizeSlider.Position);
+  ftexturescale := Round(TextureScaleSlider.Position);
   fheightsize := Round(HeightSlider.Position);
   fsmoothfactor := Round(HeightSlider.Position);
   CalcPenMasks;
@@ -1789,6 +1815,8 @@ begin
   iY1 := GetIntInRange(Y - fpensize div 2, 0, tsize - 1);
   iY2 := GetIntInRange(Y + fpensize div 2, 0, tsize - 1);
 
+  ftexturescale := GetIntInRange(ftexturescale, MINTEXTURESCALE, MAXTEXTURESCALE);
+  
   if PenSpeedButton1.Down then
   begin
     for iY := iY1 to iY2 do
@@ -1798,7 +1826,7 @@ begin
         if drawlayer[iX, iY].pass < fopacity then
         begin
           drawlayer[iX, iY].pass := fopacity;
-          c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
           c2 := RGBSwap(tline[iX]);
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
@@ -1823,7 +1851,7 @@ begin
             c2 := drawlayer[iX, iY].color;
           drawlayer[iX, iY].color := c2;
           drawlayer[iX, iY].pass := newopacity;
-          c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
         end;
@@ -1848,7 +1876,7 @@ begin
             c2 := drawlayer[iX, iY].color;
           drawlayer[iX, iY].color := c2;
           drawlayer[iX, iY].pass := newopacity;
-          c1 := colorbuffer[iX mod colorbuffersize, iY mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
           c := coloraverage(c2, c1, newopacity);
           tline[iX] := RGBSwap(c);
         end;
@@ -2619,6 +2647,15 @@ begin
   end
   else
     lst.Hint := def;
+end;
+
+procedure TForm1.TexturePageControlChange(Sender: TObject);
+begin
+  case TexturePageControl.ActivePageIndex of
+  0: NotifyFlatsListBox;
+  1: NotifyPK3ListBox;
+  2: NotifyDIRListBox;
+  end;
 end;
 
 end.

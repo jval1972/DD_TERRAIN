@@ -307,6 +307,9 @@ type
     procedure DIRTexListBoxClick(Sender: TObject);
     procedure SelectDIRFileButtonClick(Sender: TObject);
     procedure Splitter1Moved(Sender: TObject);
+    procedure WADFileNameEditChange(Sender: TObject);
+    procedure PK3FileNameEditChange(Sender: TObject);
+    procedure DIRFileNameEditChange(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -385,6 +388,7 @@ type
     procedure DoRefreshPaintBox(const r: TRect);
     procedure CheckPaletteName;
     procedure GetHeighmapFromBitmap(const tempBitmap1: TBitmap);
+    procedure ChangeListHint(const lst: TListBox; const def: string);
   public
     { Public declarations }
   end;
@@ -1517,6 +1521,7 @@ var
   idx: integer;
   bm: TBitmap;
 begin
+  ChangeListHint(FlatsListBox, 'WAD Flats');
   idx := FlatsListBox.ItemIndex;
   if (idx < 0) or (fwadfilename = '') or not FileExists(fwadfilename) then
   begin
@@ -1532,7 +1537,7 @@ begin
   bm := GetWADFlatAsBitmap(fwadfilename, FlatsListBox.Items[idx]);
 
   BitmapToColorBuffer(bm);
-  
+
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   WADFlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
   FlatSizeLabel.Caption := Format('Flat Size (%d, %d)', [bm.Width, bm.Height]);
@@ -2329,6 +2334,7 @@ var
   idx: integer;
   bm: TBitmap;
 begin
+  ChangeListHint(PK3TexListBox, 'PK3 Textures');
   idx := PK3TexListBox.ItemIndex;
   if (idx < 0) or (fpk3filename = '') or not FileExists(fpk3filename) then
   begin
@@ -2489,7 +2495,7 @@ begin
   end;
   DIRTexListBox.Items.Clear;
   for i := 0 to fdirlist.Count - 1 do
-    DIRTexListBox.Items.Add(fdirlist.Strings[i]);
+    DIRTexListBox.Items.AddObject(fdirlist.Strings[i], fdirlist.Objects[i]);
   if DIRTexListBox.Items.Count > 0 then
     DIRTexListBox.ItemIndex := 0;
   NotifyDIRListBox;
@@ -2501,6 +2507,7 @@ var
   bm: TBitmap;
   f: TLoadImageHelperForm;
 begin
+  ChangeListHint(DIRTexListBox, 'Disk Textures');
   idx := DIRTexListBox.ItemIndex;
   if (idx < 0) or (idx >= fdirlist.Count) or not FileExists((fdirlist.Objects[idx] as TString).str) then
   begin
@@ -2579,8 +2586,39 @@ begin
   idx := DIRTexListBox.ItemIndex;
   DIRTexListBox.Items.Clear;
   for i := 0 to fdirlist.Count - 1 do
-    DIRTexListBox.Items.Add(mkshortname((fdirlist.Objects[i] as TString).str, DIRTexListBoxNameSize));
+    DIRTexListBox.Items.AddObject(mkshortname((fdirlist.Objects[i] as TString).str, DIRTexListBoxNameSize), fdirlist.Objects[i]);
   DIRTexListBox.ItemIndex := idx;
+end;
+
+procedure TForm1.WADFileNameEditChange(Sender: TObject);
+begin
+  WADFileNameEdit.Hint := WADFileNameEdit.Text;
+end;
+
+procedure TForm1.PK3FileNameEditChange(Sender: TObject);
+begin
+  PK3FileNameEdit.Hint := PK3FileNameEdit.Text;
+end;
+
+procedure TForm1.DIRFileNameEditChange(Sender: TObject);
+begin
+  DIRFileNameEdit.Hint := DIRFileNameEdit.Text;
+end;
+
+procedure TForm1.ChangeListHint(const lst: TListBox; const def: string);
+var
+  idx: integer;
+begin
+  idx := lst.ItemIndex;
+  if idx >= 0 then
+  begin
+    if lst.Items.Objects[idx] <> nil then
+      lst.Hint := (lst.Items.Objects[idx] as TString).str
+    else
+      lst.Hint := lst.Items.strings[idx];
+  end
+  else
+    lst.Hint := def;
 end;
 
 end.

@@ -2602,7 +2602,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 413
-        ActivePage = DirTabSheet
+        ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
         object WADTabSheet1: TTabSheet
@@ -2695,6 +2695,7 @@ object Form1: TForm1
                 Height = 21
                 ReadOnly = True
                 TabOrder = 0
+                OnChange = WADFileNameEditChange
               end
             end
             object WADTextureListPanel: TPanel
@@ -4386,6 +4387,7 @@ object Form1: TForm1
                 Height = 21
                 ReadOnly = True
                 TabOrder = 0
+                OnChange = PK3FileNameEditChange
               end
             end
             object PK3TextureListPanel: TPanel
@@ -6077,6 +6079,7 @@ object Form1: TForm1
                 Height = 21
                 ReadOnly = True
                 TabOrder = 0
+                OnChange = DIRFileNameEditChange
               end
             end
             object DIRTextureListPanel: TPanel

@@ -46,10 +46,6 @@ uses
   Windows, Forms, Classes, Graphics;
 
 const
-
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_editmesh.bmp (14/12/2020 5:57:26 μμ)
-    StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
-
   cursor_editmesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $18, $00,
@@ -262,9 +258,6 @@ const
     $00, $00, $00, $00, $00, $00
   );
 
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_editmesh_mask.bmp (14/12/2020 5:57:22 μμ)
-    StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
-
   cursor_editmesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
@@ -309,9 +302,6 @@ const
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF,
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   );
-
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_elevatemesh.bmp (14/12/2020 5:57:36 μμ)
-    StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
   cursor_elevatemesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
@@ -525,9 +515,6 @@ const
     $00, $00, $00, $00, $00, $00
   );
 
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_elevatemesh_mask.bmp (14/12/2020 5:58:06 μμ)
-    StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
-
   cursor_elevatemesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
@@ -572,9 +559,6 @@ const
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF,
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   );
-
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_paint.bmp (14/12/2020 5:57:46 μμ)
-    StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
   cursor_paint: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
@@ -788,9 +772,6 @@ const
     $00, $00, $00, $00, $00, $00
   );
 
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_paint_mask.bmp (14/12/2020 5:59:42 μμ)
-    StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
-
   cursor_paint_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,
     $00, $00, $00, $20, $00, $00, $00, $20, $00, $00, $00, $01, $00, $04, $00,
@@ -835,9 +816,6 @@ const
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $0F, $FF,
     $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $F0, $00, $00, $FF
   );
-
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_smoothmesh.bmp (14/12/2020 5:57:52 μμ)
-    StartOffset: 00000000, EndOffset: 00000C35, Μήκος: 00000C36 }
 
   cursor_smoothmesh: packed array[0..3125] of byte = (
     $42, $4D, $36, $0C, $00, $00, $00, $00, $00, $00, $36, $00, $00, $00, $28,
@@ -1050,9 +1028,6 @@ const
     $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     $00, $00, $00, $00, $00, $00
   );
-
-  { F:\DelphiDoom_Release\OTHER\Test_Custom_Cursors\Cursors\cursor_smoothmesh_mask.bmp (14/12/2020 5:59:52 μμ)
-    StartOffset: 00000000, EndOffset: 00000275, Μήκος: 00000276 }
 
   cursor_smoothmesh_mask: packed array[0..629] of byte = (
     $42, $4D, $76, $02, $00, $00, $00, $00, $00, $00, $76, $00, $00, $00, $28,

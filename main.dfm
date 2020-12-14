@@ -1952,6 +1952,7 @@ object Form1: TForm1
             Top = 64
             Width = 153
             Height = 12
+            Hint = 'Select drawing pen size'
           end
           object PenSizeLabel: TLabel
             Left = 213
@@ -1972,6 +1973,7 @@ object Form1: TForm1
             Top = 80
             Width = 153
             Height = 12
+            Hint = 'Select drawing opacity'
           end
           object Label2: TLabel
             Left = 8
@@ -1992,6 +1994,7 @@ object Form1: TForm1
             Top = 160
             Width = 153
             Height = 12
+            Hint = 'Heightmap elevation'
           end
           object HeightLabel: TLabel
             Left = 213
@@ -2469,6 +2472,7 @@ object Form1: TForm1
             Top = 176
             Width = 153
             Height = 12
+            Hint = 'Smooth factor'
           end
           object SmoothLabel: TLabel
             Left = 213

@@ -62,7 +62,8 @@ uses
   ter_colorpickerbutton in 'ter_colorpickerbutton.pas',
   ter_colorpalettebmz in 'ter_colorpalettebmz.pas',
   ter_cursors in 'ter_cursors.pas',
-  frm_exportwadmap in 'frm_exportwadmap.pas' {ExportWADMapForm};
+  frm_exportwadmap in 'frm_exportwadmap.pas' {ExportWADMapForm},
+  ter_quantize in 'ter_quantize.pas';
 
 {$R *.res}
 

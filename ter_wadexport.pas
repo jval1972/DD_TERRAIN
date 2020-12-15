@@ -50,8 +50,8 @@ procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
 const
   ETF_SLOPED = 1;
   ETF_CALCDXDY = 2;
-  ETF_TRUECOLORFLAT = 3;
-  ETF_MERGEFLATSECTORS = 4;
+  ETF_TRUECOLORFLAT = 4;
+  ETF_MERGEFLATSECTORS = 8;
 
 implementation
 
@@ -59,7 +59,8 @@ uses
   Windows,
   Graphics,
   ter_doomdata,
-  ter_wadwriter;
+  ter_wadwriter,
+  ter_quantize;
 
 function V_FindAproxColorIndex(const pal: PLongWordArray; const c: LongWord;
   const start: integer = 0; const finish: integer = 255): integer;
@@ -631,6 +632,7 @@ var
   wadwriter: TWadWriter;
   i, x, y: integer;
   png: TPngObject;
+  bm: TBitmap;
   ms: TMemoryStream;
   sidetex: char8_t;
   pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
@@ -1145,11 +1147,24 @@ begin
   // Create flat
 
   png := TPngObject.Create;
-  png.Assign(t.Texture);
+  if flags and ETF_TRUECOLORFLAT = 0 then
+  begin
+    bm := TBitmap.Create;
+    try
+      bm.Assign(t.Texture);
+      ter_quantizebitmap(bm, 255);
+      png.Assign(bm);
+    finally
+      bm.Free;
+    end;
+  end
+  else
+    png.Assign(t.Texture);
 
   ms := TMemoryStream.Create;
 
   png.SaveToStream(ms);
+  png.Free;
 
   wadwriter.AddString('TEXTURES',
     'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
@@ -1164,7 +1179,6 @@ begin
   wadwriter.AddSeparator('P_END');
 
   ms.Free;
-  png.Free;
 
   // Create Map
   for x := 0 to t.heightmapsize - 2 do

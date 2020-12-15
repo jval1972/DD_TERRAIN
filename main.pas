@@ -2234,7 +2234,7 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToRADWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
+      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', ETF_SLOPED or ETF_CALCDXDY);
     finally
       Screen.Cursor := crDefault;
     end;
@@ -2248,7 +2248,7 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToZDOOMUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', ETF_SLOPED or ETF_CALCDXDY);
+      ExportTerrainToUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', ETF_SLOPED or ETF_CALCDXDY);
     finally
       Screen.Cursor := crDefault;
     end;

@@ -38,11 +38,11 @@ uses
   ter_utils,
   ter_wad;
 
-procedure ExportTerrainToRADWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
-procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
   const levelname: string; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
@@ -99,7 +99,7 @@ type
   TBooleanArray = packed array[0..$FFF] of boolean;
   PBooleanArray = ^TBooleanArray;
 
-procedure ExportTerrainToRADWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
@@ -607,7 +607,7 @@ begin
 
 end;
 
-procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
   const levelname: string; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 var

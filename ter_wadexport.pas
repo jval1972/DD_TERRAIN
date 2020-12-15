@@ -490,6 +490,23 @@ var
     FreeMem(sectorlines, numdoomsectors * SizeOf(integer));
   end;
 
+  procedure FixTextureOffsets;
+  var
+    j: integer;
+    v1, v2: integer;
+  begin
+    for j := 0 to numdoomlinedefs - 1 do
+      if doomlinedefs[j].sidenum[1] = -1 then
+      begin
+        v1 := doomlinedefs[j].v1;
+        v2 := doomlinedefs[j].v2;
+        if doomvertexes[v1].y = doomvertexes[v2].y then
+          doomsidedefs[doomlinedefs[j].sidenum[0]].textureoffset := doomvertexes[v1].x
+        else if doomvertexes[v1].x = doomvertexes[v2].x then
+          doomsidedefs[doomlinedefs[j].sidenum[0]].textureoffset := doomvertexes[v1].y;
+      end;
+  end;
+
 begin
   sidetex := stringtochar8(defsidetex);
   FillChar(pass, SizeOf(pass), 0);
@@ -575,6 +592,9 @@ begin
 
   // Fix flat triangle sectors
   FixTrangleSectors;
+
+  // Fix texture offsets
+  FixTextureOffsets;
 
   // Add wall textures
   for i := 0 to numdoomlinedefs - 1 do
@@ -1072,6 +1092,23 @@ var
     FreeMem(sectorlines, numzdoomsectors * SizeOf(integer));
   end;
 
+  procedure FixTextureOffsetsUDMF;
+  var
+    j: integer;
+    v1, v2: integer;
+  begin
+    for j := 0 to numzdoomlinedefs - 1 do
+      if zdoomlinedefs[j].sidenum[1] = -1 then
+      begin
+        v1 := zdoomlinedefs[j].v1;
+        v2 := zdoomlinedefs[j].v2;
+        if zdoomvertexes[v1].y = zdoomvertexes[v2].y then
+          zdoomsidedefs[zdoomlinedefs[j].sidenum[0]].textureoffset := zdoomvertexes[v1].x
+        else if zdoomvertexes[v1].x = zdoomvertexes[v2].x then
+          zdoomsidedefs[zdoomlinedefs[j].sidenum[0]].textureoffset := zdoomvertexes[v1].y;
+      end;
+  end;
+
   procedure FlashUDMFVertext(const ii: integer);
   begin
     udmfmap.Add('vertex // ' + IntToStr(ii));
@@ -1110,6 +1147,7 @@ var
     udmfmap.Add('texturebottom = "' + char8tostring(zdoomsidedefs[ii].bottomtexture) + '";');
     udmfmap.Add('texturemiddle = "' + char8tostring(zdoomsidedefs[ii].midtexture) + '";');
     udmfmap.Add('sector = ' + IntToStr(zdoomsidedefs[ii].sector) + ';');
+    udmfmap.Add('offsetx = ' + IntToStr(zdoomsidedefs[ii].textureoffset) + ';');
     udmfmap.Add('}');
     udmfmap.Add('');
   end;
@@ -1201,6 +1239,9 @@ begin
 
   // Fix flat triangle sectors
   FixTrangleSectorsUDMF;
+
+  // Fix Texture Offsets
+  FixTextureOffsetsUDMF;
 
   // Add wall textures
   for i := 0 to numzdoomlinedefs - 1 do

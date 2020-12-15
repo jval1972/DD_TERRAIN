@@ -2235,7 +2235,9 @@ begin
     try
       BackupFile(SaveWADDialog.FileName);
       ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', 1255, 1254, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS);
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT);
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS); // Doom
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @HereticPaletteRaw, 'CSTLRCK', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS); // Heretic
+//      ExportTerrainToWADFileHexen(terrain, SaveWADDialog.FileName, 'MAP01', @HereticPaletteRaw, 'FOREST02', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS); // Hexen
     finally
       Screen.Cursor := crDefault;
     end;

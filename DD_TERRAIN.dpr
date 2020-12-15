@@ -61,7 +61,8 @@ uses
   frm_loadimagehelper in 'frm_loadimagehelper.pas' {LoadImageHelperForm},
   ter_colorpickerbutton in 'ter_colorpickerbutton.pas',
   ter_colorpalettebmz in 'ter_colorpalettebmz.pas',
-  ter_cursors in 'ter_cursors.pas';
+  ter_cursors in 'ter_cursors.pas',
+  frm_exportwadmap in 'frm_exportwadmap.pas' {ExportWADMapForm};
 
 {$R *.res}
 
@@ -69,6 +70,7 @@ begin
   Application.Initialize;
   Application.Title := 'Terrain Generator';
   Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TExportWADMapForm, ExportWADMapForm);
   Application.Run;
 end.
 

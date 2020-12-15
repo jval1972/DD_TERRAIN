@@ -40,6 +40,7 @@ uses
 
 procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
@@ -49,6 +50,8 @@ procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
 const
   ETF_SLOPED = 1;
   ETF_CALCDXDY = 2;
+  ETF_TRUECOLORFLAT = 3;
+  ETF_MERGEFLATSECTORS = 4;
 
 implementation
 
@@ -101,6 +104,7 @@ type
 
 procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
   doomthings: Pmapthing_tArray;
@@ -405,17 +409,17 @@ var
     if issloped then
     begin
       if p1.Z < 0 then
-        AddThingToWad(p1.X, -p1.Y, -p1.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThingToWad(p1.X, -p1.Y, -p1.Z, _LOWERID {1255}, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThingToWad(p1.X, -p1.Y, p1.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThingToWad(p1.X, -p1.Y, p1.Z, _RAISEID {1254}, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p2.Z < 0 then
-        AddThingToWad(p2.X, -p2.Y, -p2.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThingToWad(p2.X, -p2.Y, -p2.Z, _LOWERID {1255}, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThingToWad(p2.X, -p2.Y, p2.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThingToWad(p2.X, -p2.Y, p2.Z, _RAISEID {1254}, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p3.Z < 0 then
-        AddThingToWad(p3.X, -p3.Y, -p3.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThingToWad(p3.X, -p3.Y, -p3.Z, _LOWERID {1255}, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThingToWad(p3.X, -p3.Y, p3.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThingToWad(p3.X, -p3.Y, p3.Z, _RAISEID {1254}, MTF_EASY or MTF_NORMAL or MTF_HARD);
     end;
   end;
 
@@ -516,20 +520,23 @@ begin
     def_palL[i] := (r shl 16) + (g shl 8) + (b);
   end;
 
-  // Create flat - 32 bit color - inside HI_START - HI_END namespace
-  png := TPngObject.Create;
-  png.Assign(t.Texture);
+  if flags and ETF_TRUECOLORFLAT <> 0 then
+  begin
+    // Create flat - 32 bit color - inside HI_START - HI_END namespace
+    png := TPngObject.Create;
+    png.Assign(t.Texture);
 
-  ms := TMemoryStream.Create;
+    ms := TMemoryStream.Create;
 
-  png.SaveToStream(ms);
+    png.SaveToStream(ms);
 
-  wadwriter.AddSeparator('HI_START');
-  wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
-  wadwriter.AddSeparator('HI_END');
+    wadwriter.AddSeparator('HI_START');
+    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+    wadwriter.AddSeparator('HI_END');
 
-  ms.Free;
-  png.Free;
+    ms.Free;
+    png.Free;
+  end;
 
   // Create flat - 8 bit
   bm := t.Texture;
@@ -562,7 +569,8 @@ begin
   AddThingToWad(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
 
   // Remove unneeded lines
-  RemoveUnNeededLines;
+  if flags and ETF_MERGEFLATSECTORS <> 0 then
+    RemoveUnNeededLines;
 
   // Fix flat triangle sectors
   FixTrangleSectors;
@@ -1174,7 +1182,8 @@ begin
   AddPlayerStartToUDMF(64, -64, 0, 1);
 
   // Remove unneeded lines
-  RemoveUnNeededLinesUDMF;
+  if flags and ETF_MERGEFLATSECTORS <> 0 then
+    RemoveUnNeededLinesUDMF;
 
   // Fix flat triangle sectors
   FixTrangleSectorsUDMF;

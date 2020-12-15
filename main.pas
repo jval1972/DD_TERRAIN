@@ -2248,7 +2248,7 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToZDOOMUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', ETF_SLOPED or ETF_CALCDXDY);
+      ExportTerrainToZDOOMUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', ETF_SLOPED or ETF_CALCDXDY);
     finally
       Screen.Cursor := crDefault;
     end;

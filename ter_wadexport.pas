@@ -43,7 +43,7 @@ procedure ExportTerrainToRADWADFile(const t: TTerrain; const fname: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
 procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const levelname: string; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
 const
@@ -406,15 +406,15 @@ var
     begin
       if p1.Z < 0 then
         AddThingToWad(p1.X, -p1.Y, -p1.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-      else if p1.Z > 0 then
+      else
         AddThingToWad(p1.X, -p1.Y, p1.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p2.Z < 0 then
         AddThingToWad(p2.X, -p2.Y, -p2.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-      else if p1.Z > 0 then
+      else
         AddThingToWad(p2.X, -p2.Y, p2.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p3.Z < 0 then
         AddThingToWad(p3.X, -p3.Y, -p3.Z, 1255, MTF_EASY or MTF_NORMAL or MTF_HARD)
-      else if p1.Z > 0 then
+      else
         AddThingToWad(p3.X, -p3.Y, p3.Z, 1254, MTF_EASY or MTF_NORMAL or MTF_HARD);
     end;
   end;
@@ -608,7 +608,7 @@ begin
 end;
 
 procedure ExportTerrainToZDOOMUDMFFile(const t: TTerrain; const fname: string;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const levelname: string; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
   zdoomlinedefs: Pmaplinedef_tArray;
@@ -621,9 +621,7 @@ var
   zslopedsectors: PBooleanArray;
   numzdoomsectors: integer;
   wadwriter: TWadWriter;
-  def_palL: array[0..255] of LongWord;
   i, x, y: integer;
-  r, g, b: LongWord;
   png: TPngObject;
   ms: TMemoryStream;
   sidetex: char8_t;
@@ -1135,18 +1133,6 @@ begin
   numzdoomsectors := 0;
 
   wadwriter := TWadWriter.Create;
-
-  // Create Palette
-  for i := 0 to 255 do
-  begin
-    r := palette[3 * i];
-    if r > 255 then r := 255;
-    g := palette[3 * i + 1];
-    if g > 255 then g := 255;
-    b := palette[3 * i + 2];
-    if b > 255 then b := 255;
-    def_palL[i] := (r shl 16) + (g shl 8) + (b);
-  end;
 
   // Create flat
 

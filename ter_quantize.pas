@@ -36,7 +36,7 @@ uses
   SysUtils,
   Graphics;
 
-function ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256): boolean;
+procedure ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256);
 
 implementation
 
@@ -400,7 +400,7 @@ begin
   FreeMem(heap.buf);
 end;
 
-function ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256): boolean;
+procedure ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256);
 var
   x, y: integer;
   imgsize: integer;

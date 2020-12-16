@@ -1,7 +1,7 @@
   procedure RemoveUnNeededLines;
   var
     j: integer;
-    pline: Pmaplinedef_t;
+    pline: {$IFDEF HEXEN_FORMAT}Phmaplinedef_t{$ELSE}Pmaplinedef_t{$ENDIF};
     side0, side1: integer;
   begin
     for j := numdoomlinedefs - 2 downto 0 do
@@ -13,7 +13,7 @@
         if doomsidedefs[side0].sector = doomsidedefs[side1].sector then
         begin
           doomlinedefs[j] := doomlinedefs[numdoomlinedefs - 1];
-          ReallocMem(doomlinedefs, (numdoomlinedefs  - 1) * SizeOf(maplinedef_t));
+          ReallocMem(doomlinedefs, (numdoomlinedefs  - 1) * SizeOf({$IFDEF HEXEN_FORMAT}hmaplinedef_t{$ELSE}maplinedef_t{$ENDIF}));
           dec(numdoomlinedefs);
         end;
     end;

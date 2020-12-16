@@ -39,6 +39,14 @@ const
   MTF_NORMAL = 2;
   MTF_HARD = 4;
 
+// Hexen additional flags
+  MTF_FIGHTER = 32;
+  MTF_CLERIC = 64;
+  MTF_MAGE = 128;
+  MTF_GSINGLE = 256;
+  MTF_GCOOP = 512;
+  MTF_GDEATHMATCH = 1024;
+
 type
   mapvertex_t = record
     x: smallint;
@@ -83,6 +91,21 @@ type
   maplinedef_tArray = array[0..$FFF] of maplinedef_t;
   Pmaplinedef_tArray = ^maplinedef_tArray;
 
+  hmaplinedef_t = record
+    v1: smallint;
+    v2: smallint;
+    flags: smallint;
+    special: byte;
+    arg1: byte;
+    arg2: byte;
+    arg3: byte;
+    arg4: byte;
+    arg5: byte;
+    sidenum: array[0..1] of smallint;
+  end;
+  Phmaplinedef_t = ^hmaplinedef_t;
+  hmaplinedef_tArray = array[0..$FFFF] of hmaplinedef_t;
+  Phmaplinedef_tArray = ^hmaplinedef_tArray;
 
 const
 // Solid, is an obstacle.
@@ -154,6 +177,25 @@ type
   Pmapthing_t = ^mapthing_t;
   mapthing_tArray = array[0..$FFFF] of mapthing_t;
   Pmapthing_tArray = ^mapthing_tArray;
+
+  hmapthing_t = record
+    tid: smallint;
+    x: smallint;
+    y: smallint;
+    height: smallint;
+    angle: smallint;
+    _type: word;
+    options: smallint;
+    special: byte;
+    arg1: byte;
+    arg2: byte;
+    arg3: byte;
+    arg4: byte;
+    arg5: byte;
+  end;
+  Phmapthing_t = ^hmapthing_t;
+  hmapthing_tArray = array[0..$FFFF] of hmapthing_t;
+  Phmapthing_tArray = ^hmapthing_tArray;
 
 type
   mappatch_t = packed record

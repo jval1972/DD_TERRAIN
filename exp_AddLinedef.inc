@@ -1,7 +1,7 @@
   function AddLinedef(const v1, v2: integer): integer;
   var
     j: integer;
-    pline: Pmaplinedef_t;
+    pline: {$IFDEF HEXEN_FORMAT}Phmaplinedef_t{$ELSE}Pmaplinedef_t{$ENDIF};
   begin
     for j := 0 to numdoomlinedefs - 1 do
     begin
@@ -20,13 +20,21 @@
         end;
     end;
 
-    ReallocMem(doomlinedefs, (numdoomlinedefs  + 1) * SizeOf(maplinedef_t));
+    ReallocMem(doomlinedefs, (numdoomlinedefs  + 1) * SizeOf({$IFDEF HEXEN_FORMAT}hmaplinedef_t{$ELSE}maplinedef_t{$ENDIF}));
     pline := @doomlinedefs[numdoomlinedefs];
     pline.v1 := v1;
     pline.v2 := v2;
     pline.flags := 0;
     pline.special := 0;
+    {$IFDEF HEXEN_FORMAT}
+    pline.arg1 := 0;
+    pline.arg2 := 0;
+    pline.arg3 := 0;
+    pline.arg4 := 0;
+    pline.arg5 := 0;
+    {$ELSE}
     pline.tag := 0;
+    {$ENDIF}
     pline.sidenum[0] := -1;
     pline.sidenum[1] := -1;
     result := numdoomlinedefs;

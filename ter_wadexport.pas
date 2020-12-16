@@ -43,6 +43,11 @@ procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 
+procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const _LOWERID, _RAISEID: integer;
+  const flags: LongWord; const defceilingheight: integer = 512);
+
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
   const levelname: string; const defsidetex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
@@ -136,33 +141,7 @@ var
   pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
 
-  function AddThing(const x, y: integer; const angle: smallint; const mtype: word; const options: smallint): integer;
-  var
-    j: integer;
-    mthing: Pmapthing_t;
-  begin
-    for j := 0 to numdoomthings - 1 do
-      if (doomthings[j].x = x) and (doomthings[j].y = y) and (doomthings[j].angle = angle) and
-         (doomthings[j]._type = mtype) and (doomthings[j].options = options) then
-      begin
-        result := j;
-        exit;
-      end;
-
-    ReallocMem(doomthings, (numdoomthings + 1) * SizeOf(mapthing_t));
-    mthing := @doomthings[numdoomthings];
-
-    mthing.x := x;
-    mthing.y := y;
-
-    mthing.angle := angle;
-    mthing._type := mtype;
-    mthing.options := options;
-
-    result := numdoomthings;
-    inc(numdoomthings);
-  end;
-
+{$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
 {$I exp_AddSidedef.inc}
@@ -299,6 +278,183 @@ begin
   // Free data
   FreeMem(doomthings, numdoomthings * SizeOf(mapthing_t));
   FreeMem(doomlinedefs, numdoomlinedefs * SizeOf(maplinedef_t));
+  FreeMem(doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
+  FreeMem(doomvertexes, numdoomvertexes * SizeOf(mapvertex_t));
+  FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));
+  FreeMem(slopedsectors, numdoomsectors * SizeOf(boolean));
+
+end;
+
+{$UNDEF DOOM_FORMAT}
+{$DEFINE HEXEN_FORMAT}
+{$UNDEF UDMF_FORMAT}
+procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const _LOWERID, _RAISEID: integer;
+  const flags: LongWord; const defceilingheight: integer = 512);
+var
+  doomthings: Phmapthing_tArray;
+  numdoomthings: integer;
+  doomlinedefs: Phmaplinedef_tArray;
+  numdoomlinedefs: integer;
+  doomsidedefs: Pmapsidedef_tArray;
+  numdoomsidedefs: integer;
+  doomvertexes: Pmapvertex_tArray;
+  numdoomvertexes: integer;
+  doomsectors: Pmapsector_tArray;
+  slopedsectors: PBooleanArray;
+  numdoomsectors: integer;
+  wadwriter: TWadWriter;
+  def_palL: array[0..255] of LongWord;
+  scanline: PLongWordArray;
+  i, x, y: integer;
+  c, r, g, b: LongWord;
+  png: TPngObject;
+  ms: TMemoryStream;
+  flattexture: PByteArray;
+  bm: TBitmap;
+  sidetex: char8_t;
+  pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+
+{$I exp_AddThing.inc}
+{$I exp_AddSector.inc}
+{$I exp_AddVertex.inc}
+{$I exp_AddSidedef.inc}
+{$I exp_AddLinedef.inc}
+{$I exp_GetHeightmapCoords3D.inc}
+{$I exp_AddFlatQuad.inc}
+{$I exp_TryFlatRange.inc}
+{$I exp_AddSlopedTriangle.inc}
+{$I exp_AddHeightmapItem.inc}
+{$I exp_RemoveUnNeededLines.inc}
+{$I exp_FixTrangleSectors.inc}
+{$I exp_FixTextureOffsets.inc}
+
+begin
+  sidetex := stringtochar8(defsidetex);
+  FillChar(pass, SizeOf(pass), 0);
+  FillChar(flat, SizeOf(flat), 0);
+
+  doomthings := nil;
+  numdoomthings := 0;
+  doomlinedefs := nil;
+  numdoomlinedefs := 0;
+  doomsidedefs := nil;
+  numdoomsidedefs := 0;
+  doomvertexes := nil;
+  numdoomvertexes := 0;
+  doomsectors := nil;
+  slopedsectors := nil;
+  numdoomsectors := 0;
+
+  wadwriter := TWadWriter.Create;
+
+  // Create Palette
+  for i := 0 to 255 do
+  begin
+    r := palette[3 * i];
+    if r > 255 then r := 255;
+    g := palette[3 * i + 1];
+    if g > 255 then g := 255;
+    b := palette[3 * i + 2];
+    if b > 255 then b := 255;
+    def_palL[i] := (r shl 16) + (g shl 8) + (b);
+  end;
+
+  if flags and ETF_TRUECOLORFLAT <> 0 then
+  begin
+    // Create flat - 32 bit color - inside HI_START - HI_END namespace
+    png := TPngObject.Create;
+    png.Assign(t.Texture);
+
+    ms := TMemoryStream.Create;
+
+    png.SaveToStream(ms);
+
+    wadwriter.AddSeparator('HI_START');
+    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+    wadwriter.AddSeparator('HI_END');
+
+    ms.Free;
+    png.Free;
+  end;
+
+  // Create flat - 8 bit
+  bm := t.Texture;
+  GetMem(flattexture, bm.Width * bm.Height);
+
+  i := 0;
+  for y := 0 to t.texturesize - 1 do
+  begin
+    scanline := t.Texture.ScanLine[y];
+    for x := 0 to t.texturesize - 1 do
+    begin
+      c := scanline[x];
+      flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
+      inc(i);
+    end;
+  end;
+
+  wadwriter.AddSeparator('F_START');
+  wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
+  wadwriter.AddSeparator('F_END');
+
+  FreeMem(flattexture, bm.Width * bm.Height);
+
+  // Create Map
+  for x := 0 to t.heightmapsize - 2 do
+    for y := 0 to t.heightmapsize - 2 do
+      AddHeightmapItem(x, y);
+
+  // Player start
+  if flags and ETF_ADDPLAYERSTART <> 0 then
+    AddThing(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
+
+  // Remove unneeded lines
+  if flags and ETF_MERGEFLATSECTORS <> 0 then
+    RemoveUnNeededLines;
+
+  // Fix flat triangle sectors
+  FixTrangleSectors;
+
+  // Fix texture offsets
+  FixTextureOffsets;
+
+  // Add wall textures
+  for i := 0 to numdoomlinedefs - 1 do
+  begin
+    if doomlinedefs[i].flags and ML_TWOSIDED = 0 then
+      doomsidedefs[doomlinedefs[i].sidenum[0]].midtexture := sidetex
+    else
+    begin
+      doomsidedefs[doomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
+      doomsidedefs[doomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
+    end;
+  end;
+
+  // Flash data to wad
+  wadwriter.AddSeparator(levelname);
+  wadwriter.AddData('THINGS', doomthings, numdoomthings * SizeOf(hmapthing_t));
+  wadwriter.AddData('LINEDEFS', doomlinedefs, numdoomlinedefs * SizeOf(hmaplinedef_t));
+  wadwriter.AddData('SIDEDEFS', doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
+  wadwriter.AddData('VERTEXES', doomvertexes, numdoomvertexes * SizeOf(mapvertex_t));
+  wadwriter.AddSeparator('SEGS');
+  wadwriter.AddSeparator('SSECTORS');
+  wadwriter.AddSeparator('NODES');
+  wadwriter.AddData('SECTORS', doomsectors, numdoomsectors * SizeOf(mapsector_t));
+  wadwriter.AddSeparator('REJECT');
+  wadwriter.AddSeparator('BLOCKMAP');
+  wadwriter.AddSeparator('BEHAVIOR');
+
+  // Save wad to disk
+  wadwriter.SaveToFile(fname);
+
+  wadwriter.Free;
+
+  // Free data
+  FreeMem(doomthings, numdoomthings * SizeOf(hmapthing_t));
+  FreeMem(doomlinedefs, numdoomlinedefs * SizeOf(hmaplinedef_t));
   FreeMem(doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
   FreeMem(doomvertexes, numdoomvertexes * SizeOf(mapvertex_t));
   FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));

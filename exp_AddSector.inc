@@ -23,7 +23,7 @@
     dsec.floorheight := hfloor;
     dsec.ceilingheight := hceiling;
     dsec.floorpic := stringtochar8(levelname + 'TER');
-    dsec.ceilingpic := stringtochar8('F_SKY1');
+    dsec.ceilingpic := stringtochar8({$IFDEF HEXEN_FORMAT}'F_SKY'{$ELSE}'F_SKY1'{$ENDIF});
     dsec.lightlevel := 192;
     dsec.special := 0;
     dsec.tag := 0;

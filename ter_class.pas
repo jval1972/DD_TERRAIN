@@ -916,4 +916,29 @@ begin
     Result := 65;
 end;
 
+type
+  resampleitem_t = record
+    height: integer;
+    heightmapX, heightmapY: integer;
+  end;
+  resampleitem_p = ^resampleitem_t;
+
+const
+  MAXRESAMPLEITEMS = 4;
+
+type
+  resampleitems_t = record
+    cnt: integer;
+    sample: array[0..MAXRESAMPLEITEMS - 1] of resampleitem_t;
+  end;
+  resampleitems_t = ^resampleitems_p;
+
+const
+  RESAMPLEMATRIXSIZE = 512;
+
+type
+  resamplematrix_t = array[0..RESAMPLEMATRIXSIZE - 1, 0..RESAMPLEMATRIXSIZE - 1] of resampleitems_t;
+  resamplematrix_p = ^resamplematrix_t;
+
+
 end.

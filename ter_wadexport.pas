@@ -52,6 +52,7 @@ const
   ETF_CALCDXDY = 2;
   ETF_TRUECOLORFLAT = 4;
   ETF_MERGEFLATSECTORS = 8;
+  ETF_ADDPLAYERSTART = 16;
 
 implementation
 
@@ -252,7 +253,8 @@ begin
       AddHeightmapItem(x, y);
 
   // Player start
-  AddThing(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
+  if flags and ETF_ADDPLAYERSTART <> 0 then
+    AddThing(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
 
   // Remove unneeded lines
   if flags and ETF_MERGEFLATSECTORS <> 0 then
@@ -496,7 +498,8 @@ begin
   udmfmap.Add('');
 
   // Player start
-  AddPlayerStartToUDMF(64, -64, 0, 1);
+  if flags and ETF_ADDPLAYERSTART <> 0 then
+    AddPlayerStartToUDMF(64, -64, 0, 1);
 
   // Remove unneeded lines
   if flags and ETF_MERGEFLATSECTORS <> 0 then

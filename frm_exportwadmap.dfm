@@ -1099,7 +1099,7 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 24
       Top = 16
       Width = 201
-      Height = 201
+      Height = 249
       Caption = ' Engine '
       ItemIndex = 0
       Items.Strings = (
@@ -1119,7 +1119,7 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 248
       Top = 16
       Width = 185
-      Height = 129
+      Height = 161
       Caption = ' Options '
       TabOrder = 1
       object SlopedSectorsCheckBox: TCheckBox
@@ -1161,6 +1161,16 @@ object ExportWADMapForm: TExportWADMapForm
         Checked = True
         State = cbChecked
         TabOrder = 3
+      end
+      object AddPlayerStartCheckBox: TCheckBox
+        Left = 16
+        Top = 120
+        Width = 153
+        Height = 17
+        Caption = 'Add Player Start'
+        Checked = True
+        State = cbChecked
+        TabOrder = 4
       end
     end
   end

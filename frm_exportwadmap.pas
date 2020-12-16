@@ -47,6 +47,7 @@ type
     DeformmationsCheckBox: TCheckBox;
     TrueColorFlatCheckBox: TCheckBox;
     MergeFlatSectorsCheckBox: TCheckBox;
+    AddPlayerStartCheckBox: TCheckBox;
   private
     { Private declarations }
   public

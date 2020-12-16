@@ -7920,8 +7920,8 @@ object Form1: TForm1
       object OpenGLScrollBox: TScrollBox
         Left = 0
         Top = 0
-        Width = 1031
-        Height = 540
+        Width = 760
+        Height = 610
         Align = alClient
         BorderStyle = bsNone
         TabOrder = 0

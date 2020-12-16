@@ -1421,12 +1421,16 @@ begin
             hy := drawy + hitem.dy;
             for k := -hstep div 2 to hstep + 2 do
             begin
-              if (hy + k) mod 8 = 4 then
+//              if (hy + k) mod 8 = 4 then
+//              if (hy + k) mod 4 <> 2 then
+              if (hy + k) mod 2 <> 1 then
               begin
                 C.MoveTo(hx - hstep div 2, hy + k);
                 C.LineTo(hx + hstep div 2, hy + k);
               end;
-              if (hx + k) mod 8 = 4 then
+//              if (hx + k) mod 8 = 4 then
+//              if (hx + k) mod 4 <> 2 then
+              if (hx + k) mod 2 <> 1 then
               begin
                 C.MoveTo(hx + k, hy - hstep div 2);
                 C.LineTo(hx + k, hy + hstep div 2);

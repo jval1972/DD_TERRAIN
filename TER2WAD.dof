@@ -90,17 +90,17 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=
-UnitOutputDir=
+OutputDir=..\bin
+UnitOutputDir=..\dcu\TER2WAD
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=
-Packages=
+Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP
 Conditionals=
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams=
+RunParams= -i ..\garbage\Example02.terrain -o ..\garbage\Example02_UDMF.wad -e UDMF -g DOOM -wait
 HostApplication=
 Launcher=
 UseLauncher=0
@@ -138,8 +138,9 @@ Comments=
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlUnitOutputDirectory]
-Count=1
-Item0=..\dcu
+Count=2
+Item0=..\dcu\TER2WAD
+Item1=..\dcu
 [HistoryLists\hlOutputDirectorry]
 Count=1
 Item0=..\bin

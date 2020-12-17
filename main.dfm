@@ -7991,25 +7991,21 @@ object Form1: TForm1
       end
       object MNExport1: TMenuItem
         Caption = '&Export'
+        object RadixWADFile1: TMenuItem
+          Caption = 'WAD Map...'
+          OnClick = RadixWADFile1Click
+        end
         object ExportObjModel1: TMenuItem
           Caption = 'Obj model'
           Visible = False
           OnClick = ExportObjModel1Click
         end
-        object ExportScreenshot1: TMenuItem
-          Caption = 'Screenshot (3D View)'
-          OnClick = ExportScreenshot1Click
-        end
         object N3: TMenuItem
           Caption = '-'
         end
-        object RadixWADFile1: TMenuItem
-          Caption = 'Radix WAD Map'
-          OnClick = RadixWADFile1Click
-        end
-        object ZDoomUDMFMap1: TMenuItem
-          Caption = 'UDMF Map (GZDoom/K8Vavoom)'
-          OnClick = ZDoomUDMFMap1Click
+        object ExportScreenshot1: TMenuItem
+          Caption = 'Screenshot (3D View)'
+          OnClick = ExportScreenshot1Click
         end
       end
       object N2: TMenuItem

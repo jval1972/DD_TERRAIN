@@ -32,7 +32,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Buttons, ter_class, ter_wadexport;
+  Dialogs, StdCtrls, ExtCtrls, Buttons, ter_class, ter_wadexport, ComCtrls;
 
 type
   TExportWADMapForm = class(TForm)
@@ -48,11 +48,6 @@ type
     TrueColorFlatCheckBox: TCheckBox;
     MergeFlatSectorsCheckBox: TCheckBox;
     AddPlayerStartCheckBox: TCheckBox;
-    GroupBox1: TGroupBox;
-    Edit1: TEdit;
-    CeilingTextureLabel: TLabel;
-    Edit2: TEdit;
-    SideTextureLabel: TLabel;
     Label3: TLabel;
     FileNameEdit: TEdit;
     SelectFileButton: TSpeedButton;
@@ -60,6 +55,10 @@ type
     Panel3: TPanel;
     PaintBox1: TPaintBox;
     SaveWADDialog: TSaveDialog;
+    ExportFlatCheckBox: TCheckBox;
+    Label1: TLabel;
+    CeilingHeightTrackBar: TTrackBar;
+    CeilingHeightLabel: TLabel;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -67,20 +66,20 @@ type
     procedure DeformationsCheckBoxClick(Sender: TObject);
     procedure MergeFlatSectorsCheckBoxClick(Sender: TObject);
     procedure FileNameEditChange(Sender: TObject);
+    procedure ExportFlatCheckBoxClick(Sender: TObject);
+    procedure CeilingHeightTrackBarChange(Sender: TObject);
   private
     { Private declarations }
     bm, bmTexture: TBitmap;
     t: TTerrain;
-    fneedstexturerecalc: boolean;
-    fneedslinesrecalc: boolean;
-    procedure UpdateControls;
     procedure GeneratePreview;
+    procedure GenerateFlatTexture;
   public
     { Public declarations }
     procedure SetTerrain(const aterrain: TTerrain);
   end;
 
-function GetWADExportOptions(const options: exportwadoptions_p): boolean;
+function GetWADExportOptions(const t: TTerrain; const options: exportwadoptions_p; var fname: string): boolean;
 
 implementation
 
@@ -89,16 +88,104 @@ implementation
 uses
   ter_wadreader,
   ter_doomdata,
-  ter_utils;
+  ter_utils,
+  ter_palettes;
 
-function GetWADExportOptions(const options: exportwadoptions_p): boolean;
+function GetWADExportOptions(const t: TTerrain; const options: exportwadoptions_p; var fname: string): boolean;
 var
   f: TExportWADMapForm;
 begin
   Result := False;
   f := TExportWADMapForm.Create(nil);
   try
+    f.FileNameEdit.Text := fname;
+    f.EngineRadioGroup.ItemIndex := options.engine;
+    f.CeilingHeightTrackBar.Position := GetIntInRange(options.defceilingheight, f.CeilingHeightTrackBar.Min, f.CeilingHeightTrackBar.Max);
+    f.CeilingHeightLabel.Caption := IntToStr(f.CeilingHeightTrackBar.Position);
+    f.SlopedSectorsCheckBox.Checked := options.flags and ETF_SLOPED <> 0;
+    f.DeformationsCheckBox.Checked := options.flags and ETF_CALCDXDY <> 0;
+    f.TrueColorFlatCheckBox.Checked := options.flags and ETF_TRUECOLORFLAT <> 0;
+    f.MergeFlatSectorsCheckBox.Checked := options.flags and ETF_MERGEFLATSECTORS <> 0;
+    f.AddPlayerStartCheckBox.Checked := options.flags and ETF_ADDPLAYERSTART <> 0;
+    f.ExportFlatCheckBox.Checked := options.flags and ETF_EXPORTFLAT <> 0;
 
+    f.SetTerrain(t);
+
+    f.ShowModal;
+    if f.ModalResult = mrOK then
+    begin
+      Result := True;
+      fname := f.FileNameEdit.Text;
+      options.engine := f.EngineRadioGroup.ItemIndex;
+      options.defceilingheight := f.CeilingHeightTrackBar.Position;
+      options.flags := 0;
+      if f.SlopedSectorsCheckBox.Checked then
+        options.flags := options.flags or ETF_SLOPED;
+      if f.DeformationsCheckBox.Checked then
+        options.flags := options.flags or ETF_CALCDXDY;
+      if f.TrueColorFlatCheckBox.Checked then
+        options.flags := options.flags or ETF_TRUECOLORFLAT;
+      if f.MergeFlatSectorsCheckBox.Checked then
+        options.flags := options.flags or ETF_MERGEFLATSECTORS;
+      if f.AddPlayerStartCheckBox.Checked then
+        options.flags := options.flags or ETF_ADDPLAYERSTART;
+      if f.ExportFlatCheckBox.Checked then
+        options.flags := options.flags or ETF_EXPORTFLAT;
+      case options.engine of
+      ENGINE_RAD:
+        begin
+          options.palette := @RadixPaletteRaw;
+          options.levelname := 'E1M1';
+          options.defsidetex := 'RDXW0012';
+          options.deceilingpic := 'F_SKY1';
+          options.lowerid := 1255;
+          options.raiseid := 1254;
+        end;
+      ENGINE_DELHIDOOM:
+        begin
+          options.palette := @DoomPaletteRaw;
+          options.levelname := 'MAP01';
+          options.defsidetex := 'METAL1';
+          options.deceilingpic := 'F_SKY1';
+          options.lowerid := 1155;
+          options.raiseid := 1154;
+        end;
+      ENGINE_DELHIHERETIC:
+        begin
+          options.palette := @HereticPaletteRaw;
+          options.levelname := 'E1M1';
+          options.defsidetex := 'CSTLRCK';
+          options.deceilingpic := 'F_SKY1';
+          options.lowerid := 1155;
+          options.raiseid := 1154;
+        end;
+      ENGINE_DELHIHEXEN:
+        begin
+          options.palette := @HexenPaletteRaw;
+          options.levelname := 'MAP01';
+          options.defsidetex := 'FOREST02';
+          options.deceilingpic := 'F_SKY';
+          options.lowerid := 1155;
+          options.raiseid := 1154;
+        end;
+      ENGINE_DELHISTRIFE:
+        begin
+          options.palette := @StrifePaletteRaw;
+          options.levelname := 'MAP01';
+          options.defsidetex := 'BRKGRY01';
+          options.deceilingpic := 'F_SKY001';
+          options.lowerid := 1155;
+          options.raiseid := 1154;
+        end;
+      ENGINE_UDMF:
+        begin
+          options.palette := @DoomPaletteRaw;
+          options.levelname := 'MAP01';
+          options.defsidetex := 'METAL1';
+          options.deceilingpic := 'F_SKY1';
+        end;
+      end;
+    end;
   finally
     f.Free;
   end;
@@ -113,10 +200,6 @@ begin
   end;
 end;
 
-procedure TExportWADMapForm.UpdateControls;
-begin
-end;
-
 procedure TExportWADMapForm.FormCreate(Sender: TObject);
 begin
   bm := TBitmap.Create;
@@ -128,9 +211,6 @@ begin
   bmTexture.Width := PaintBox1.Width;
   bmTexture.Height := PaintBox1.Height;
   bmTexture.PixelFormat := pf32bit;
-
-  fneedstexturerecalc := true;
-  fneedslinesrecalc := true;
 
   t := nil;
 end;
@@ -158,59 +238,63 @@ var
   v1, v2: integer;
   x1, y1, x2, y2: integer;
 begin
-  if t = nil then
-    Exit;
-
-  strm := TMemoryStream.Create;
-
-  flags := ETF_DONTEXPORTFLAT;
-  if DeformmationsCheckBox.Checked then
-    flags := flags or ETF_CALCDXDY;
-  if MergeFlatSectorsCheckBox.Checked then
-    flags := flags or ETF_MERGEFLATSECTORS;
-
-  ExportTerrainToWADFile(t, strm, 'MAP01', nil, '', '', 0, 0, flags);
-
-  wadreader := TWADReader.Create;
-  wadreader.LoadFromStream(strm);
-  strm.Free;
-
   bm.Canvas.Draw(0, 0, bmTexture);
 
-  wadreader.ReadEntry('VERTEXES', p, vsize);
-  vertexes := p;
-  numvertexes := vsize div SizeOf(mapvertex_t);
-
-  wadreader.ReadEntry('LINEDEFS', p, lsize);
-  linedefs := p;
-  numlinedefs := lsize div SizeOf(maplinedef_t);
-
-  wadreader.Free;
-
-  scalex := PaintBox1.Width / t.heightmapsize;
-  scaley := PaintBox1.Height / t.heightmapsize;
-
-  bm.Canvas.Pen.Color := RGB(0, 255, 0);
-  bm.Canvas.Pen.Style := psSolid;
-  for i := 0 to numlinedefs - 1 do
+  if t <> nil then
   begin
-    v1 := linedefs[i].v1;
-    v2 := linedefs[i].v2;
-    x1 := vertexes[v1].x;
-    y1 := vertexes[v1].y;
-    x2 := vertexes[v2].x;
-    y2 := vertexes[v2].y;
-    x1 := GetIntInRange(Round(x1 * scalex), 0, bm.Width);
-    y1 := GetIntInRange(-Round(y1 * scaley), 0, bm.Height);
-    x2 := GetIntInRange(Round(x2 * scalex), 0, bm.Width);
-    y2 := GetIntInRange(-Round(y2 * scaley), 0, bm.Height);
-    bm.Canvas.MoveTo(x1, y1);
-    bm.Canvas.LineTo(x2, y2);
-  end;
+    strm := TMemoryStream.Create;
 
-  // Draw 2d map here ////////
-  FreeMem(vertexes, vsize);
-  FreeMem(linedefs, lsize);
+    flags := 0;
+    if DeformationsCheckBox.Checked then
+      flags := flags or ETF_CALCDXDY;
+    if MergeFlatSectorsCheckBox.Checked then
+      flags := flags or ETF_MERGEFLATSECTORS;
+
+    ExportTerrainToWADFile(t, strm, 'MAP01', nil, '', '', 0, 0, flags);
+
+    wadreader := TWADReader.Create;
+    strm.Position := 0;
+    wadreader.LoadFromStream(strm);
+    strm.Free;
+
+    wadreader.ReadEntry('VERTEXES', p, vsize);
+    vertexes := p;
+    numvertexes := vsize div SizeOf(mapvertex_t);
+
+    wadreader.ReadEntry('LINEDEFS', p, lsize);
+    linedefs := p;
+    numlinedefs := lsize div SizeOf(maplinedef_t);
+
+    wadreader.Free;
+
+    scalex := PaintBox1.Width / t.texturesize;
+    scaley := PaintBox1.Height / t.texturesize;
+
+    bm.Canvas.Pen.Color := RGB(0, 255, 0);
+    bm.Canvas.Pen.Style := psSolid;
+    for i := 0 to numlinedefs - 1 do
+    begin
+      v1 := linedefs[i].v1;
+      v2 := linedefs[i].v2;
+      if IsIntInRange(v1, 0, numvertexes - 1) and IsIntInRange(v2, 0, numvertexes - 1) then
+      begin
+        x1 := vertexes[v1].x;
+        y1 := vertexes[v1].y;
+        x2 := vertexes[v2].x;
+        y2 := vertexes[v2].y;
+        x1 := GetIntInRange(Round(x1 * scalex), 0, bm.Width - 1);
+        y1 := GetIntInRange(-Round(y1 * scaley), 0, bm.Height - 1);
+        x2 := GetIntInRange(Round(x2 * scalex), 0, bm.Width - 1);
+        y2 := GetIntInRange(-Round(y2 * scaley), 0, bm.Height - 1);
+        bm.Canvas.MoveTo(x1, y1);
+        bm.Canvas.LineTo(x2, y2);
+      end;
+    end;
+
+    // Draw 2d map here ////////
+    FreeMem(vertexes, vsize);
+    FreeMem(linedefs, lsize);
+  end;
 end;
 
 procedure TExportWADMapForm.PaintBox1Paint(Sender: TObject);
@@ -218,41 +302,58 @@ begin
   PaintBox1.Canvas.Draw(0, 0, bm);
 end;
 
-procedure TExportWADMapForm.SetTerrain(const aterrain: TTerrain);
+procedure TExportWADMapForm.GenerateFlatTexture;
 var
   r: TRect;
 begin
-  t := aterrain;
   r := Rect(0, 0, bm.Width, bm.Height);
-  if t <> nil then
-    bm.Canvas.StretchDraw(r, t.Texture)
+  if (t <> nil) and ExportFlatCheckBox.Checked then
+    bmTexture.Canvas.StretchDraw(r, t.Texture)
   else
   begin
-    bm.Canvas.Brush.Color := RGB(255, 255, 255);
-    bm.Canvas.Brush.Style := bsSolid;
-    bm.Canvas.Pen.Style := psClear;
-    bm.Canvas.FillRect(r);
+    bmTexture.Canvas.Brush.Color := RGB(255, 255, 255);
+    bmTexture.Canvas.Brush.Style := bsSolid;
+    bmTexture.Canvas.Pen.Style := psClear;
+    bmTexture.Canvas.FillRect(r);
   end;
+end;
+
+procedure TExportWADMapForm.SetTerrain(const aterrain: TTerrain);
+begin
+  t := aterrain;
+  GenerateFlatTexture;
   GeneratePreview;
+  PaintBox1.Invalidate;
 end;
 
 procedure TExportWADMapForm.DeformationsCheckBoxClick(Sender: TObject);
 begin
-  fneedslinesrecalc := true;
   GeneratePreview;
   PaintBox1.Invalidate;
 end;
 
 procedure TExportWADMapForm.MergeFlatSectorsCheckBoxClick(Sender: TObject);
 begin
-  fneedslinesrecalc := true;
   GeneratePreview;
   PaintBox1.Invalidate;
 end;
 
 procedure TExportWADMapForm.FileNameEditChange(Sender: TObject);
 begin
-    OKButton1.Enabled := Trim(FileNameEdit.Text) <> '';
+  OKButton1.Enabled := Trim(FileNameEdit.Text) <> '';
+end;
+
+procedure TExportWADMapForm.ExportFlatCheckBoxClick(Sender: TObject);
+begin
+  GenerateFlatTexture;
+  GeneratePreview;
+  PaintBox1.Invalidate;
+end;
+
+procedure TExportWADMapForm.CeilingHeightTrackBarChange(Sender: TObject);
+begin
+  CeilingHeightLabel.Caption := IntToStr(CeilingHeightTrackBar.Position);
+  CeilingHeightTrackBar.Hint := IntToStr(CeilingHeightTrackBar.Position);
 end;
 
 end.

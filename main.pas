@@ -35,7 +35,7 @@ uses
   Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, FileCtrl,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1, ter_pk3, ter_colorpickerbutton,
-  ImgList;
+  ter_wadexport, ImgList;
 
 type
   drawlayeritem_t = packed record
@@ -163,7 +163,6 @@ type
     RadixWADFile1: TMenuItem;
     SaveWADDialog: TSaveDialog;
     N3: TMenuItem;
-    ZDoomUDMFMap1: TMenuItem;
     N4: TMenuItem;
     Copy3dview1: TMenuItem;
     CopyHeightmap1: TMenuItem;
@@ -307,7 +306,6 @@ type
     procedure PasteHeightmap1Click(Sender: TObject);
     procedure Scaleheightmap1Click(Sender: TObject);
     procedure RadixWADFile1Click(Sender: TObject);
-    procedure ZDoomUDMFMap1Click(Sender: TObject);
     procedure Copy3dview1Click(Sender: TObject);
     procedure CopyHeightmap1Click(Sender: TObject);
     procedure PaletteSpeedButton1Click(Sender: TObject);
@@ -349,6 +347,7 @@ type
     fpk3reader: TZipFile;
     fdirdirectory: string;
     fdirlist: TStringList;
+    fexportoptions: exportwadoptions_t;
     fdrawcolor: TColor;
     lpickcolormousedown: boolean;
     drawlayer: drawlayer_p;
@@ -446,11 +445,11 @@ uses
   ter_wadreader,
   frm_editheightmapitem,
   frm_scaleheightmap,
-  ter_wadexport,
   ter_palettes,
   frm_loadimagehelper,
   ter_colorpalettebmz,
-  ter_cursors;
+  ter_cursors,
+  frm_exportwadmap;
 
 {$R *.dfm}
 
@@ -481,6 +480,16 @@ begin
   colorbuffer := nil;
 
   DoubleBuffered := True;
+
+  fexportoptions.engine := ENGINE_RAD;
+  fexportoptions.levelname := 'E1M1';
+  fexportoptions.palette := @RadixPaletteRaw;
+  fexportoptions.defsidetex := 'RDXW0012';
+  fexportoptions.deceilingpic := 'F_SKY1';
+  fexportoptions.lowerid := 1255;
+  fexportoptions.raiseid := 1254;
+  fexportoptions.flags := ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
+  fexportoptions.defceilingheight := 512;
 
   bitmapbuffer := TBitmap.Create;
   bitmapbuffer.PixelFormat := pf32bit;
@@ -2234,36 +2243,52 @@ end;
 procedure TForm1.RadixWADFile1Click(Sender: TObject);
 var
   fs: TFileStream;
+  ename: string;
 begin
-  if SaveWADDialog.Execute then
+  if GetWADExportOptions(terrain, @fexportoptions, ename) then
   begin
     Screen.Cursor := crHourglass;
     try
-      BackupFile(SaveWADDialog.FileName);
-      fs := TFileStream.Create(SaveWADDialog.FileName, fmCreate);
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', 'F_SKY1', 1255, 1254, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 'F_SKY1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Doom
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @HereticPaletteRaw, 'F_SKY1', 'CSTLRCK', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Heretic
-      ExportTerrainToHexenFile(terrain, fs, 'MAP01', @HexenPaletteRaw, 'FOREST02', 'F_SKY', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Hexen
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @StrifePaletteRaw, 'BRKGRY01', 'F_SKY001', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Strife
-      fs.Free;
-    finally
-      Screen.Cursor := crDefault;
-    end;
-  end;
-end;
-
-procedure TForm1.ZDoomUDMFMap1Click(Sender: TObject);
-var
-  fs: TFileStream;
-begin
-  if SaveWADDialog.Execute then
-  begin
-    Screen.Cursor := crHourglass;
-    try
-      BackupFile(SaveWADDialog.FileName);
-      fs := TFileStream.Create(SaveWADDialog.FileName, fmCreate);
-      ExportTerrainToUDMFFile(terrain, fs, 'MAP01', 'METAL1', 'F_SKY1', ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
+      BackupFile(ename);
+      fs := TFileStream.Create(ename, fmCreate);
+      case fexportoptions.engine of
+        ENGINE_RAD, ENGINE_DELHIDOOM, ENGINE_DELHIHERETIC, ENGINE_DELHISTRIFE:
+          ExportTerrainToWADFile(
+            terrain,
+            fs,
+            fexportoptions.levelname,
+            fexportoptions.palette,
+            fexportoptions.defsidetex,
+            fexportoptions.deceilingpic,
+            fexportoptions.lowerid,
+            fexportoptions.raiseid,
+            fexportoptions.flags,
+            fexportoptions.defceilingheight
+          );
+        ENGINE_DELHIHEXEN:
+          ExportTerrainToHexenFile(
+            terrain,
+            fs,
+            fexportoptions.levelname,
+            fexportoptions.palette,
+            fexportoptions.defsidetex,
+            fexportoptions.deceilingpic,
+            fexportoptions.lowerid,
+            fexportoptions.raiseid,
+            fexportoptions.flags,
+            fexportoptions.defceilingheight
+          );
+        ENGINE_UDMF:
+          ExportTerrainToUDMFFile(
+            terrain,
+            fs,
+            fexportoptions.levelname,
+            fexportoptions.defsidetex,
+            fexportoptions.deceilingpic,
+            fexportoptions.flags,
+            fexportoptions.defceilingheight
+          );
+        end;
       fs.Free;
     finally
       Screen.Cursor := crDefault;

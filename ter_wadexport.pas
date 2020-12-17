@@ -44,7 +44,7 @@ const
   ETF_TRUECOLORFLAT = 4;
   ETF_MERGEFLATSECTORS = 8;
   ETF_ADDPLAYERSTART = 16;
-  ETF_DONTEXPORTFLAT = 32;
+  ETF_EXPORTFLAT = 32;
 
 const
   ENGINE_RAD = 0;
@@ -196,7 +196,7 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_DONTEXPORTFLAT = 0 then
+  if flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create Palette
     for i := 0 to 255 do
@@ -375,7 +375,7 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_DONTEXPORTFLAT = 0 then
+  if flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create Palette
     for i := 0 to 255 do
@@ -633,7 +633,7 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_DONTEXPORTFLAT = 0 then
+  if flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create flat
     png := TPngObject.Create;

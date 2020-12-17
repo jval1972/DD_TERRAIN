@@ -1,10 +1,10 @@
 object ExportWADMapForm: TExportWADMapForm
-  Left = 312
-  Top = 136
+  Left = 229
+  Top = 199
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 372
+  ClientHeight = 330
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1052,7 +1052,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 331
+    Top = 289
     Width = 681
     Height = 41
     Align = alBottom
@@ -1094,7 +1094,7 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 331
+    Height = 289
     Align = alClient
     Caption = ' '
     TabOrder = 1
@@ -1114,11 +1114,26 @@ object ExportWADMapForm: TExportWADMapForm
       Flat = True
       OnClick = SelectFileButtonClick
     end
+    object Label1: TLabel
+      Left = 16
+      Top = 240
+      Width = 71
+      Height = 13
+      Caption = 'Ceiling Height: '
+      FocusControl = CeilingHeightTrackBar
+    end
+    object CeilingHeightLabel: TLabel
+      Left = 392
+      Top = 240
+      Width = 24
+      Height = 13
+      Caption = '(512)'
+    end
     object EngineRadioGroup: TRadioGroup
       Left = 16
       Top = 56
       Width = 201
-      Height = 185
+      Height = 169
       Caption = ' Engine '
       ItemIndex = 0
       Items.Strings = (
@@ -1128,18 +1143,18 @@ object ExportWADMapForm: TExportWADMapForm
         'DelphiHexen'
         'DelphiStrife'
         'UDMF (GZDoom, K8Vavoom, etc)')
-      TabOrder = 0
+      TabOrder = 1
     end
     object OptionsGroupBox: TGroupBox
       Left = 240
       Top = 56
       Width = 185
-      Height = 161
+      Height = 169
       Caption = ' Options '
-      TabOrder = 1
+      TabOrder = 2
       object SlopedSectorsCheckBox: TCheckBox
         Left = 16
-        Top = 24
+        Top = 16
         Width = 153
         Height = 17
         Caption = 'Sloped Sectors'
@@ -1149,7 +1164,7 @@ object ExportWADMapForm: TExportWADMapForm
       end
       object DeformationsCheckBox: TCheckBox
         Left = 16
-        Top = 48
+        Top = 40
         Width = 153
         Height = 17
         Caption = 'Deformations'
@@ -1160,7 +1175,7 @@ object ExportWADMapForm: TExportWADMapForm
       end
       object TrueColorFlatCheckBox: TCheckBox
         Left = 16
-        Top = 72
+        Top = 64
         Width = 153
         Height = 17
         Caption = 'True Color Flat'
@@ -1170,7 +1185,7 @@ object ExportWADMapForm: TExportWADMapForm
       end
       object MergeFlatSectorsCheckBox: TCheckBox
         Left = 16
-        Top = 96
+        Top = 88
         Width = 153
         Height = 17
         Caption = 'Merge Flat Sectors'
@@ -1181,7 +1196,7 @@ object ExportWADMapForm: TExportWADMapForm
       end
       object AddPlayerStartCheckBox: TCheckBox
         Left = 16
-        Top = 120
+        Top = 112
         Width = 153
         Height = 17
         Caption = 'Add Player Start'
@@ -1189,45 +1204,16 @@ object ExportWADMapForm: TExportWADMapForm
         State = cbChecked
         TabOrder = 4
       end
-    end
-    object GroupBox1: TGroupBox
-      Left = 240
-      Top = 224
-      Width = 185
-      Height = 89
-      Caption = ' Textures '
-      TabOrder = 2
-      object CeilingTextureLabel: TLabel
-        Left = 13
-        Top = 52
-        Width = 76
-        Height = 13
-        Caption = 'Ceiling Texture: '
-        FocusControl = Edit2
-      end
-      object SideTextureLabel: TLabel
-        Left = 17
-        Top = 20
-        Width = 62
-        Height = 13
-        Caption = 'Side texture: '
-        FocusControl = Edit1
-      end
-      object Edit1: TEdit
-        Left = 104
-        Top = 20
-        Width = 65
-        Height = 21
-        MaxLength = 8
-        TabOrder = 0
-      end
-      object Edit2: TEdit
-        Left = 104
-        Top = 52
-        Width = 65
-        Height = 21
-        MaxLength = 8
-        TabOrder = 1
+      object ExportFlatCheckBox: TCheckBox
+        Left = 16
+        Top = 136
+        Width = 153
+        Height = 17
+        Caption = 'Export Flat'
+        Checked = True
+        State = cbChecked
+        TabOrder = 5
+        OnClick = ExportFlatCheckBoxClick
       end
     end
     object FileNameEdit: TEdit
@@ -1235,7 +1221,7 @@ object ExportWADMapForm: TExportWADMapForm
       Top = 16
       Width = 417
       Height = 21
-      TabOrder = 3
+      TabOrder = 0
       OnChange = FileNameEditChange
     end
     object PreviewGroupBox: TGroupBox
@@ -1265,6 +1251,18 @@ object ExportWADMapForm: TExportWADMapForm
           OnPaint = PaintBox1Paint
         end
       end
+    end
+    object CeilingHeightTrackBar: TTrackBar
+      Left = 96
+      Top = 232
+      Width = 289
+      Height = 33
+      Max = 1024
+      Min = 384
+      Frequency = 64
+      Position = 512
+      TabOrder = 3
+      OnChange = CeilingHeightTrackBarChange
     end
   end
   object SaveWADDialog: TSaveDialog

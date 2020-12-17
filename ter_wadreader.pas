@@ -124,7 +124,7 @@ procedure TWadReader.LoadFromStream(const strm: TStream);
 begin
   Clear;
   ss := TMemoryStream.Create;
-  ss.CopyFrom(strm, -1);
+  ss.CopyFrom(strm, strm.Size);
   ss.Position := 0;
   if ss.Size > SizeOf(wadinfo_t) then
   begin

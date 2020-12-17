@@ -38,13 +38,14 @@ type
   private
     h: wadinfo_t;
     la: Pfilelump_tArray;
-    fs: TFileStream;
+    ss: TStream;
     ffilename: string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
     procedure Clear; virtual;
     procedure OpenWadFile(const aname: string);
+    procedure LoadFromStream(const strm: TStream);
     function EntryAsString(const id: integer): string; overload;
     function EntryAsString(const aname: string): string; overload;
     function ReadEntry(const id: integer; var buf: pointer; var bufsize: integer): boolean; overload;
@@ -65,7 +66,7 @@ begin
   h.numlumps := 0;
   h.infotableofs := 0;
   la := nil;
-  fs := nil;
+  ss := nil;
   ffilename := '';
   Inherited;
 end;
@@ -92,10 +93,10 @@ begin
     h.identification := 0;
     h.infotableofs := 0;
   end;
-  if fs <> nil then
+  if ss <> nil then
   begin
-    fs.Free;
-    fs := nil;
+    ss.Free;
+    ss := nil;
   end;
 end;
 
@@ -106,26 +107,45 @@ begin
   Clear;
   if not FileExists(aname) then
     Exit;
-    
-  fs := TFileStream.Create(aname, fmOpenRead or fmShareDenyWrite);
 
-  fs.Read(h, SizeOf(wadinfo_t));
-  if (h.numlumps > 0) and (h.infotableofs < fs.Size) and ((h.identification = IWAD) or (h.identification = PWAD)) then
+  ss := TFileStream.Create(aname, fmOpenRead or fmShareDenyWrite);
+
+  ss.Read(h, SizeOf(wadinfo_t));
+  if (h.numlumps > 0) and (h.infotableofs < ss.Size) and ((h.identification = IWAD) or (h.identification = PWAD)) then
   begin
-    fs.Position := h.infotableofs;
+    ss.Position := h.infotableofs;
     GetMem(la, h.numlumps * SizeOf(filelump_t));
-    fs.Read(la^, h.numlumps * SizeOf(filelump_t));
+    ss.Read(la^, h.numlumps * SizeOf(filelump_t));
     ffilename := aname;
+  end;
+end;
+
+procedure TWadReader.LoadFromStream(const strm: TStream);
+begin
+  Clear;
+  ss := TMemoryStream.Create;
+  ss.CopyFrom(strm, -1);
+  ss.Position := 0;
+  if ss.Size > SizeOf(wadinfo_t) then
+  begin
+    ss.Read(h, SizeOf(wadinfo_t));
+    if (h.numlumps > 0) and (h.infotableofs < ss.Size) and ((h.identification = IWAD) or (h.identification = PWAD)) then
+    begin
+      ss.Position := h.infotableofs;
+      GetMem(la, h.numlumps * SizeOf(filelump_t));
+      ss.Read(la^, h.numlumps * SizeOf(filelump_t));
+      ffilename := '';
+    end;
   end;
 end;
 
 function TWadReader.EntryAsString(const id: integer): string;
 begin
-  if (fs <> nil) and (id >= 0) and (id < h.numlumps) then
+  if (ss <> nil) and (id >= 0) and (id < h.numlumps) then
   begin
     SetLength(Result, la[id].size);
-    fs.Position := la[id].filepos;
-    fs.Read((@Result[1])^, la[id].size);
+    ss.Position := la[id].filepos;
+    ss.Read((@Result[1])^, la[id].size);
   end
   else
     Result := '';
@@ -144,19 +164,19 @@ end;
 
 function TWadReader.ReadEntry(const id: integer; var buf: pointer; var bufsize: integer): boolean;
 begin
-  if (fs <> nil) and (id >= 0) and (id < h.numlumps) then
+  if (ss <> nil) and (id >= 0) and (id < h.numlumps) then
   begin
-    fs.Position := la[id].filepos;
+    ss.Position := la[id].filepos;
     bufsize := la[id].size;
     GetMem(buf, bufsize);
-    fs.Read(buf^, bufsize);
+    ss.Read(buf^, bufsize);
     Result := true;
   end
   else
     Result := False;
 end;
 
-function TWadReader.ReadEntry(const aname: string; var buf: pointer; var bufsize: integer): boolean; 
+function TWadReader.ReadEntry(const aname: string; var buf: pointer; var bufsize: integer): boolean;
 var
   id: integer;
 begin

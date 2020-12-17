@@ -104,8 +104,6 @@ begin
   if aname = '' then
     Exit;
   Clear;
-  if aname = '' then
-    Exit;
   if not FileExists(aname) then
     Exit;
     

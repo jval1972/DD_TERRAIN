@@ -1046,6 +1046,8 @@ object ExportWADMapForm: TExportWADMapForm
     00000000000000000000000000000000000000000000000000000000}
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object BottomPanel: TPanel
@@ -1145,7 +1147,7 @@ object ExportWADMapForm: TExportWADMapForm
         State = cbChecked
         TabOrder = 0
       end
-      object DeformmationsCheckBox: TCheckBox
+      object DeformationsCheckBox: TCheckBox
         Left = 16
         Top = 48
         Width = 153
@@ -1154,6 +1156,7 @@ object ExportWADMapForm: TExportWADMapForm
         Checked = True
         State = cbChecked
         TabOrder = 1
+        OnClick = DeformationsCheckBoxClick
       end
       object TrueColorFlatCheckBox: TCheckBox
         Left = 16
@@ -1174,6 +1177,7 @@ object ExportWADMapForm: TExportWADMapForm
         Checked = True
         State = cbChecked
         TabOrder = 3
+        OnClick = MergeFlatSectorsCheckBoxClick
       end
       object AddPlayerStartCheckBox: TCheckBox
         Left = 16
@@ -1232,18 +1236,19 @@ object ExportWADMapForm: TExportWADMapForm
       Width = 417
       Height = 21
       TabOrder = 3
+      OnChange = FileNameEditChange
     end
-    object GroupBox3: TGroupBox
+    object PreviewGroupBox: TGroupBox
       Left = 448
       Top = 56
-      Width = 201
+      Width = 196
       Height = 209
       Caption = ' Preview '
       TabOrder = 4
       object Panel3: TPanel
         Left = 2
         Top = 15
-        Width = 197
+        Width = 192
         Height = 192
         Align = alClient
         BevelOuter = bvNone
@@ -1257,6 +1262,7 @@ object ExportWADMapForm: TExportWADMapForm
           Height = 184
           Cursor = crCross
           Align = alLeft
+          OnPaint = PaintBox1Paint
         end
       end
     end

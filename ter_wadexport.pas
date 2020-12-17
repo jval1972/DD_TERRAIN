@@ -68,7 +68,7 @@ type
   end;
   exportwadoptions_p = ^exportwadoptions_t;
 
-const
+type
   wadexportstats_t = record
     numthings: integer;
     numlinedefs: integer;
@@ -81,16 +81,19 @@ const
 procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 
 procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const defsidetex: string; const defceilingtex: string;
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 
 implementation
 
@@ -148,7 +151,8 @@ type
 procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 var
   doomthings: Pmapthing_tArray;
   numdoomthings: integer;
@@ -319,6 +323,14 @@ begin
   FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));
   FreeMem(slopedsectors, numdoomsectors * SizeOf(boolean));
 
+  if stats <> nil then
+  begin
+    stats.numthings := numdoomthings;
+    stats.numlinedefs := numdoomlinedefs;
+    stats.numsidedefs := numdoomsidedefs;
+    stats.numvertexes := numdoomvertexes;
+    stats.numsectors := numdoomsectors;
+  end;
 end;
 
 {$UNDEF DOOM_FORMAT}
@@ -327,7 +339,8 @@ end;
 procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 var
   doomthings: Phmapthing_tArray;
   numdoomthings: integer;
@@ -499,14 +512,23 @@ begin
   FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));
   FreeMem(slopedsectors, numdoomsectors * SizeOf(boolean));
 
+  if stats <> nil then
+  begin
+    stats.numthings := numdoomthings;
+    stats.numlinedefs := numdoomlinedefs;
+    stats.numsidedefs := numdoomsidedefs;
+    stats.numvertexes := numdoomvertexes;
+    stats.numsectors := numdoomsectors;
+  end;
 end;
 
 {$UNDEF DOOM_FORMAT}
 {$UNDEF HEXEN_FORMAT}
 {$DEFINE UDMF_FORMAT}
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const defsidetex: string; const defceilingtex: string; 
-  const flags: LongWord; const defceilingheight: integer = 512);
+  const levelname: string; const defsidetex: string; const defceilingtex: string;
+  const flags: LongWord; const defceilingheight: integer = 512;
+  const stats: wadexportstats_p = nil);
 var
   doomlinedefs: Pmaplinedef_tArray;
   numdoomlinedefs: integer;
@@ -749,6 +771,17 @@ begin
   FreeMem(doomsectors, numdoomsectors * SizeOf(mapsector_t));
   FreeMem(slopedsectors, numdoomsectors * SizeOf(boolean));
 
+  if stats <> nil then
+  begin
+    if flags and ETF_ADDPLAYERSTART <> 0 then
+      stats.numthings := 1
+    else
+      stats.numthings := 0;
+    stats.numlinedefs := numdoomlinedefs;
+    stats.numsidedefs := numdoomsidedefs;
+    stats.numvertexes := numdoomvertexes;
+    stats.numsectors := numdoomsectors;
+  end;
 end;
 
 end.

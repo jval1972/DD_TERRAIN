@@ -2252,7 +2252,7 @@ begin
       BackupFile(ename);
       fs := TFileStream.Create(ename, fmCreate);
       case fexportoptions.engine of
-        ENGINE_RAD, ENGINE_DELHIDOOM, ENGINE_DELHIHERETIC, ENGINE_DELHISTRIFE:
+        ENGINE_RAD, ENGINE_DELPHIDOOM, ENGINE_DELPHIHERETIC, ENGINE_DELPHISTRIFE:
           ExportTerrainToWADFile(
             terrain,
             fs,
@@ -2265,7 +2265,7 @@ begin
             fexportoptions.flags,
             fexportoptions.defceilingheight
           );
-        ENGINE_DELHIHEXEN:
+        ENGINE_DELPHIHEXEN:
           ExportTerrainToHexenFile(
             terrain,
             fs,

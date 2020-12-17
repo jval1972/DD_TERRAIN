@@ -141,7 +141,7 @@ begin
           options.lowerid := 1255;
           options.raiseid := 1254;
         end;
-      ENGINE_DELHIDOOM:
+      ENGINE_DELPHIDOOM:
         begin
           options.palette := @DoomPaletteRaw;
           options.levelname := 'MAP01';
@@ -150,7 +150,7 @@ begin
           options.lowerid := 1155;
           options.raiseid := 1154;
         end;
-      ENGINE_DELHIHERETIC:
+      ENGINE_DELPHIHERETIC:
         begin
           options.palette := @HereticPaletteRaw;
           options.levelname := 'E1M1';
@@ -159,7 +159,7 @@ begin
           options.lowerid := 1155;
           options.raiseid := 1154;
         end;
-      ENGINE_DELHIHEXEN:
+      ENGINE_DELPHIHEXEN:
         begin
           options.palette := @HexenPaletteRaw;
           options.levelname := 'MAP01';
@@ -168,7 +168,7 @@ begin
           options.lowerid := 1155;
           options.raiseid := 1154;
         end;
-      ENGINE_DELHISTRIFE:
+      ENGINE_DELPHISTRIFE:
         begin
           options.palette := @StrifePaletteRaw;
           options.levelname := 'MAP01';

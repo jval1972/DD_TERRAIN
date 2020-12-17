@@ -23,12 +23,8 @@ Multiple Undo/Redo
 
 ## Screenshots
 
-![Screenshot1](https://i.postimg.cc/1tSH70Ky/Image2.png "Screenshot1")
+![Screenshot1](https://i.postimg.cc/63NV0SkH/screenshot4.png "Screenshot1")
 
-![Screenshot2](https://i.postimg.cc/W377BD9g/Image1.png "Screenshot2")
+![Screenshot2](https://i.postimg.cc/BnXCQ25C/screenshot2.png "Screenshot2")
 
-![Screenshot3](https://i.postimg.cc/tChNLCpF/Image4.png "Screenshot3")
-
-![Screenshot4](https://i.postimg.cc/L5qcn7VD/Image14.png "Screenshot4")
-
-![Screenshot5](https://i.postimg.cc/C5WWDNPg/Image12.png "Screenshot4")
+![Screenshot3](https://i.postimg.cc/NjSkyLpv/screenshot3.png "Screenshot3")

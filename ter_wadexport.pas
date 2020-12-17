@@ -68,6 +68,16 @@ type
   end;
   exportwadoptions_p = ^exportwadoptions_t;
 
+const
+  wadexportstats_t = record
+    numthings: integer;
+    numlinedefs: integer;
+    numsidedefs: integer;
+    numvertexes: integer;
+    numsectors: integer;
+  end;
+  wadexportstats_p = ^wadexportstats_t;
+
 procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;

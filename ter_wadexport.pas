@@ -654,9 +654,6 @@ begin
 
     ms := TMemoryStream.Create;
 
-    png.SaveToStream(ms);
-    png.Free;
-
     wadwriter.AddString('TEXTURES',
       'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
       '{' + #13#10 +
@@ -665,6 +662,10 @@ begin
       '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
       '}' + #13#10
     );
+
+    png.SaveToStream(ms);
+    png.Free;
+
     wadwriter.AddSeparator('P_START');
     wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
     wadwriter.AddSeparator('P_END');

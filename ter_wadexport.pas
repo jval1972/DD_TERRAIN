@@ -44,6 +44,7 @@ const
   ETF_TRUECOLORFLAT = 4;
   ETF_MERGEFLATSECTORS = 8;
   ETF_ADDPLAYERSTART = 16;
+  ETF_DONTEXPORTFLAT = 32;
 
 const
   ENGINE_RAD = 0;
@@ -66,17 +67,17 @@ type
   end;
   exportwadoptions_p = ^exportwadoptions_t;
 
-procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 
-procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 
-procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const defsidetex: string; const defceilingtex: string;
   const flags: LongWord; const defceilingheight: integer = 512);
 
@@ -133,7 +134,7 @@ type
 {$DEFINE DOOM_FORMAT}
 {$UNDEF HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
-procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
@@ -195,58 +196,61 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  // Create Palette
-  for i := 0 to 255 do
+  if flags and ETF_DONTEXPORTFLAT = 0 then
   begin
-    r := palette[3 * i];
-    if r > 255 then r := 255;
-    g := palette[3 * i + 1];
-    if g > 255 then g := 255;
-    b := palette[3 * i + 2];
-    if b > 255 then b := 255;
-    def_palL[i] := (r shl 16) + (g shl 8) + (b);
-  end;
-
-  if flags and ETF_TRUECOLORFLAT <> 0 then
-  begin
-    // Create flat - 32 bit color - inside HI_START - HI_END namespace
-    png := TPngObject.Create;
-    png.Assign(t.Texture);
-
-    ms := TMemoryStream.Create;
-
-    png.SaveToStream(ms);
-
-    wadwriter.AddSeparator('HI_START');
-    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
-    wadwriter.AddSeparator('HI_END');
-
-    ms.Free;
-    png.Free;
-  end;
-
-  // Create flat - 8 bit
-  bm := t.Texture;
-  GetMem(flattexture, bm.Width * bm.Height);
-
-  i := 0;
-  for y := 0 to t.texturesize - 1 do
-  begin
-    scanline := t.Texture.ScanLine[y];
-    for x := 0 to t.texturesize - 1 do
+    // Create Palette
+    for i := 0 to 255 do
     begin
-      c := scanline[x];
-      flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
-      inc(i);
+      r := palette[3 * i];
+      if r > 255 then r := 255;
+      g := palette[3 * i + 1];
+      if g > 255 then g := 255;
+      b := palette[3 * i + 2];
+      if b > 255 then b := 255;
+      def_palL[i] := (r shl 16) + (g shl 8) + (b);
     end;
+
+    if flags and ETF_TRUECOLORFLAT <> 0 then
+    begin
+      // Create flat - 32 bit color - inside HI_START - HI_END namespace
+      png := TPngObject.Create;
+      png.Assign(t.Texture);
+
+      ms := TMemoryStream.Create;
+
+      png.SaveToStream(ms);
+
+      wadwriter.AddSeparator('HI_START');
+      wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+      wadwriter.AddSeparator('HI_END');
+
+      ms.Free;
+      png.Free;
+    end;
+
+    // Create flat - 8 bit
+    bm := t.Texture;
+    GetMem(flattexture, bm.Width * bm.Height);
+
+    i := 0;
+    for y := 0 to t.texturesize - 1 do
+    begin
+      scanline := t.Texture.ScanLine[y];
+      for x := 0 to t.texturesize - 1 do
+      begin
+        c := scanline[x];
+        flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
+        inc(i);
+      end;
+    end;
+
+    wadwriter.AddSeparator('F_START');
+    wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
+    wadwriter.AddSeparator('F_END');
+
+    FreeMem(flattexture, bm.Width * bm.Height);
   end;
-
-  wadwriter.AddSeparator('F_START');
-  wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
-  wadwriter.AddSeparator('F_END');
-
-  FreeMem(flattexture, bm.Width * bm.Height);
-
+  
   // Create Map
   for x := 0 to t.heightmapsize - 2 do
     for y := 0 to t.heightmapsize - 2 do
@@ -291,8 +295,8 @@ begin
   wadwriter.AddSeparator('REJECT');
   wadwriter.AddSeparator('BLOCKMAP');
 
-  // Save wad to disk
-  wadwriter.SaveToFile(fname);
+  // Save wad
+  wadwriter.SaveToStream(strm);
 
   wadwriter.Free;
 
@@ -309,7 +313,7 @@ end;
 {$UNDEF DOOM_FORMAT}
 {$DEFINE HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
-procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
@@ -468,8 +472,8 @@ begin
   wadwriter.AddSeparator('BLOCKMAP');
   wadwriter.AddSeparator('BEHAVIOR');
 
-  // Save wad to disk
-  wadwriter.SaveToFile(fname);
+  // Save wad
+  wadwriter.SaveToStream(strm);
 
   wadwriter.Free;
 
@@ -486,7 +490,7 @@ end;
 {$UNDEF DOOM_FORMAT}
 {$UNDEF HEXEN_FORMAT}
 {$DEFINE UDMF_FORMAT}
-procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
+procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
   const levelname: string; const defsidetex: string; const defceilingtex: string; 
   const flags: LongWord; const defceilingheight: integer = 512);
 var
@@ -716,7 +720,7 @@ begin
   wadwriter.AddSeparator('ENDMAP');
 
   // Save wad to disk
-  wadwriter.SaveToFile(fname);
+  wadwriter.SaveToStream(strm);
 
   wadwriter.Free;
   udmfmap.Free;

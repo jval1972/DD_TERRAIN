@@ -4,7 +4,7 @@ object ExportWADMapForm: TExportWADMapForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 413
+  ClientHeight = 372
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1050,7 +1050,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 372
+    Top = 331
     Width = 681
     Height = 41
     Align = alBottom
@@ -1092,7 +1092,7 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 372
+    Height = 331
     Align = alClient
     Caption = ' '
     TabOrder = 1
@@ -1114,9 +1114,9 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object EngineRadioGroup: TRadioGroup
       Left = 16
-      Top = 80
+      Top = 56
       Width = 201
-      Height = 249
+      Height = 185
       Caption = ' Engine '
       ItemIndex = 0
       Items.Strings = (
@@ -1125,16 +1125,12 @@ object ExportWADMapForm: TExportWADMapForm
         'DelphiHeretic'
         'DelphiHexen'
         'DelphiStrife'
-        'UDMF (GZDoom, K8Vavoom, etc)'
-        'Vanilla Doom'
-        'Vanilla Heretic'
-        'Vanilla Hexen'
-        'Vanilla Strife')
+        'UDMF (GZDoom, K8Vavoom, etc)')
       TabOrder = 0
     end
     object OptionsGroupBox: TGroupBox
       Left = 240
-      Top = 80
+      Top = 56
       Width = 185
       Height = 161
       Caption = ' Options '
@@ -1192,7 +1188,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object GroupBox1: TGroupBox
       Left = 240
-      Top = 256
+      Top = 224
       Width = 185
       Height = 89
       Caption = ' Textures '
@@ -1238,8 +1234,8 @@ object ExportWADMapForm: TExportWADMapForm
       TabOrder = 3
     end
     object GroupBox3: TGroupBox
-      Left = 432
-      Top = 80
+      Left = 448
+      Top = 56
       Width = 201
       Height = 209
       Caption = ' Preview '

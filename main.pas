@@ -2232,18 +2232,21 @@ begin
 end;
 
 procedure TForm1.RadixWADFile1Click(Sender: TObject);
+var
+  fs: TFileStream;
 begin
   if SaveWADDialog.Execute then
   begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
+      fs := TFileStream.Create(SaveWADDialog.FileName, fmCreate);
 //      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', 'F_SKY1', 1255, 1254, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
 //      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 'F_SKY1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Doom
 //      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @HereticPaletteRaw, 'F_SKY1', 'CSTLRCK', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Heretic
-      ExportTerrainToHexenFile(terrain, SaveWADDialog.FileName, 'MAP01', @HexenPaletteRaw, 'FOREST02', 'F_SKY', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Hexen
+      ExportTerrainToHexenFile(terrain, fs, 'MAP01', @HexenPaletteRaw, 'FOREST02', 'F_SKY', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Hexen
 //      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @StrifePaletteRaw, 'BRKGRY01', 'F_SKY001', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Strife
-
+      fs.Free;
     finally
       Screen.Cursor := crDefault;
     end;
@@ -2251,13 +2254,17 @@ begin
 end;
 
 procedure TForm1.ZDoomUDMFMap1Click(Sender: TObject);
+var
+  fs: TFileStream;
 begin
   if SaveWADDialog.Execute then
   begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', 'F_SKY1', ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
+      fs := TFileStream.Create(SaveWADDialog.FileName, fmCreate);
+      ExportTerrainToUDMFFile(terrain, fs, 'MAP01', 'METAL1', 'F_SKY1', ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
+      fs.Free;
     finally
       Screen.Cursor := crDefault;
     end;

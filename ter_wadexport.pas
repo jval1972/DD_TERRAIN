@@ -38,26 +38,47 @@ uses
   ter_utils,
   ter_wad;
 
-procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
-  const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
-
-procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
-  const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512);
-
-procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
-  const levelname: string; const defsidetex: string;
-  const flags: LongWord; const defceilingheight: integer = 512);
-
 const
   ETF_SLOPED = 1;
   ETF_CALCDXDY = 2;
   ETF_TRUECOLORFLAT = 4;
   ETF_MERGEFLATSECTORS = 8;
   ETF_ADDPLAYERSTART = 16;
+
+const
+  ENGINE_RAD = 0;
+  ENGINE_DELHIDOOM = 1;
+  ENGINE_DELHIHERETIC = 2;
+  ENGINE_DELHIHEXEN = 3;
+  ENGINE_DELHISTRIFE = 4;
+  ENGINE_UDMF = 5;
+
+type
+  exportwadoptions_t = record
+    engine: integer;
+    levelname: string[8];
+    palette: PByteArray;
+    defsidetex: string[8];
+    deceilingpic: string[8];
+    lowerid, raiseid: integer;
+    flags: integer;
+    defceilingheight: integer;
+  end;
+  exportwadoptions_p = ^exportwadoptions_t;
+
+procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const defceilingtex: string; const _LOWERID, _RAISEID: integer;
+  const flags: LongWord; const defceilingheight: integer = 512);
+
+procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
+  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const defceilingtex: string; const _LOWERID, _RAISEID: integer;
+  const flags: LongWord; const defceilingheight: integer = 512);
+
+procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
+  const levelname: string; const defsidetex: string; const defceilingtex: string;
+  const flags: LongWord; const defceilingheight: integer = 512);
 
 implementation
 
@@ -114,7 +135,7 @@ type
 {$UNDEF UDMF_FORMAT}
 procedure ExportTerrainToWADFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
-  const _LOWERID, _RAISEID: integer;
+  const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
   doomthings: Pmapthing_tArray;
@@ -290,7 +311,7 @@ end;
 {$UNDEF UDMF_FORMAT}
 procedure ExportTerrainToHexenFile(const t: TTerrain; const fname: string;
   const levelname: string; const palette: PByteArray; const defsidetex: string;
-  const _LOWERID, _RAISEID: integer;
+  const defceilingtex: string; const _LOWERID, _RAISEID: integer;
   const flags: LongWord; const defceilingheight: integer = 512);
 var
   doomthings: Phmapthing_tArray;
@@ -466,7 +487,7 @@ end;
 {$UNDEF HEXEN_FORMAT}
 {$DEFINE UDMF_FORMAT}
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const fname: string;
-  const levelname: string; const defsidetex: string;
+  const levelname: string; const defsidetex: string; const defceilingtex: string; 
   const flags: LongWord; const defceilingheight: integer = 512);
 var
   doomlinedefs: Pmaplinedef_tArray;

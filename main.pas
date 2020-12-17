@@ -2238,11 +2238,11 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', 1255, 1254, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Doom
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @HereticPaletteRaw, 'CSTLRCK', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Heretic
-      ExportTerrainToHexenFile(terrain, SaveWADDialog.FileName, 'MAP01', @HexenPaletteRaw, 'FOREST02', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Hexen
-//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @StrifePaletteRaw, 'BRKGRY01', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Strife
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @RadixPaletteRaw, 'RDXW0012', 'F_SKY1', 1255, 1254, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @DoomPaletteRaw, 'METAL1', 'F_SKY1', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Doom
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'E1M1', @HereticPaletteRaw, 'F_SKY1', 'CSTLRCK', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Heretic
+      ExportTerrainToHexenFile(terrain, SaveWADDialog.FileName, 'MAP01', @HexenPaletteRaw, 'FOREST02', 'F_SKY', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Hexen
+//      ExportTerrainToWADFile(terrain, SaveWADDialog.FileName, 'MAP01', @StrifePaletteRaw, 'BRKGRY01', 'F_SKY001', 1155, 1154, ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART); // Strife
 
     finally
       Screen.Cursor := crDefault;
@@ -2257,7 +2257,7 @@ begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(SaveWADDialog.FileName);
-      ExportTerrainToUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
+      ExportTerrainToUDMFFile(terrain, SaveWADDialog.FileName, 'MAP01', 'METAL1', 'F_SKY1', ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART);
     finally
       Screen.Cursor := crDefault;
     end;

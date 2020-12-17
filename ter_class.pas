@@ -931,7 +931,7 @@ type
     cnt: integer;
     sample: array[0..MAXRESAMPLEITEMS - 1] of resampleitem_t;
   end;
-  resampleitems_t = ^resampleitems_p;
+  resampleitems_p = ^resampleitems_t;
 
 const
   RESAMPLEMATRIXSIZE = 512;

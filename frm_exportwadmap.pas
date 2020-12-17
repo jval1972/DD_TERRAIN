@@ -32,7 +32,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Buttons;
+  Dialogs, StdCtrls, ExtCtrls, Buttons, ter_wadexport;
 
 type
   TExportWADMapForm = class(TForm)
@@ -48,17 +48,53 @@ type
     TrueColorFlatCheckBox: TCheckBox;
     MergeFlatSectorsCheckBox: TCheckBox;
     AddPlayerStartCheckBox: TCheckBox;
+    GroupBox1: TGroupBox;
+    Edit1: TEdit;
+    CeilingTextureLabel: TLabel;
+    Edit2: TEdit;
+    SideTextureLabel: TLabel;
+    Label3: TLabel;
+    FileNameEdit: TEdit;
+    SelectFileButton: TSpeedButton;
+    GroupBox3: TGroupBox;
+    Panel3: TPanel;
+    PaintBox1: TPaintBox;
+    SaveWADDialog: TSaveDialog;
+    procedure SelectFileButtonClick(Sender: TObject);
   private
     { Private declarations }
+    procedure UpdateControls;
   public
     { Public declarations }
   end;
 
-var
-  ExportWADMapForm: TExportWADMapForm;
+function GetWADExportOptions(const options: exportwadoptions_p): boolean;
 
 implementation
 
 {$R *.dfm}
+
+function GetWADExportOptions(const options: exportwadoptions_p): boolean;
+var
+  f: TExportWADMapForm;
+begin
+  Result := False;
+  f := TExportWADMapForm.Create(nil);
+  try
+
+  finally
+    f.Free;
+  end;
+end;
+
+procedure TExportWADMapForm.SelectFileButtonClick(Sender: TObject);
+begin
+  if SaveWADDialog.Execute then
+    FileNameEdit.Text := SaveWADDialog.FileName;
+end;
+
+procedure TExportWADMapForm.UpdateControls;
+begin
+end;
 
 end.

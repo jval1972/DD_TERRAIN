@@ -71,7 +71,6 @@ begin
   Application.Initialize;
   Application.Title := 'Terrain Generator';
   Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TExportWADMapForm, ExportWADMapForm);
   Application.Run;
 end.
 

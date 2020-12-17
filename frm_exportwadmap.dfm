@@ -4,7 +4,7 @@ object ExportWADMapForm: TExportWADMapForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 322
+  ClientHeight = 413
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1050,7 +1050,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 281
+    Top = 372
     Width = 681
     Height = 41
     Align = alBottom
@@ -1072,6 +1072,7 @@ object ExportWADMapForm: TExportWADMapForm
         Height = 25
         Caption = 'OK'
         Default = True
+        Enabled = False
         ModalResult = 1
         TabOrder = 0
       end
@@ -1091,13 +1092,29 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 281
+    Height = 372
     Align = alClient
     Caption = ' '
     TabOrder = 1
-    object EngineRadioGroup: TRadioGroup
-      Left = 24
+    object Label3: TLabel
+      Left = 16
       Top = 16
+      Width = 22
+      Height = 13
+      Caption = 'File: '
+    end
+    object SelectFileButton: TSpeedButton
+      Left = 472
+      Top = 16
+      Width = 23
+      Height = 22
+      Caption = '...'
+      Flat = True
+      OnClick = SelectFileButtonClick
+    end
+    object EngineRadioGroup: TRadioGroup
+      Left = 16
+      Top = 80
       Width = 201
       Height = 249
       Caption = ' Engine '
@@ -1116,8 +1133,8 @@ object ExportWADMapForm: TExportWADMapForm
       TabOrder = 0
     end
     object OptionsGroupBox: TGroupBox
-      Left = 248
-      Top = 16
+      Left = 240
+      Top = 80
       Width = 185
       Height = 161
       Caption = ' Options '
@@ -1173,5 +1190,86 @@ object ExportWADMapForm: TExportWADMapForm
         TabOrder = 4
       end
     end
+    object GroupBox1: TGroupBox
+      Left = 240
+      Top = 256
+      Width = 185
+      Height = 89
+      Caption = ' Textures '
+      TabOrder = 2
+      object CeilingTextureLabel: TLabel
+        Left = 13
+        Top = 52
+        Width = 76
+        Height = 13
+        Caption = 'Ceiling Texture: '
+        FocusControl = Edit2
+      end
+      object SideTextureLabel: TLabel
+        Left = 17
+        Top = 20
+        Width = 62
+        Height = 13
+        Caption = 'Side texture: '
+        FocusControl = Edit1
+      end
+      object Edit1: TEdit
+        Left = 104
+        Top = 20
+        Width = 65
+        Height = 21
+        MaxLength = 8
+        TabOrder = 0
+      end
+      object Edit2: TEdit
+        Left = 104
+        Top = 52
+        Width = 65
+        Height = 21
+        MaxLength = 8
+        TabOrder = 1
+      end
+    end
+    object FileNameEdit: TEdit
+      Left = 56
+      Top = 16
+      Width = 417
+      Height = 21
+      TabOrder = 3
+    end
+    object GroupBox3: TGroupBox
+      Left = 432
+      Top = 80
+      Width = 201
+      Height = 209
+      Caption = ' Preview '
+      TabOrder = 4
+      object Panel3: TPanel
+        Left = 2
+        Top = 15
+        Width = 197
+        Height = 192
+        Align = alClient
+        BevelOuter = bvNone
+        BorderWidth = 4
+        Caption = ' '
+        TabOrder = 0
+        object PaintBox1: TPaintBox
+          Left = 4
+          Top = 4
+          Width = 184
+          Height = 184
+          Cursor = crCross
+          Align = alLeft
+        end
+      end
+    end
+  end
+  object SaveWADDialog: TSaveDialog
+    DefaultExt = 'WAD'
+    Filter = 'wad files(*.wad)|*.wad|All files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
+    Left = 513
+    Top = 16
   end
 end

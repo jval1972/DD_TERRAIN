@@ -438,7 +438,7 @@ begin
 
   // Player start
   if flags and ETF_ADDPLAYERSTART <> 0 then
-    AddThing(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
+    AddThing(64, -64, 0, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
 
   // Remove unneeded lines
   if flags and ETF_MERGEFLATSECTORS <> 0 then

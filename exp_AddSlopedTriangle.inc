@@ -5,6 +5,17 @@
     l1, l2, l3: integer;
     sec: integer;
     issloped: boolean;
+    {$IFDEF HEXEN_FORMAT}
+    procedure doaddhexenthing(const p: point3d_p);
+    begin
+      if flags and ETF_HEXENHEIGHT <> 0 then
+        AddThing(p.X, -p.Y, 0, p1.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else if p1.Z < 0 then
+        AddThing(p.X, -p.Y, 0, -p.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else
+        AddThing(p.X, -p.Y, 0, p.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+    end;
+    {$ENDIF}
   begin
     p1 := GetHeightmapCoords3D(iX1, iY1);
     p2 := GetHeightmapCoords3D(iX2, iY2);
@@ -48,6 +59,11 @@
       doomvertexes[v2].z := p2.Z;
       doomvertexes[v3].z := p3.Z;
       {$ELSE}
+      {$IFDEF HEXEN_FORMAT}
+      doaddhexenthing(@p1);
+      doaddhexenthing(@p2);
+      doaddhexenthing(@p3);
+      {$ELSE}
       if p1.Z < 0 then
         AddThing(p1.X, -p1.Y, -p1.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
@@ -60,6 +76,7 @@
         AddThing(p3.X, -p3.Y, -p3.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
         AddThing(p3.X, -p3.Y, p3.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+      {$ENDIF}
       {$ENDIF}
     end;
   end;

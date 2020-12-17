@@ -33,7 +33,7 @@ interface
 uses
   ter_wad;
 
-const  
+const
 // Skill flags.
   MTF_EASY = 1;
   MTF_NORMAL = 2;
@@ -48,24 +48,24 @@ const
   MTF_GDEATHMATCH = 1024;
 
 type
-  mapvertex_t = record
+  mapvertex_t = packed record
     x: smallint;
     y: smallint;
   end;
   Pmapvertex_t = ^mapvertex_t;
-  mapvertex_tArray = array[0..$FFF] of mapvertex_t;
+  mapvertex_tArray = packed array[0..$FFF] of mapvertex_t;
   Pmapvertex_tArray = ^mapvertex_tArray;
 
-  zmapvertex_t = record
+  zmapvertex_t = packed record
     x: smallint;
     y: smallint;
     z: smallint;
   end;
   Pzmapvertex_t = ^zmapvertex_t;
-  zmapvertex_tArray = array[0..$FFF] of zmapvertex_t;
+  zmapvertex_tArray = packed array[0..$FFF] of zmapvertex_t;
   Pzmapvertex_tArray = ^zmapvertex_tArray;
 
-  mapsidedef_t = record
+  mapsidedef_t = packed record
     textureoffset: smallint;
     rowoffset: smallint;
     toptexture: char8_t;
@@ -75,23 +75,23 @@ type
     sector: smallint;
   end;
   Pmapsidedef_t = ^mapsidedef_t;
-  mapsidedef_tArray = array[0..$FFF] of mapsidedef_t;
+  mapsidedef_tArray = packed array[0..$FFF] of mapsidedef_t;
   Pmapsidedef_tArray = ^mapsidedef_tArray;
 
-  maplinedef_t = record
+  maplinedef_t = packed record
     v1: smallint;
     v2: smallint;
     flags: smallint;
     special: smallint;
     tag: smallint;
   // sidenum[1] will be -1 if one sided
-    sidenum: array[0..1] of smallint;
+    sidenum: packed array[0..1] of smallint;
   end;
   Pmaplinedef_t = ^maplinedef_t;
-  maplinedef_tArray = array[0..$FFF] of maplinedef_t;
+  maplinedef_tArray = packed array[0..$FFF] of maplinedef_t;
   Pmaplinedef_tArray = ^maplinedef_tArray;
 
-  hmaplinedef_t = record
+  hmaplinedef_t = packed record
     v1: smallint;
     v2: smallint;
     flags: smallint;
@@ -101,10 +101,10 @@ type
     arg3: byte;
     arg4: byte;
     arg5: byte;
-    sidenum: array[0..1] of smallint;
+    sidenum: packed array[0..1] of smallint;
   end;
   Phmaplinedef_t = ^hmaplinedef_t;
-  hmaplinedef_tArray = array[0..$FFFF] of hmaplinedef_t;
+  hmaplinedef_tArray = packed array[0..$FFFF] of hmaplinedef_t;
   Phmaplinedef_tArray = ^hmaplinedef_tArray;
 
 const
@@ -154,7 +154,7 @@ const
 
 type
 // Sector definition, from editing.
-  mapsector_t = record
+  mapsector_t = packed record
     floorheight: smallint;
     ceilingheight: smallint;
     floorpic: char8_t;
@@ -164,10 +164,10 @@ type
     tag: smallint;
   end;
   Pmapsector_t = ^mapsector_t;
-  mapsector_tArray = array[0..$FFFF] of mapsector_t;
+  mapsector_tArray = packed array[0..$FFFF] of mapsector_t;
   Pmapsector_tArray = ^mapsector_tArray;
 
-  mapthing_t = record
+  mapthing_t = packed record
     x: smallint;
     y: smallint;
     angle: smallint;
@@ -175,10 +175,10 @@ type
     options: smallint;
   end;
   Pmapthing_t = ^mapthing_t;
-  mapthing_tArray = array[0..$FFFF] of mapthing_t;
+  mapthing_tArray = packed array[0..$FFFF] of mapthing_t;
   Pmapthing_tArray = ^mapthing_tArray;
 
-  hmapthing_t = record
+  hmapthing_t = packed record
     tid: smallint;
     x: smallint;
     y: smallint;
@@ -194,7 +194,7 @@ type
     arg5: byte;
   end;
   Phmapthing_t = ^hmapthing_t;
-  hmapthing_tArray = array[0..$FFFF] of hmapthing_t;
+  hmapthing_tArray = packed array[0..$FFFF] of hmapthing_t;
   Phmapthing_tArray = ^hmapthing_tArray;
 
 type
@@ -237,4 +237,3 @@ type
 implementation
 
 end.
- 

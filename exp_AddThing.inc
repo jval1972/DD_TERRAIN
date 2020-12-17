@@ -1,7 +1,7 @@
-  function AddThing(const x, y: integer; const angle: smallint; const mtype: word; options: smallint): integer;
+  function AddThing(const x, y: integer; const angle: smallint;{$IFDEF HEXEN_FORMAT}const height: integer;{$ENDIF} const mtype: word; options: smallint): integer;
   var
     j: integer;
-    mthing: Phmapthing_t;
+    mthing: {$IFDEF HEXEN_FORMAT}Phmapthing_t{$ELSE}Pmapthing_t{$ENDIF};
   begin
     {$IFDEF HEXEN_FORMAT}
     options := options or (MTF_FIGHTER or MTF_CLERIC or MTF_MAGE or MTF_GSINGLE or MTF_GCOOP or MTF_GDEATHMATCH);
@@ -14,7 +14,7 @@
         exit;
       end;
 
-    ReallocMem(doomthings, (numdoomthings + 1) * SizeOf(hmapthing_t));
+    ReallocMem(doomthings, (numdoomthings + 1) * SizeOf({$IFDEF HEXEN_FORMAT}hmapthing_t{$ELSE}mapthing_t{$ENDIF}));
     mthing := @doomthings[numdoomthings];
 
     mthing.x := x;
@@ -25,7 +25,7 @@
     mthing.options := options;
     {$IFDEF HEXEN_FORMAT}
     mthing.tid := 0;
-    mthing.height := 0;
+    mthing.height := height;
     mthing.special := 0;
     mthing.arg1 := 0;
     mthing.arg2 := 0;

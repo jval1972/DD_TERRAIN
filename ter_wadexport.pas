@@ -375,57 +375,60 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  // Create Palette
-  for i := 0 to 255 do
+  if flags and ETF_DONTEXPORTFLAT = 0 then
   begin
-    r := palette[3 * i];
-    if r > 255 then r := 255;
-    g := palette[3 * i + 1];
-    if g > 255 then g := 255;
-    b := palette[3 * i + 2];
-    if b > 255 then b := 255;
-    def_palL[i] := (r shl 16) + (g shl 8) + (b);
-  end;
-
-  if flags and ETF_TRUECOLORFLAT <> 0 then
-  begin
-    // Create flat - 32 bit color - inside HI_START - HI_END namespace
-    png := TPngObject.Create;
-    png.Assign(t.Texture);
-
-    ms := TMemoryStream.Create;
-
-    png.SaveToStream(ms);
-
-    wadwriter.AddSeparator('HI_START');
-    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
-    wadwriter.AddSeparator('HI_END');
-
-    ms.Free;
-    png.Free;
-  end;
-
-  // Create flat - 8 bit
-  bm := t.Texture;
-  GetMem(flattexture, bm.Width * bm.Height);
-
-  i := 0;
-  for y := 0 to t.texturesize - 1 do
-  begin
-    scanline := t.Texture.ScanLine[y];
-    for x := 0 to t.texturesize - 1 do
+    // Create Palette
+    for i := 0 to 255 do
     begin
-      c := scanline[x];
-      flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
-      inc(i);
+      r := palette[3 * i];
+      if r > 255 then r := 255;
+      g := palette[3 * i + 1];
+      if g > 255 then g := 255;
+      b := palette[3 * i + 2];
+      if b > 255 then b := 255;
+      def_palL[i] := (r shl 16) + (g shl 8) + (b);
     end;
+
+    if flags and ETF_TRUECOLORFLAT <> 0 then
+    begin
+      // Create flat - 32 bit color - inside HI_START - HI_END namespace
+      png := TPngObject.Create;
+      png.Assign(t.Texture);
+
+      ms := TMemoryStream.Create;
+
+      png.SaveToStream(ms);
+
+      wadwriter.AddSeparator('HI_START');
+      wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+      wadwriter.AddSeparator('HI_END');
+
+      ms.Free;
+      png.Free;
+    end;
+
+    // Create flat - 8 bit
+    bm := t.Texture;
+    GetMem(flattexture, bm.Width * bm.Height);
+
+    i := 0;
+    for y := 0 to t.texturesize - 1 do
+    begin
+      scanline := t.Texture.ScanLine[y];
+      for x := 0 to t.texturesize - 1 do
+      begin
+        c := scanline[x];
+        flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
+        inc(i);
+      end;
+    end;
+
+    wadwriter.AddSeparator('F_START');
+    wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
+    wadwriter.AddSeparator('F_END');
+
+    FreeMem(flattexture, bm.Width * bm.Height);
   end;
-
-  wadwriter.AddSeparator('F_START');
-  wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
-  wadwriter.AddSeparator('F_END');
-
-  FreeMem(flattexture, bm.Width * bm.Height);
 
   // Create Map
   for x := 0 to t.heightmapsize - 2 do
@@ -630,41 +633,43 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  // Create flat
-
-  png := TPngObject.Create;
-  if flags and ETF_TRUECOLORFLAT = 0 then
+  if flags and ETF_DONTEXPORTFLAT = 0 then
   begin
-    bm := TBitmap.Create;
-    try
-      bm.Assign(t.Texture);
-      ter_quantizebitmap(bm, 255);
-      png.Assign(bm);
-    finally
-      bm.Free;
-    end;
-  end
-  else
-    png.Assign(t.Texture);
+    // Create flat
+    png := TPngObject.Create;
+    if flags and ETF_TRUECOLORFLAT = 0 then
+    begin
+      bm := TBitmap.Create;
+      try
+        bm.Assign(t.Texture);
+        ter_quantizebitmap(bm, 255);
+        png.Assign(bm);
+      finally
+        bm.Free;
+      end;
+    end
+    else
+      png.Assign(t.Texture);
 
-  ms := TMemoryStream.Create;
+    ms := TMemoryStream.Create;
 
-  png.SaveToStream(ms);
-  png.Free;
+    png.SaveToStream(ms);
+    png.Free;
 
-  wadwriter.AddString('TEXTURES',
-    'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
-    '{' + #13#10 +
-    '   XScale 1.0' + #13#10 +
-    '   YScale 1.0' + #13#10 +
-    '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
-    '}' + #13#10
-  );
-  wadwriter.AddSeparator('P_START');
-  wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
-  wadwriter.AddSeparator('P_END');
+    wadwriter.AddString('TEXTURES',
+      'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
+      '{' + #13#10 +
+      '   XScale 1.0' + #13#10 +
+      '   YScale 1.0' + #13#10 +
+      '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
+      '}' + #13#10
+    );
+    wadwriter.AddSeparator('P_START');
+    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+    wadwriter.AddSeparator('P_END');
 
-  ms.Free;
+    ms.Free;
+  end;
 
   // Create Map
   for x := 0 to t.heightmapsize - 2 do

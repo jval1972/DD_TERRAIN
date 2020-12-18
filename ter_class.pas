@@ -898,6 +898,8 @@ type
     points: array[0..2] of point3df_t;
     fa, fb, fic, fd: single;
     left, right, top, bottom: integer;
+    flat: boolean;
+    z: single;
   end;
   triangle3df_p = ^triangle3df_t;
 
@@ -934,6 +936,9 @@ type
     tri.fb := fb;
     tri.fic := -1 / fc;
     tri.fd := fd;
+    tri.flat := (z1 = z2) and (z1 = z3);
+    if tri.flat then
+      tri.z := z1;
   end;
 
   procedure calc_box(
@@ -983,25 +988,25 @@ type
 
     tri1.points[0].X := p1.X * bmhsize / ftexturesize;
     tri1.points[0].Y := p1.Y * bmhsize / ftexturesize;
-    tri1.points[0].Z := p1.Z * bmhsize / ftexturesize;
+    tri1.points[0].Z := p1.Z;
     tri1.points[1].X := p2.X * bmhsize / ftexturesize;
     tri1.points[1].Y := p2.Y * bmhsize / ftexturesize;
-    tri1.points[1].Z := p2.Z * bmhsize / ftexturesize;
+    tri1.points[1].Z := p2.Z;
     tri1.points[2].X := p4.X * bmhsize / ftexturesize;
     tri1.points[2].Y := p4.Y * bmhsize / ftexturesize;
-    tri1.points[2].Z := p4.Z * bmhsize / ftexturesize;
+    tri1.points[2].Z := p4.Z;
     calc_plane(tri1);
     calc_box(tri1);
 
     tri2.points[0].X := p4.X * bmhsize / ftexturesize;
     tri2.points[0].Y := p4.Y * bmhsize / ftexturesize;
-    tri2.points[0].Z := p4.Z * bmhsize / ftexturesize;
+    tri2.points[0].Z := p4.Z;
     tri2.points[1].X := p2.X * bmhsize / ftexturesize;
     tri2.points[1].Y := p2.Y * bmhsize / ftexturesize;
-    tri2.points[1].Z := p2.Z * bmhsize / ftexturesize;
+    tri2.points[1].Z := p2.Z;
     tri2.points[2].X := p3.X * bmhsize / ftexturesize;
     tri2.points[2].Y := p3.Y * bmhsize / ftexturesize;
-    tri2.points[2].Z := p3.Z * bmhsize / ftexturesize;
+    tri2.points[2].Z := p3.Z;
     calc_plane(tri2);
     calc_box(tri2);
   end;
@@ -1028,7 +1033,10 @@ type
 
   function ZatPoint(const x, y: integer; const tri: triangle3df_p): single;
   begin
-    Result := (tri.fa * x + tri.fb * y + tri.fd) * tri.fic;
+    if tri.flat then
+      Result := tri.z
+    else
+      Result := (tri.fa * x + tri.fb * y + tri.fd) * tri.fic;
   end;
 
 var

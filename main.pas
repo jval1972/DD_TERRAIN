@@ -252,6 +252,8 @@ type
     ColorPanel1: TPanel;
     ColorPaletteImage: TImage;
     PickColorRGBLabel: TLabel;
+    Hiresheightmap1: TMenuItem;
+    SavePictureDialog2: TSavePictureDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -338,6 +340,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure ColorPaletteImageMouseUp(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure Hiresheightmap1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -2862,6 +2865,57 @@ begin
     lpickcolormousedown := False;
     PickColorPalette(X, Y);
   end;
+end;
+
+procedure TForm1.Hiresheightmap1Click(Sender: TObject);
+var
+  bmh: bitmapheightmap_p;
+  x, y: integer;
+  b: TBitmap;
+  png: TPngObject;
+  imgfname: string;
+  l: PLongWordArray;
+  g: integer;
+begin
+  if SavePictureDialog2.Execute then
+  begin
+    Screen.Cursor := crHourglass;
+    imgfname := SavePictureDialog2.FileName;
+    BackupFile(imgfname);
+    b := TBitmap.Create;
+    try
+      GetMem(bmh, SizeOf(bitmapheightmap_t));
+      terrain.GenerateBitmapHeightmap(bmh, MAXBITMAPHEIGHTMAP);
+      b.Width := MAXBITMAPHEIGHTMAP;
+      b.Height := MAXBITMAPHEIGHTMAP;
+      b.PixelFormat := pf32bit;
+      for y := 0 to b.Height - 1 do
+      begin
+        l := b.ScanLine[y];
+        for x := 0 to b.Width - 1 do
+        begin
+          g := bmh[x, y];
+          g := GetIntInRange(Round((g + HEIGHTMAPRANGE) * 256 / (2 * HEIGHTMAPRANGE)), 0, 255);
+          l[x] := RGB(g, g, g);
+        end;
+      end;
+      FreeMem(bmh, SizeOf(bitmapheightmap_t));
+
+      if UpperCase(ExtractFileExt(imgfname)) = '.PNG' then
+      begin
+        png := TPngObject.Create;
+        png.Assign(b);
+        png.SaveToFile(imgfname);
+        png.Free;
+      end
+      else
+        b.SaveToFile(imgfname);
+    finally
+      b.Free;
+    end;
+    Screen.Cursor := crDefault;
+  end;
+
 end;
 
 end.

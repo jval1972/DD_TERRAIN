@@ -8007,6 +8007,10 @@ object Form1: TForm1
           Caption = 'Screenshot (3D View)'
           OnClick = ExportScreenshot1Click
         end
+        object Hiresheightmap1: TMenuItem
+          Caption = 'Hi res heightmap'
+          OnClick = Hiresheightmap1Click
+        end
       end
       object N2: TMenuItem
         Caption = '-'
@@ -8516,5 +8520,12 @@ object Form1: TForm1
       0C3000000000000087E10000000000008181000000000000C003000000000000
       E007000000000000F00F00000000000000000000000000000000000000000000
       000000000000}
+  end
+  object SavePictureDialog2: TSavePictureDialog
+    DefaultExt = 'png'
+    Filter = 'PNG Images (*.png)|*.png|Bitmaps (*.bmp)|*.bmp'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
+    Left = 401
+    Top = 153
   end
 end

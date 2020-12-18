@@ -929,10 +929,10 @@ type
     fa := b1 * c2 - b2 * c1;
     fb := a2 * c1 - a1 * c2;
     fc := a1 * b2 - b1 * a2;
-    fd := (- fa * x1 - fb * y1 - fc * z1);
+    fd := -(fa * x1 + fb * y1 + fc * z1);
     tri.fa := fa;
     tri.fb := fb;
-    tri.fic := 1 / fc;
+    tri.fic := -1 / fc;
     tri.fd := fd;
   end;
 
@@ -1028,7 +1028,7 @@ type
 
   function ZatPoint(const x, y: integer; const tri: triangle3df_p): single;
   begin
-    Result := (-tri.fa * x - tri.fb * y - tri.fd) * tri.fic;
+    Result := (tri.fa * x + tri.fb * y + tri.fd) * tri.fic;
   end;
 
 var

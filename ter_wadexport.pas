@@ -427,6 +427,15 @@ begin
       wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
       wadwriter.AddSeparator('HI_END');
 
+      wadwriter.AddString('TEXTURES',
+        'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
+        '{' + #13#10 +
+        '   XScale 1.0' + #13#10 +
+        '   YScale 1.0' + #13#10 +
+        '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
+        '}' + #13#10
+      );
+
       ms.Free;
       png.Free;
     end;

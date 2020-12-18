@@ -9,11 +9,11 @@
     procedure doaddhexenthing(const p: point3d_p);
     begin
       if flags and ETF_HEXENHEIGHT <> 0 then
-        AddThing(p.X, -p.Y, 0, p1.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD)
-      else if p1.Z < 0 then
-        AddThing(p.X, -p.Y, 0, -p.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThing(p.X, -p.Y, 0, p.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      else if p.Z < 0 then
+        AddThing(p.X, -p.Y, -p.Z, 0, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThing(p.X, -p.Y, 0, p.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThing(p.X, -p.Y, p.Z, 0, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
     end;
     {$ENDIF}
   begin

@@ -59,6 +59,11 @@ type
   bitmapheightmap_p = ^bitmapheightmap_t;
 
 type
+  point2d_t = record
+    X, Y: integer;
+  end;
+  point2d_p = ^point2d_t;
+  
   point3d_t = record
     X, Y, Z: integer;
   end;

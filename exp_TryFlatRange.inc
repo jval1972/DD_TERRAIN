@@ -24,7 +24,7 @@
     if p1.Z <> p4.Z then
       Exit;
     AddFlatQuad(iX1, iY1, iX2, iY2, iX3, iY3, iX4, iY4);
-    flat[iX1, iY1] := true;
+    flat[iX1, iY1] := True;
 
     Result := True;
   end;

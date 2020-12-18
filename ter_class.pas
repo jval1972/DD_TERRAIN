@@ -51,6 +51,13 @@ type
   heightbuffer_t = packed array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of heightbufferitem_t;
   heightbuffer_p = ^heightbuffer_t;
 
+const
+  MAXBITMAPHEIGHTMAP = MAXTEXTURESIZE;
+
+type
+  bitmapheightmap_t = packed array[0..MAXBITMAPHEIGHTMAP - 1, 0..MAXBITMAPHEIGHTMAP - 1] of smallint;
+  bitmapheightmap_p = ^bitmapheightmap_t;
+
 type
   point3d_t = record
     X, Y, Z: integer;
@@ -93,6 +100,7 @@ type
     function CanResampleHeightMapX2: boolean;
     function heightmapblocksize: integer;
     function RenderMeshGL(const sz: single): integer;
+    function GenerateBitmapHeightmap(const bmh: bitmapheightmap_p; const bmhsize: integer): boolean;
     property Texture: TBitmap read GetTexture;
     property Heightmap[x, y: integer]: heightbufferitem_t read GetHeightmap write SetHeightmap;
     property texturesize: integer read ftexturesize;
@@ -877,6 +885,184 @@ begin
   glEnd;
 
   Result := numTris;
+end;
+
+function TTerrain.GenerateBitmapHeightmap(const bmh: bitmapheightmap_p; const bmhsize: integer): boolean;
+type
+  point3df_t = record
+    X, Y, Z: single;
+  end;
+  point3df_p = ^point3df_t;
+
+  triangle3df_t = record
+    points: array[0..2] of point3df_t;
+    fa, fb, fic, fd: single;
+    left, right, top, bottom: integer;
+  end;
+  triangle3df_p = ^triangle3df_t;
+
+  procedure calc_plane(
+    const tri: triangle3df_p);
+  var
+    x1, y1, z1: single;
+    x2, y2, z2: single;
+    x3, y3, z3: single;
+    a1, b1, c1: single;
+    a2, b2, c2: single;
+    fa, fb, fc, fd: single;
+  begin
+    x1 := tri.points[0].X;
+    y1 := tri.points[0].Y;
+    z1 := tri.points[0].Z;
+    x2 := tri.points[1].X;
+    y2 := tri.points[1].Y;
+    z2 := tri.points[1].Z;
+    x3 := tri.points[2].X;
+    y3 := tri.points[2].Y;
+    z3 := tri.points[2].Z;
+    a1 := x2 - x1;
+    b1 := y2 - y1;
+    c1 := z2 - z1;
+    a2 := x3 - x1;
+    b2 := y3 - y1;
+    c2 := z3 - z1;
+    fa := b1 * c2 - b2 * c1;
+    fb := a2 * c1 - a1 * c2;
+    fc := a1 * b2 - b1 * a2;
+    fd := (- fa * x1 - fb * y1 - fc * z1);
+    tri.fa := fa;
+    tri.fb := fb;
+    tri.fic := 1 / fc;
+    tri.fd := fd;
+  end;
+
+  procedure calc_box(
+    const tri: triangle3df_p);
+  var
+    l, r, t, b: single;
+  begin
+    // Left
+    l := tri.points[0].X;
+    if tri.points[1].X < l then
+      l := tri.points[1].X;
+    if tri.points[2].X < l then
+      l := tri.points[1].X;
+    // Right
+    r := tri.points[0].X;
+    if tri.points[1].X > r then
+      r := tri.points[1].X;
+    if tri.points[2].X > r then
+      r := tri.points[1].X;
+    // Top
+    t := tri.points[0].Y;
+    if tri.points[1].Y < t then
+      t := tri.points[1].Y;
+    if tri.points[2].Y < t then
+      t := tri.points[1].Y;
+    // Bottom
+    b := tri.points[0].Y;
+    if tri.points[1].Y > b then
+      b := tri.points[1].Y;
+    if tri.points[2].Y > b then
+      b := tri.points[1].Y;
+
+    tri.left := GetIntInRange(Trunc(l), 0, bmhsize - 1);
+    tri.right := GetIntInRange(Trunc(r + 0.5), 0, bmhsize - 1);
+    tri.top := GetIntInRange(Trunc(t), 0, bmhsize - 1);
+    tri.bottom := GetIntInRange(Trunc(b), 0, bmhsize - 1);
+  end;
+
+  procedure GetTris(const x, y: integer; const tri1, tri2: triangle3df_p);
+  var
+    p1, p2, p3, p4: point3d_t;
+    fa, fb, fc, fd: single;
+  begin
+    p1 := HeightmapCoords3D(x, y);
+    p2 := HeightmapCoords3D(x + 1, y);
+    p3 := HeightmapCoords3D(x + 1, y + 1);
+    p4 := HeightmapCoords3D(x, y + 1);
+
+    tri1.points[0].X := p1.X * bmhsize / ftexturesize;
+    tri1.points[0].Y := p1.Y * bmhsize / ftexturesize;
+    tri1.points[0].Z := p1.Z * bmhsize / ftexturesize;
+    tri1.points[1].X := p2.X * bmhsize / ftexturesize;
+    tri1.points[1].Y := p2.Y * bmhsize / ftexturesize;
+    tri1.points[1].Z := p2.Z * bmhsize / ftexturesize;
+    tri1.points[2].X := p3.X * bmhsize / ftexturesize;
+    tri1.points[2].Y := p3.Y * bmhsize / ftexturesize;
+    tri1.points[2].Z := p3.Z * bmhsize / ftexturesize;
+    calc_plane(tri1);
+    calc_box(tri1);
+
+    tri2.points[0].X := p2.X * bmhsize / ftexturesize;
+    tri2.points[0].Y := p2.Y * bmhsize / ftexturesize;
+    tri2.points[0].Z := p2.Z * bmhsize / ftexturesize;
+    tri2.points[1].X := p3.X * bmhsize / ftexturesize;
+    tri2.points[1].Y := p3.Y * bmhsize / ftexturesize;
+    tri2.points[1].Z := p3.Z * bmhsize / ftexturesize;
+    tri2.points[2].X := p4.X * bmhsize / ftexturesize;
+    tri2.points[2].Y := p4.Y * bmhsize / ftexturesize;
+    tri2.points[2].Z := p4.Z * bmhsize / ftexturesize;
+    calc_plane(tri2);
+    calc_box(tri1);
+  end;
+
+  function sign(const x, y: integer; const p2, p3: point3df_p): single;
+  begin
+    result := (x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (y - p3.y);
+  end;
+
+  function PointInTriangle(const x, y: integer; const tri: triangle3df_p): boolean;
+  var
+    d1, d2, d3: single;
+    has_neg, has_pos: boolean;
+  begin
+    d1 := sign(x, y, tri.points[0], tri.points[1]);
+    d2 := sign(x, y, tri.points[1], tri.points[2]);
+    d3 := sign(x, y, tri.points[2], tri.points[0]);
+
+    has_neg := (d1 < 0) or (d2 < 0) or (d3 < 0);
+    has_pos := (d1 > 0) or (d2 > 0) or (d3 > 0);
+
+    result := not (has_neg and has_pos);
+  end;
+
+  function ZatPoint(const x, y: integer; const tri: triangle3df_p): single;
+  begin
+    Result := (-tri.fa * x - tri.fb * y - tri.fd) * tri.fic;
+  end;
+
+var
+  hX, hY: integer;
+  bX, bY: integer;
+  tri1, tri2: triangle3df_t;
+begin
+  if not IsIntInRange(bmhsize, 1, MAXBITMAPHEIGHTMAP) then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  Result := True;
+
+  for hX := 0 to fheightmapsize - 1 do
+    for hY := 0 to fheightmapsize - 1 do
+    begin
+      GetTris(hX, hY, @tri1, @tri2);
+      for bX := tri1.left to tri1.right do
+        for bY := tri1.top to tri1.top do
+        begin
+          if PointInTriangle(bX, bY, @tri1) then
+            bmh[bX, bY] := Round(ZatPoint(bX, bY, @tri1));
+        end;
+      for bX := tri2.left to tri2.right do
+        for bY := tri2.top to tri2.top do
+        begin
+          if PointInTriangle(bX, bY, @tri2) then
+            bmh[bX, bY] := Round(ZatPoint(bX, bY, @tri2));
+        end;
+    end;
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

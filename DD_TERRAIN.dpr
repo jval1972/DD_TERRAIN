@@ -63,7 +63,8 @@ uses
   ter_colorpalettebmz in 'ter_colorpalettebmz.pas',
   ter_cursors in 'ter_cursors.pas',
   frm_exportwadmap in 'frm_exportwadmap.pas' {ExportWADMapForm},
-  ter_quantize in 'ter_quantize.pas';
+  ter_quantize in 'ter_quantize.pas',
+  ter_contour in 'ter_contour.pas';
 
 {$R *.res}
 

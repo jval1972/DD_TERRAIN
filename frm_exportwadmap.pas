@@ -89,7 +89,8 @@ uses
   ter_wadreader,
   ter_doomdata,
   ter_utils,
-  ter_palettes;
+  ter_palettes,
+  ter_contour;
 
 function GetWADExportOptions(const t: TTerrain; const options: exportwadoptions_p; var fname: string): boolean;
 var
@@ -237,6 +238,8 @@ var
   i: integer;
   v1, v2: integer;
   x1, y1, x2, y2: integer;
+  clines: Pcountourline_tArray;
+  numclines: integer;
 begin
   bm.Canvas.Draw(0, 0, bmTexture);
 
@@ -272,6 +275,7 @@ begin
 
     bm.Canvas.Pen.Color := RGB(0, 255, 0);
     bm.Canvas.Pen.Style := psSolid;
+    // Draw 2d map
     for i := 0 to numlinedefs - 1 do
     begin
       v1 := linedefs[i].v1;
@@ -291,9 +295,31 @@ begin
       end;
     end;
 
-    // Draw 2d map here ////////
     FreeMem(vertexes, vsize);
     FreeMem(linedefs, lsize);
+
+    {
+    ter_tracecontour(t, 1024, 32, 32, clines, numclines);
+    scalex := bm.Width / 1024;
+    scaley := bm.Height / 1024;
+    bm.Canvas.Pen.Color := RGB(255, 0, 0);
+    bm.Canvas.Pen.Style := psSolid;
+    for i := 0 to numclines - 1 do
+    begin
+      x1 := clines[i].x1;
+      y1 := clines[i].y1;
+      x2 := clines[i].x2;
+      y2 := clines[i].y2;
+
+      x1 := GetIntInRange(Round(x1 * scalex), 0, bm.Width - 1);
+      y1 := GetIntInRange(Round(y1 * scaley), 0, bm.Height - 1);
+      x2 := GetIntInRange(Round(x2 * scalex), 0, bm.Width - 1);
+      y2 := GetIntInRange(Round(y2 * scaley), 0, bm.Height - 1);
+      bm.Canvas.MoveTo(x1, y1);
+      bm.Canvas.LineTo(x2, y2);
+    end;
+    FreeMem(clines, numclines * SizeOf(countourline_t));
+    }
   end;
 end;
 

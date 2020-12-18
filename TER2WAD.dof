@@ -100,7 +100,7 @@ Conditionals=
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams= -i ..\garbage\Example02.terrain -o ..\garbage\Example02_UDMF.wad -e UDMF -g DOOM -wait
+RunParams=-i ..\garbage\Example02.terrain -o ..\garbage\Example02_HEXEN.wad -e HEXEN -g DOOM -wait
 HostApplication=
 Launcher=
 UseLauncher=0

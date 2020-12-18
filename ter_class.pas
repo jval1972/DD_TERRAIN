@@ -946,25 +946,25 @@ type
     if tri.points[1].X < l then
       l := tri.points[1].X;
     if tri.points[2].X < l then
-      l := tri.points[1].X;
+      l := tri.points[2].X;
     // Right
     r := tri.points[0].X;
     if tri.points[1].X > r then
       r := tri.points[1].X;
     if tri.points[2].X > r then
-      r := tri.points[1].X;
+      r := tri.points[2].X;
     // Top
     t := tri.points[0].Y;
     if tri.points[1].Y < t then
       t := tri.points[1].Y;
     if tri.points[2].Y < t then
-      t := tri.points[1].Y;
+      t := tri.points[2].Y;
     // Bottom
     b := tri.points[0].Y;
     if tri.points[1].Y > b then
       b := tri.points[1].Y;
     if tri.points[2].Y > b then
-      b := tri.points[1].Y;
+      b := tri.points[2].Y;
 
     tri.left := GetIntInRange(Trunc(l), 0, bmhsize - 1);
     tri.right := GetIntInRange(Trunc(r + 0.5), 0, bmhsize - 1);
@@ -975,7 +975,6 @@ type
   procedure GetTris(const x, y: integer; const tri1, tri2: triangle3df_p);
   var
     p1, p2, p3, p4: point3d_t;
-    fa, fb, fc, fd: single;
   begin
     p1 := HeightmapCoords3D(x, y);
     p2 := HeightmapCoords3D(x + 1, y);
@@ -988,23 +987,23 @@ type
     tri1.points[1].X := p2.X * bmhsize / ftexturesize;
     tri1.points[1].Y := p2.Y * bmhsize / ftexturesize;
     tri1.points[1].Z := p2.Z * bmhsize / ftexturesize;
-    tri1.points[2].X := p3.X * bmhsize / ftexturesize;
-    tri1.points[2].Y := p3.Y * bmhsize / ftexturesize;
-    tri1.points[2].Z := p3.Z * bmhsize / ftexturesize;
+    tri1.points[2].X := p4.X * bmhsize / ftexturesize;
+    tri1.points[2].Y := p4.Y * bmhsize / ftexturesize;
+    tri1.points[2].Z := p4.Z * bmhsize / ftexturesize;
     calc_plane(tri1);
     calc_box(tri1);
 
-    tri2.points[0].X := p2.X * bmhsize / ftexturesize;
-    tri2.points[0].Y := p2.Y * bmhsize / ftexturesize;
-    tri2.points[0].Z := p2.Z * bmhsize / ftexturesize;
-    tri2.points[1].X := p3.X * bmhsize / ftexturesize;
-    tri2.points[1].Y := p3.Y * bmhsize / ftexturesize;
-    tri2.points[1].Z := p3.Z * bmhsize / ftexturesize;
-    tri2.points[2].X := p4.X * bmhsize / ftexturesize;
-    tri2.points[2].Y := p4.Y * bmhsize / ftexturesize;
-    tri2.points[2].Z := p4.Z * bmhsize / ftexturesize;
+    tri2.points[0].X := p4.X * bmhsize / ftexturesize;
+    tri2.points[0].Y := p4.Y * bmhsize / ftexturesize;
+    tri2.points[0].Z := p4.Z * bmhsize / ftexturesize;
+    tri2.points[1].X := p2.X * bmhsize / ftexturesize;
+    tri2.points[1].Y := p2.Y * bmhsize / ftexturesize;
+    tri2.points[1].Z := p2.Z * bmhsize / ftexturesize;
+    tri2.points[2].X := p3.X * bmhsize / ftexturesize;
+    tri2.points[2].Y := p3.Y * bmhsize / ftexturesize;
+    tri2.points[2].Z := p3.Z * bmhsize / ftexturesize;
     calc_plane(tri2);
-    calc_box(tri1);
+    calc_box(tri2);
   end;
 
   function sign(const x, y: integer; const p2, p3: point3df_p): single;
@@ -1017,9 +1016,9 @@ type
     d1, d2, d3: single;
     has_neg, has_pos: boolean;
   begin
-    d1 := sign(x, y, tri.points[0], tri.points[1]);
-    d2 := sign(x, y, tri.points[1], tri.points[2]);
-    d3 := sign(x, y, tri.points[2], tri.points[0]);
+    d1 := sign(x, y, @tri.points[0], @tri.points[1]);
+    d2 := sign(x, y, @tri.points[1], @tri.points[2]);
+    d3 := sign(x, y, @tri.points[2], @tri.points[0]);
 
     has_neg := (d1 < 0) or (d2 < 0) or (d3 < 0);
     has_pos := (d1 > 0) or (d2 > 0) or (d3 > 0);
@@ -1045,18 +1044,18 @@ begin
 
   Result := True;
 
-  for hX := 0 to fheightmapsize - 1 do
-    for hY := 0 to fheightmapsize - 1 do
+  for hX := 0 to fheightmapsize - 2 do
+    for hY := 0 to fheightmapsize - 2 do
     begin
       GetTris(hX, hY, @tri1, @tri2);
       for bX := tri1.left to tri1.right do
-        for bY := tri1.top to tri1.top do
+        for bY := tri1.top to tri1.bottom do
         begin
           if PointInTriangle(bX, bY, @tri1) then
             bmh[bX, bY] := Round(ZatPoint(bX, bY, @tri1));
         end;
       for bX := tri2.left to tri2.right do
-        for bY := tri2.top to tri2.top do
+        for bY := tri2.top to tri2.bottom do
         begin
           if PointInTriangle(bX, bY, @tri2) then
             bmh[bX, bY] := Round(ZatPoint(bX, bY, @tri2));

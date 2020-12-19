@@ -59,6 +59,7 @@ type
     Label1: TLabel;
     CeilingHeightTrackBar: TTrackBar;
     CeilingHeightLabel: TLabel;
+    GameRadioGroup: TRadioGroup;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -101,6 +102,7 @@ begin
   try
     f.FileNameEdit.Text := fname;
     f.EngineRadioGroup.ItemIndex := options.engine;
+    f.GameRadioGroup.ItemIndex := options.game;
     f.CeilingHeightTrackBar.Position := GetIntInRange(options.defceilingheight, f.CeilingHeightTrackBar.Min, f.CeilingHeightTrackBar.Max);
     f.CeilingHeightLabel.Caption := IntToStr(f.CeilingHeightTrackBar.Position);
     f.SlopedSectorsCheckBox.Checked := options.flags and ETF_SLOPED <> 0;
@@ -118,6 +120,7 @@ begin
       Result := True;
       fname := f.FileNameEdit.Text;
       options.engine := f.EngineRadioGroup.ItemIndex;
+      options.game := f.GameRadioGroup.ItemIndex;
       options.defceilingheight := f.CeilingHeightTrackBar.Position;
       options.flags := 0;
       if f.SlopedSectorsCheckBox.Checked then
@@ -132,58 +135,67 @@ begin
         options.flags := options.flags or ETF_ADDPLAYERSTART;
       if f.ExportFlatCheckBox.Checked then
         options.flags := options.flags or ETF_EXPORTFLAT;
-      case options.engine of
-      ENGINE_RAD:
+
+      case options.game of
+      GAME_RADIX:
         begin
           options.palette := @RadixPaletteRaw;
           options.levelname := 'E1M1';
           options.defsidetex := 'RDXW0012';
           options.deceilingpic := 'F_SKY1';
-          options.lowerid := 1255;
-          options.raiseid := 1254;
         end;
-      ENGINE_DELPHIDOOM:
+      GAME_DOOM:
         begin
           options.palette := @DoomPaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'METAL1';
           options.deceilingpic := 'F_SKY1';
-          options.lowerid := 1155;
-          options.raiseid := 1154;
         end;
-      ENGINE_DELPHIHERETIC:
+      GAME_HERETIC:
         begin
           options.palette := @HereticPaletteRaw;
           options.levelname := 'E1M1';
           options.defsidetex := 'CSTLRCK';
           options.deceilingpic := 'F_SKY1';
-          options.lowerid := 1155;
-          options.raiseid := 1154;
         end;
-      ENGINE_DELPHIHEXEN:
+      GAME_HEXEN:
         begin
           options.palette := @HexenPaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'FOREST02';
           options.deceilingpic := 'F_SKY';
-          options.lowerid := 1155;
-          options.raiseid := 1154;
         end;
-      ENGINE_DELPHISTRIFE:
+      GAME_STRIFE:
         begin
           options.palette := @StrifePaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'BRKGRY01';
           options.deceilingpic := 'F_SKY001';
-          options.lowerid := 1155;
-          options.raiseid := 1154;
+        end;
+      end;
+
+      case options.engine of
+      ENGINE_RAD:
+        begin
+          if options.game = GAME_RADIX then
+          begin
+            options.lowerid := 1255;
+            options.raiseid := 1254;
+          end
+          else
+          begin
+            options.lowerid := 1155;
+            options.raiseid := 1154;
+          end;
         end;
       ENGINE_UDMF:
         begin
-          options.palette := @DoomPaletteRaw;
-          options.levelname := 'MAP01';
-          options.defsidetex := 'METAL1';
-          options.deceilingpic := 'F_SKY1';
+        end;
+      ENGINE_VAVOOM:
+        begin
+          options.flags := options.flags or ETF_HEXENHEIGHT;
+          options.raiseid := 1504;
+          options.lowerid := 1504;
         end;
       end;
     end;

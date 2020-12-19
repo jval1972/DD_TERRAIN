@@ -485,6 +485,7 @@ begin
   DoubleBuffered := True;
 
   fexportoptions.engine := ENGINE_RAD;
+  fexportoptions.game := GAME_RADIX;
   fexportoptions.levelname := 'E1M1';
   fexportoptions.palette := @RadixPaletteRaw;
   fexportoptions.defsidetex := 'RDXW0012';
@@ -2246,20 +2247,34 @@ begin
       BackupFile(ename);
       fs := TFileStream.Create(ename, fmCreate);
       case fexportoptions.engine of
-        ENGINE_RAD, ENGINE_DELPHIDOOM, ENGINE_DELPHIHERETIC, ENGINE_DELPHISTRIFE:
-          ExportTerrainToWADFile(
-            terrain,
-            fs,
-            fexportoptions.levelname,
-            fexportoptions.palette,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.lowerid,
-            fexportoptions.raiseid,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight
-          );
-        ENGINE_DELPHIHEXEN:
+        ENGINE_RAD:
+          if fexportoptions.game = GAME_HEXEN then
+            ExportTerrainToHexenFile(
+              terrain,
+              fs,
+              fexportoptions.levelname,
+              fexportoptions.palette,
+              fexportoptions.defsidetex,
+              fexportoptions.deceilingpic,
+              fexportoptions.lowerid,
+              fexportoptions.raiseid,
+              fexportoptions.flags,
+              fexportoptions.defceilingheight
+            )
+          else
+            ExportTerrainToWADFile(
+              terrain,
+              fs,
+              fexportoptions.levelname,
+              fexportoptions.palette,
+              fexportoptions.defsidetex,
+              fexportoptions.deceilingpic,
+              fexportoptions.lowerid,
+              fexportoptions.raiseid,
+              fexportoptions.flags,
+              fexportoptions.defceilingheight
+            );
+        ENGINE_VAVOOM:
           ExportTerrainToHexenFile(
             terrain,
             fs,

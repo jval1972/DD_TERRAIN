@@ -194,9 +194,10 @@ begin
     fexportoptions.engine := ENGINE_UDMF
   else if engine = 'HEXEN' then
   begin
-    fexportoptions.engine := ENGINE_DELPHIHEXEN;
+    fexportoptions.engine := ENGINE_VAVOOM;
     fexportoptions.flags := fexportoptions.flags or ETF_HEXENHEIGHT;
     fexportoptions.raiseid := 1504;
+    fexportoptions.lowerid := 1504;
   end
   else
   begin
@@ -312,7 +313,7 @@ begin
             fexportoptions.defceilingheight,
             @stats
           );
-        ENGINE_DELPHIHEXEN:
+        ENGINE_VAVOOM:
           ExportTerrainToHexenFile(
             t,
             fs,

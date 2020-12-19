@@ -4,7 +4,7 @@ object ExportWADMapForm: TExportWADMapForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 330
+  ClientHeight = 536
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1052,7 +1052,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 289
+    Top = 495
     Width = 681
     Height = 41
     Align = alBottom
@@ -1094,7 +1094,7 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 289
+    Height = 495
     Align = alClient
     Caption = ' '
     TabOrder = 1
@@ -1115,16 +1115,16 @@ object ExportWADMapForm: TExportWADMapForm
       OnClick = SelectFileButtonClick
     end
     object Label1: TLabel
-      Left = 16
-      Top = 240
+      Left = 24
+      Top = 440
       Width = 71
       Height = 13
       Caption = 'Ceiling Height: '
       FocusControl = CeilingHeightTrackBar
     end
     object CeilingHeightLabel: TLabel
-      Left = 392
-      Top = 240
+      Left = 400
+      Top = 440
       Width = 24
       Height = 13
       Caption = '(512)'
@@ -1133,16 +1133,13 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 16
       Top = 56
       Width = 201
-      Height = 169
+      Height = 121
       Caption = ' Engine '
       ItemIndex = 0
       Items.Strings = (
-        'RAD (Radix in Doom Format)'
-        'DelphiDoom'
-        'DelphiHeretic'
-        'DelphiHexen'
-        'DelphiStrife'
-        'UDMF (GZDoom, K8Vavoom, etc)')
+        'DelphiDoom/RAD'
+        'UDMF (GZDoom, K8Vavoom, etc)'
+        'Hexen format (ZDoom, Vavoom)')
       TabOrder = 1
     end
     object OptionsGroupBox: TGroupBox
@@ -1253,8 +1250,8 @@ object ExportWADMapForm: TExportWADMapForm
       end
     end
     object CeilingHeightTrackBar: TTrackBar
-      Left = 96
-      Top = 232
+      Left = 104
+      Top = 432
       Width = 289
       Height = 33
       Max = 1024
@@ -1263,6 +1260,21 @@ object ExportWADMapForm: TExportWADMapForm
       Position = 512
       TabOrder = 3
       OnChange = CeilingHeightTrackBarChange
+    end
+    object GameRadioGroup: TRadioGroup
+      Left = 16
+      Top = 192
+      Width = 201
+      Height = 153
+      Caption = ' Game '
+      ItemIndex = 0
+      Items.Strings = (
+        'Doom'
+        'Heretic'
+        'Hexen'
+        'Strife'
+        'Radix')
+      TabOrder = 5
     end
   end
   object SaveWADDialog: TSaveDialog

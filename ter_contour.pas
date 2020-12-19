@@ -37,9 +37,10 @@ type
   countourline_t = record
     x1, y1: integer;
     x2, y2: integer;
-    height: integer;
     frontside: integer;
+    frontheight: integer;
     backside: integer;
+    backheight: integer;
   end;
   countourline_p = ^countourline_t;
   countourline_tArray = array[0..$FFF] of countourline_t;
@@ -178,8 +179,9 @@ var
         lines[numlines].y1 := contour_points[0].Y;
         lines[numlines].x2 := contour_points[1].X;
         lines[numlines].y2 := contour_points[1].Y;
-        lines[numlines].height := elevation;
+        lines[numlines].frontheight := elevation;
         lines[numlines].frontside := layer;
+        lines[numlines].backheight := elevation - elevstep;
         lines[numlines].backside := layer - 1;
         inc(numlines);
         inc(Result);

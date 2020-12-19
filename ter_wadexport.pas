@@ -46,18 +46,25 @@ const
   ETF_ADDPLAYERSTART = 16;
   ETF_EXPORTFLAT = 32;
   ETF_HEXENHEIGHT = 64;
+  ETF_BUILDNODES = 128;
+  ETF_TRACECONTOUR = 256;
 
 const
   ENGINE_RAD = 0;
-  ENGINE_DELPHIDOOM = 1;
-  ENGINE_DELPHIHERETIC = 2;
-  ENGINE_DELPHIHEXEN = 3;
-  ENGINE_DELPHISTRIFE = 4;
-  ENGINE_UDMF = 5;
+  ENGINE_UDMF = 1;
+  ENGINE_VAVOOM = 2;
+
+const
+  GAME_DOOM = 0;
+  GAME_HERETIC = 1;
+  GAME_HEXEN = 2;
+  GAME_STRIFE = 3;
+  GAME_RADIX = 4;
 
 type
   exportwadoptions_t = record
     engine: integer;
+    game: integer;
     levelname: string[8];
     palette: PByteArray;
     defsidetex: string[8];
@@ -102,7 +109,8 @@ uses
   Graphics,
   ter_doomdata,
   ter_wadwriter,
-  ter_quantize;
+  ter_quantize,
+  ter_contour;
 
 function V_FindAproxColorIndex(const pal: PLongWordArray; const c: LongWord;
   const start: integer = 0; const finish: integer = 255): integer;
@@ -192,6 +200,49 @@ var
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
 
+  procedure TraceContourMap;
+  var
+    clines: Pcountourline_tArray;
+    numclines: integer;
+    ii: integer;
+    v1, v2: integer;
+    ll: integer;
+    frontsec, backsec: integer;
+  begin
+    ter_tracecontour(t, t.texturesize, 32, 32, clines, numclines);
+
+    for ii := 0 to numclines - 1 do
+    begin
+      frontsec := AddSector(clines[ii].frontheight, defceilingheight, False);
+      backsec := AddSector(clines[ii].backheight, defceilingheight, False);
+      v1 := AddVertex(clines[ii].x1, -clines[ii].y1);
+      v2 := AddVertex(clines[ii].x2, -clines[ii].y2);
+      if v1 > v2 then
+      begin
+        ll := AddLinedef(v2, v1);
+        doomlinedefs[ll].sidenum[1] := AddSidedef(frontsec);
+        doomlinedefs[ll].sidenum[0] := AddSidedef(backsec);
+      end
+      else
+      begin
+        ll := AddLinedef(v1, v2);
+        doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec);
+        doomlinedefs[ll].sidenum[1] := AddSidedef(backsec);
+      end;
+      doomlinedefs[ll].flags := doomlinedefs[ll].flags or ML_TWOSIDED;
+{
+      if doomlinedefs[ll].sidenum[0] < 0 then
+        doomlinedefs[ll].sidenum[0] := AddSidedef(sec)
+      else
+      begin
+        doomlinedefs[ll].sidenum[1] := AddSidedef(sec);
+        doomlinedefs[ll].flags := doomlinedefs[ll].flags or ML_TWOSIDED;
+      end;    }
+    end;
+
+    FreeMem(clines, numclines * SizeOf(countourline_t));
+  end;
+
 begin
   sidetex := stringtochar8(defsidetex);
   FillChar(pass, SizeOf(pass), 0);
@@ -265,11 +316,12 @@ begin
 
     FreeMem(flattexture, bm.Width * bm.Height);
   end;
-  
+
   // Create Map
-  for x := 0 to t.heightmapsize - 2 do
+  TraceContourMap;
+{  for x := 0 to t.heightmapsize - 2 do
     for y := 0 to t.heightmapsize - 2 do
-      AddHeightmapItem(x, y);
+      AddHeightmapItem(x, y);}
 
   // Player start
   if flags and ETF_ADDPLAYERSTART <> 0 then

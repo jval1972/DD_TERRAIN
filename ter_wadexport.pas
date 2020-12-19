@@ -218,26 +218,12 @@ var
       v1 := AddVertex(clines[ii].x1, -clines[ii].y1);
       v2 := AddVertex(clines[ii].x2, -clines[ii].y2);
       if clines[ii].orientation > 0 then
-      begin
-        ll := AddLinedef(v1, v2);
-        doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec);
-        doomlinedefs[ll].sidenum[1] := AddSidedef(backsec);
-      end
+        ll := AddLinedef(v1, v2)
       else
-      begin
         ll := AddLinedef(v2, v1);
-        doomlinedefs[ll].sidenum[1] := AddSidedef(frontsec);
-        doomlinedefs[ll].sidenum[0] := AddSidedef(backsec);
-      end;
+      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
+      doomlinedefs[ll].sidenum[1] := AddSidedef(backsec, false);
       doomlinedefs[ll].flags := doomlinedefs[ll].flags or ML_TWOSIDED;
-{
-      if doomlinedefs[ll].sidenum[0] < 0 then
-        doomlinedefs[ll].sidenum[0] := AddSidedef(sec)
-      else
-      begin
-        doomlinedefs[ll].sidenum[1] := AddSidedef(sec);
-        doomlinedefs[ll].flags := doomlinedefs[ll].flags or ML_TWOSIDED;
-      end;    }
     end;
 
     FreeMem(clines, numclines * SizeOf(countourline_t));

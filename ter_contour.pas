@@ -130,7 +130,7 @@ var
   // 0 --> Colinear
   // positive --> Clockwise
   // negative --> Counterclockwise
-  function orientation(const x1, y1, x2, y2, x3, y3: integer): integer;
+  function TriOrientation(const x1, y1, x2, y2, x3, y3: integer): integer;
   begin
     Result := (y2 - y1) * (x3 - x2) -
               (x2 - x1) * (y3 - y2);
@@ -186,31 +186,28 @@ var
           contour_points[j].Y := Round(f * crossed_edges[j].e1.Y + (1 - f) * crossed_edges[j].e2.Y);
         end;
 
-        ReallocMem(lines, (numlines + 1) * SizeOf(countourline_t));
-        lines[numlines].x1 := contour_points[0].X;
-        lines[numlines].y1 := contour_points[0].Y;
-        lines[numlines].x2 := contour_points[1].X;
-        lines[numlines].y2 := contour_points[1].Y;
-        lines[numlines].frontheight := elevation;
-        lines[numlines].frontside := layer;
-        lines[numlines].backheight := elevation - elevstep;
-        lines[numlines].backside := layer - 1;
-        if above.v1.Z = elevation then
+        if (contour_points[0].X <> contour_points[1].X) or
+           (contour_points[0].Y <> contour_points[1].Y) then
+        begin
+          ReallocMem(lines, (numlines + 1) * SizeOf(countourline_t));
+          lines[numlines].x1 := contour_points[0].X;
+          lines[numlines].y1 := contour_points[0].Y;
+          lines[numlines].x2 := contour_points[1].X;
+          lines[numlines].y2 := contour_points[1].Y;
+          lines[numlines].frontheight := elevation;
+          lines[numlines].frontside := layer;
+          lines[numlines].backheight := elevation - elevstep;
+          lines[numlines].backside := layer - 1;
+          // This will help the WAD generator
           lines[numlines].orientation :=
-            -orientation(
-              below.v1.X, below.v1.Y,
-              contour_points[0].X, contour_points[0].Y,
-              contour_points[1].X, contour_points[1].Y
-            )
-        else
-          lines[numlines].orientation :=
-            orientation(
-              above.v1.X, above.v1.Y,
-              contour_points[0].X, contour_points[0].Y,
-              contour_points[1].X, contour_points[1].Y
-            );
-        inc(numlines);
-        inc(Result);
+                TriOrientation(
+                  below.v1.X, below.v1.Y,
+                  contour_points[0].X, contour_points[0].Y,
+                  contour_points[1].X, contour_points[1].Y
+                );
+          inc(numlines);
+          inc(Result);
+        end;
       end;
     end;
   end;
@@ -237,7 +234,6 @@ begin
     for y := 0 to numtrisY - 1 do
     begin
       AddTriangle(x * tristep, y * tristep, (x + 1) * tristep, y * tristep, x * tristep, (y + 1) * tristep);
-//      AddTriangle((x + 1) * tristep, y * tristep, x * tristep, (y + 1) * tristep, (x + 1) * tristep, (y + 1) * tristep);
       AddTriangle((x + 1) * tristep, y * tristep, (x + 1) * tristep, (y + 1) * tristep, x * tristep, (y + 1) * tristep);
     end;
 

@@ -41,6 +41,7 @@ type
     frontheight: integer;
     backside: integer;
     backheight: integer;
+    orientation: integer;
   end;
   countourline_p = ^countourline_t;
   countourline_tArray = array[0..$FFF] of countourline_t;
@@ -124,6 +125,17 @@ var
     Result := True;
   end;
 
+  // Finds orientation of 3 Points
+  // Returns:
+  // 0 --> Colinear
+  // positive --> Clockwise
+  // negative --> Counterclockwise
+  function orientation(const x1, y1, x2, y2, x3, y3: integer): integer;
+  begin
+    Result := (y2 - y1) * (x3 - x2) -
+              (x2 - x1) * (y3 - y2);
+  end;
+
   function ProcessLayer: integer;
   var
     above, below: slicetri3d_t;
@@ -183,6 +195,20 @@ var
         lines[numlines].frontside := layer;
         lines[numlines].backheight := elevation - elevstep;
         lines[numlines].backside := layer - 1;
+        if above.v1.Z = elevation then
+          lines[numlines].orientation :=
+            -orientation(
+              below.v1.X, below.v1.Y,
+              contour_points[0].X, contour_points[0].Y,
+              contour_points[1].X, contour_points[1].Y
+            )
+        else
+          lines[numlines].orientation :=
+            orientation(
+              above.v1.X, above.v1.Y,
+              contour_points[0].X, contour_points[0].Y,
+              contour_points[1].X, contour_points[1].Y
+            );
         inc(numlines);
         inc(Result);
       end;
@@ -211,7 +237,8 @@ begin
     for y := 0 to numtrisY - 1 do
     begin
       AddTriangle(x * tristep, y * tristep, (x + 1) * tristep, y * tristep, x * tristep, (y + 1) * tristep);
-      AddTriangle((x + 1) * tristep, y * tristep, x * tristep, (y + 1) * tristep, (x + 1) * tristep, (y + 1) * tristep);
+//      AddTriangle((x + 1) * tristep, y * tristep, x * tristep, (y + 1) * tristep, (x + 1) * tristep, (y + 1) * tristep);
+      AddTriangle((x + 1) * tristep, y * tristep, (x + 1) * tristep, (y + 1) * tristep, x * tristep, (y + 1) * tristep);
     end;
 
   layer := 0;

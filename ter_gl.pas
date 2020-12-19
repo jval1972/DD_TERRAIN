@@ -97,7 +97,7 @@ begin
   glShadeModel(GL_SMOOTH);            // Enables Smooth Color Shading
   glClearDepth(1.0);                  // Depth Buffer Setup
   glEnable(GL_DEPTH_TEST);            // Enable Depth Buffer
-  glDepthFunc(GL_LESS);		            // The Type Of Depth Test To Do
+  glDepthFunc(GL_LESS);               // The Type Of Depth Test To Do
   glEnable(GL_POINT_SIZE);
 
   glGetIntegerv(GL_MAX_TEXTURE_SIZE, @gld_max_texturesize);

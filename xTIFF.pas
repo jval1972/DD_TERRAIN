@@ -81,8 +81,8 @@ var
 begin
   tif := TIFFOpenStream(Stream, 'r');
 
-	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, @w);
-	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, @h);
+  TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, @w);
+  TIFFGetField(tif, TIFFTAG_IMAGELENGTH, @h);
 
   raster := _TIFFmalloc(w * h * SizeOf(LongWord));
   if raster <> nil then
@@ -131,7 +131,7 @@ begin
     aBitmap.Assign(self);
     aBitmap.PixelFormat := pf32bit;
 
-    tif := TIFFOpenStream(Stream, 'w');
+    tif := TIFFOpenStream(Stream, 'wl');
 
     w := aBitmap.Width;
     h := aBitmap.Height;
@@ -151,7 +151,7 @@ begin
     begin
       l1 := aBitmap.ScanLine[i];
       for j := 0 to aBitmap.Width - 1 do
-        l2[j] := RGBSwap(l1[j]);
+        l2[j] := RGBSwap(l1[j]) or $FF000000;
       TIFFWriteScanline(tif, l2, i, 0);
     end;
     FreeMem(l2, aBitmap.Width * SizeOf(LongWord));

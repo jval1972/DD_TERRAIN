@@ -695,12 +695,12 @@ begin
   if changed then
   begin
     ret := MessageBox(Handle, 'Do you want to save changes?', PChar(rsTitle), MB_YESNOCANCEL or MB_ICONQUESTION or MB_APPLMODAL);
-    if ret = IDCANCEL	then
+    if ret = IDCANCEL then
     begin
       Result := False;
       exit;
     end;
-    if ret = IDNO	then
+    if ret = IDNO then
     begin
       Result := True;
       exit;

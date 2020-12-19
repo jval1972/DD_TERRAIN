@@ -39,20 +39,20 @@ uses
   ter_wad;
 
 const
-  ETF_SLOPED = 1;
-  ETF_CALCDXDY = 2;
-  ETF_TRUECOLORFLAT = 4;
-  ETF_MERGEFLATSECTORS = 8;
-  ETF_ADDPLAYERSTART = 16;
-  ETF_EXPORTFLAT = 32;
-  ETF_HEXENHEIGHT = 64;
-  ETF_BUILDNODES = 128;
-  ETF_TRACECONTOUR = 256;
+  ETF_SLOPED = 1;             // Generates maps with slopes
+  ETF_CALCDXDY = 2;           // Takes into accound the deformations
+  ETF_TRUECOLORFLAT = 4;      // Export true color flat
+  ETF_MERGEFLATSECTORS = 8;   // Merge flat sectors
+  ETF_ADDPLAYERSTART = 16;    // Add a player start
+  ETF_EXPORTFLAT = 32;        // Export flat?
+  ETF_HEXENHEIGHT = 64;       // Use Hexen special 1504
+  ETF_BUILDNODES = 128;       // Build nodes for non advanced ports?
+  ETF_TRACECONTOUR = 256;     // Use trace contour method?
 
 const
-  ENGINE_RAD = 0;
-  ENGINE_UDMF = 1;
-  ENGINE_VAVOOM = 2;
+  ENGINE_RAD = 0;             // WAD format for RAD & DelphiDoom
+  ENGINE_UDMF = 1;            // GZDoom/k8vavoom/etc
+  ENGINE_VAVOOM = 2;          // Hexen format for ZDoom/Vavoom
 
 const
   GAME_DOOM = 0;

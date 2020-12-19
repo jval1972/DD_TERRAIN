@@ -59,8 +59,8 @@ type
 type
   node_heap_p = ^node_heap_t;
   node_heap_t = record
-	  alloc, n: integer;
-	  buf: oct_node_pp;
+    alloc, n: integer;
+    buf: oct_node_pp;
   end;
 
 // cmp function that decides the ordering in the heap.  This is how we determine
@@ -94,24 +94,24 @@ procedure down_heap(h: node_heap_p; p: oct_node_p);
 var
   n, m: integer;
 begin
-	n := p.heap_idx;
-	while true do
+  n := p.heap_idx;
+  while true do
   begin
-		m := n * 2;
-		if m >= h.n then
+    m := n * 2;
+    if m >= h.n then
       break;
-		if (m + 1 < h.n) and (cmp_node(h.buf[m], h.buf[m + 1]) > 0) then
+    if (m + 1 < h.n) and (cmp_node(h.buf[m], h.buf[m + 1]) > 0) then
       inc(m);
 
-		if cmp_node(p, h.buf[m]) <= 0 then
+    if cmp_node(p, h.buf[m]) <= 0 then
       Break;
 
-		h.buf[n] := h.buf[m];
-		h.buf[n].heap_idx := n;
-		n := m;
-	end;
-	h.buf[n] := p;
-	p.heap_idx := n;
+    h.buf[n] := h.buf[m];
+    h.buf[n].heap_idx := n;
+    n := m;
+  end;
+  h.buf[n] := p;
+  p.heap_idx := n;
 end;
 
 procedure up_heap(h: node_heap_p; p: oct_node_p);
@@ -119,20 +119,20 @@ var
   n: integer;
   prev: oct_node_p;
 begin
-	n := p.heap_idx;
+  n := p.heap_idx;
 
-	while n > 1 do
+  while n > 1 do
   begin
-		prev := h.buf[n div 2];
-		if cmp_node(p, prev) >= 0 then
+    prev := h.buf[n div 2];
+    if cmp_node(p, prev) >= 0 then
       Break;
 
-		h.buf[n] := prev;
-		prev.heap_idx := n;
-		n := n div 2;
-	end;
-	h.buf[n] := p;
-	p.heap_idx := n;
+    h.buf[n] := prev;
+    prev.heap_idx := n;
+    n := n div 2;
+  end;
+  h.buf[n] := p;
+  p.heap_idx := n;
 end;
 
 const
@@ -140,45 +140,45 @@ const
 
 procedure heap_add(h: node_heap_p; p: oct_node_p);
 begin
-	if p.flags and ON_INHEAP <> 0 then
+  if p.flags and ON_INHEAP <> 0 then
   begin
-		down_heap(h, p);
-		up_heap(h, p);
-		Exit;
-	end;
+    down_heap(h, p);
+    up_heap(h, p);
+    Exit;
+  end;
 
-	p.flags := p.flags or ON_INHEAP;
-	if h.n = 0 then
+  p.flags := p.flags or ON_INHEAP;
+  if h.n = 0 then
     h.n := 1;
-	if h.n >= h.alloc then
+  if h.n >= h.alloc then
   begin
-		while h.n >= h.alloc do
+    while h.n >= h.alloc do
       h.alloc := h.alloc + 1024;
     ReallocMem(h.buf, SizeOf(oct_node_p) * h.alloc);
-	end;
+  end;
 
-	p.heap_idx := h.n;
-	h.buf[h.n] := p;
+  p.heap_idx := h.n;
+  h.buf[h.n] := p;
   inc(h.n);
-	up_heap(h, p);
+  up_heap(h, p);
 end;
 
 function pop_heap(h: node_heap_p): oct_node_p;
 begin
-	if h.n <= 1 then
+  if h.n <= 1 then
   begin
     Result := nil;
     Exit;
    end;
 
-	Result := h.buf[1];
+  Result := h.buf[1];
   dec(h.n);
-	h.buf[1] := h.buf[h.n];
+  h.buf[1] := h.buf[h.n];
 
-	h.buf[h.n] := nil;
+  h.buf[h.n] := nil;
 
-	h.buf[1].heap_idx := 1;
-	down_heap(h, h.buf[1]);
+  h.buf[1].heap_idx := 1;
+  down_heap(h, h.buf[1]);
 end;
 
 var
@@ -189,22 +189,22 @@ function node_new(const idx, depth: byte; p: oct_node_p): oct_node_p;
 var
   x: oct_node_p;
 begin
-	if nodeslen <= 1 then
+  if nodeslen <= 1 then
   begin
-		GetMem(x, SizeOf(oct_node_t) * 2048);
+    GetMem(x, SizeOf(oct_node_t) * 2048);
     ZeroMemory(x, SizeOf(oct_node_t) * 2048);
-		x.parent := pool;
-		pool := x;
-		nodeslen := 2048;
-	end;
+    x.parent := pool;
+    pool := x;
+    nodeslen := 2048;
+  end;
 
   dec(nodeslen);
   x := @(oct_node_pa(pool)[nodeslen]);
-	x.kid_idx := idx;
-	x.depth := depth;
-	x.parent := p;
-	if p <> nil then inc(p.n_kids);
-	Result := x;
+  x.kid_idx := idx;
+  x.depth := depth;
+  x.parent := p;
+  if p <> nil then inc(p.n_kids);
+  Result := x;
 end;
 
 function bitvalue(const x: integer): byte;
@@ -311,14 +311,14 @@ end;
 
 procedure node_free;
 var
-	p: oct_node_p;
+  p: oct_node_p;
 begin
-	while pool <> nil do
+  while pool <> nil do
   begin
-		p := pool.parent;
-		FreeMem(pool);
-		pool := p;
-	end;
+    p := pool.parent;
+    FreeMem(pool);
+    pool := p;
+  end;
 end;
 
 // Building an octree and keep leaf nodes in a bin heap.  Afterwards remove first node

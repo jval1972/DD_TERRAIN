@@ -8144,10 +8144,10 @@ object Form1: TForm1
   end
   object OpenPictureDialog1: TOpenPictureDialog
     Filter = 
-      'All (*.jpg;*.jpeg;*.bmp;*.png;*.tga)|*.jpg;*.jpeg;*.bmp;*.png;*.' +
-      'tga|JPEG Image File (*.jpg)|*.jpg|JPEG Image File (*.jpeg)|*.jpe' +
-      'g|Bitmaps (*.bmp)|*.bmp|PNG Image (*.png)|*.png|TGA Image (*.tga' +
-      ')|*.tga'
+      'All (*.jpg;*.jpeg;*.bmp;*.png;*.tga, *.tif)|*.jpg;*.jpeg;*.bmp;*' +
+      '.png;*.tga;*.tif|JPEG Image File (*.jpg)|*.jpg|JPEG Image File (' +
+      '*.jpeg)|*.jpeg|Bitmaps (*.bmp)|*.bmp|PNG Image (*.png)|*.png|TGA' +
+      ' Image (*.tga)|*.tga|TIF Images (*.tif)|*.tif'
     Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
     Left = 481
     Top = 137
@@ -8159,7 +8159,9 @@ object Form1: TForm1
   end
   object SavePictureDialog1: TSavePictureDialog
     DefaultExt = 'png'
-    Filter = 'PNG Images (*.png)|*.png|Bitmaps (*.bmp)|*.bmp'
+    Filter = 
+      'PNG Images (*.png)|*.png|Tagged Image File Format (*.tif; *.tiff' +
+      ')|*.tif;*.tiff|Bitmaps (*.bmp)|*.bmp'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 361
     Top = 153
@@ -8173,10 +8175,10 @@ object Form1: TForm1
   end
   object OpenPictureDialog2: TOpenPictureDialog
     Filter = 
-      'All (*.jpg;*.jpeg;*.bmp;*.png;*.tga)|*.jpg;*.jpeg;*.bmp;*.png;*.' +
-      'tga|JPEG Image File (*.jpg)|*.jpg|JPEG Image File (*.jpeg)|*.jpe' +
-      'g|Bitmaps (*.bmp)|*.bmp|PNG Image (*.png)|*.png|TGA Image (*.tga' +
-      ')|*.tga'
+      'All (*.jpg;*.jpeg;*.bmp;*.png;*.tga, *.tif)|*.jpg;*.jpeg;*.bmp;*' +
+      '.png;*.tga;*.tif|JPEG Image File (*.jpg)|*.jpg|JPEG Image File (' +
+      '*.jpeg)|*.jpeg|Bitmaps (*.bmp)|*.bmp|PNG Image (*.png)|*.png|TGA' +
+      ' Image (*.tga)|*.tga|TIF Images (*.tif)|*.tif'
     Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
     Left = 481
     Top = 201
@@ -8523,7 +8525,9 @@ object Form1: TForm1
   end
   object SavePictureDialog2: TSavePictureDialog
     DefaultExt = 'png'
-    Filter = 'PNG Images (*.png)|*.png|Bitmaps (*.bmp)|*.bmp'
+    Filter = 
+      'PNG Images (*.png)|*.png|Tagged Image File Format (*.tif; *.tiff' +
+      ')|*.tif;*.tiff|Bitmaps (*.bmp)|*.bmp'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 401
     Top = 153

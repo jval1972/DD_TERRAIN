@@ -93,12 +93,17 @@ type
   TLongWordArray = array[0..$FFF] of LongWord;
   PLongWordArray = ^TLongWordArray;
 
+procedure SaveImageToDisk(const b: TBitmap; const imgfname: string);
+
 implementation
 
 uses
   Classes,
   SysUtils,
-  clipbrd;
+  clipbrd,
+  PngImage1,
+  jpeg,
+  xTIFF;
 
 function StretchClipboardToBitmap(const b: TBitmap): boolean;
 var
@@ -410,6 +415,39 @@ end;
 constructor TString.Create(const astring: string);
 begin
   str := astring;
+end;
+
+procedure SaveImageToDisk(const b: TBitmap; const imgfname: string);
+var
+  png: TPngObject;
+  jpg: TJPEGImage;
+  tif: TTIFFBitmap;
+  ext: string;
+begin
+  ext := UpperCase(ExtractFileExt(imgfname));
+  if ext = '.PNG' then
+  begin
+    png := TPngObject.Create;
+    png.Assign(b);
+    png.SaveToFile(imgfname);
+    png.Free;
+  end
+  else if (ext = '.TIF') or (ext = '.TIFF') then
+  begin
+    tif := TTIFFBitmap.Create;
+    tif.Assign(b);
+    tif.SaveToFile(imgfname);
+    tif.Free;
+  end
+  else if (ext = '.JPG') or (ext = '.JPEG') then
+  begin
+    jpg := TJPEGImage.Create;
+    jpg.Assign(b);
+    jpg.SaveToFile(imgfname);
+    jpg.Free;
+  end
+  else
+    b.SaveToFile(imgfname);
 end;
 
 end.

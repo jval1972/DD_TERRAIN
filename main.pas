@@ -35,7 +35,7 @@ uses
   Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, FileCtrl,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1, ter_pk3, ter_colorpickerbutton,
-  ter_wadexport, ImgList;
+  ter_wadexport, xTIFF, ImgList;
 
 type
   drawlayeritem_t = packed record
@@ -1334,7 +1334,6 @@ end;
 procedure TForm1.ExportScreenshot1Click(Sender: TObject);
 var
   b: TBitmap;
-  png: TPngObject;
   imgfname: string;
 begin
   if SavePictureDialog1.Execute then
@@ -1345,15 +1344,7 @@ begin
     try
       DoRenderGL;
       Get3dPreviewBitmap(b);
-      if UpperCase(ExtractFileExt(imgfname)) = '.PNG' then
-      begin
-        png := TPngObject.Create;
-        png.Assign(b);
-        png.SaveToFile(imgfname);
-        png.Free;
-      end
-      else
-        b.SaveToFile(imgfname);
+      SaveImageToDisk(b, imgfname);
     finally
       b.Free;
     end;
@@ -2872,7 +2863,6 @@ var
   bmh: bitmapheightmap_p;
   x, y: integer;
   b: TBitmap;
-  png: TPngObject;
   imgfname: string;
   l: PLongWordArray;
   g: integer;
@@ -2900,16 +2890,7 @@ begin
         end;
       end;
       FreeMem(bmh, SizeOf(bitmapheightmap_t));
-
-      if UpperCase(ExtractFileExt(imgfname)) = '.PNG' then
-      begin
-        png := TPngObject.Create;
-        png.Assign(b);
-        png.SaveToFile(imgfname);
-        png.Free;
-      end
-      else
-        b.SaveToFile(imgfname);
+      SaveImageToDisk(b, imgfname);
     finally
       b.Free;
     end;

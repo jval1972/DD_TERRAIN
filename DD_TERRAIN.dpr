@@ -64,7 +64,12 @@ uses
   ter_cursors in 'ter_cursors.pas',
   frm_exportwadmap in 'frm_exportwadmap.pas' {ExportWADMapForm},
   ter_quantize in 'ter_quantize.pas',
-  ter_contour in 'ter_contour.pas';
+  ter_contour in 'ter_contour.pas',
+  xTIFF in 'xTIFF.pas',
+  LibDelphi in 'LibDelphi.pas',
+  LibJpegDelphi in 'LibJpegDelphi.pas',
+  LibTiffDelphi in 'LibTiffDelphi.pas',
+  ter_tmp in 'ter_tmp.pas';
 
 {$R *.res}
 

@@ -122,7 +122,6 @@ var
   aBitmap: TBitmap;
   i, j: integer;
   l1, l2: uint32array_p;
-  stmp: string;
   tif: PTIFF;
   w, h: LongWord;
 begin

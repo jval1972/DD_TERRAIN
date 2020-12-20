@@ -10,8 +10,9 @@
     topN, rightN, bottomN, leftN: T2DNumberList;
     merges: integer;
     mapxmax, mapymax: integer;
+    dx1, dx2, dy1, dy2: integer;
   begin
-    ter_tracecontour(t, t.texturesize, 8, 8, clines, numclines);
+    ter_tracecontour(t, t.texturesize, 32, 16, clines, numclines);
 
     if numclines = 0 then
     begin
@@ -64,6 +65,7 @@
         mapymax := clines[ii].y2;
     end;
 
+    {
     if mapxmax = t.texturesize - 1 then
     begin
       for ii := 0 to numclines - 1 do
@@ -87,6 +89,10 @@
       end;
       inc(mapymax);
     end;
+    }
+
+    inc(mapxmax);
+    inc(mapymax);
 
     topN := T2DNumberList.Create;
     topN.Add(0, -1);
@@ -164,7 +170,7 @@
         v4 := doomlinedefs[jj].v2;
         if (v1 = v4) and (v2 = v3) then
         begin
-          // discard both line
+          // discard both lines
           doomlinedefs[ii].v2 := v1;
           doomlinedefs[jj].v2 := v3;
         end
@@ -185,6 +191,19 @@
               doomlinedefs[ii].v2 := v4;
               doomlinedefs[jj].v2 := v3;  // discard this line
               inc(merges);
+            end
+            else
+            begin
+              dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
+              dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
+              dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
+              dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
+              if (dy1 <> 0) and (dy2 <> 0) then
+                if abs(dx1 / dy1 - dx2 / dy2) <= 0.1 then
+                begin
+                  doomlinedefs[ii].v2 := v4;
+                  doomlinedefs[jj].v2 := v3;  // discard this line
+                end;
             end;
           end;
           if v1 = v4 then
@@ -202,6 +221,19 @@
               doomlinedefs[ii].v2 := v1;  // discard this line
               doomlinedefs[jj].v2 := v2;
               inc(merges);
+            end
+            else
+            begin
+              dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
+              dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
+              dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
+              dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
+              if (dy1 <> 0) and (dy2 <> 0) then
+                if abs(dx1 / dy1 - dx2 / dy2) < 0.1 then
+                begin
+                  doomlinedefs[ii].v2 := v1;  // discard this line
+                  doomlinedefs[jj].v2 := v2;
+                end;
             end;
           end;
         end;

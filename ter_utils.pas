@@ -563,7 +563,7 @@ var
   i: integer;
 begin
   for i := 0 to fNumItems - 1 do
-    if fList[i].num2 = value1 then
+    if fList[i].num2 = value2 then
     begin
       result := i;
       exit;

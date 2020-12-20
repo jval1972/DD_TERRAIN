@@ -2,7 +2,7 @@
   var
     j: integer;
   begin
-    for j := 0 to numdoomvertexes - 1 do
+    for j := numdoomvertexes - 1 downto 0 do
       if (doomvertexes[j].x = x) and (doomvertexes[j].y = y) then
       begin
         result := j;

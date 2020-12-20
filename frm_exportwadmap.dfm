@@ -1,10 +1,10 @@
 object ExportWADMapForm: TExportWADMapForm
-  Left = 229
-  Top = 199
+  Left = 190
+  Top = 174
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 533
+  ClientHeight = 487
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1052,7 +1052,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 492
+    Top = 446
     Width = 681
     Height = 41
     Align = alBottom
@@ -1094,7 +1094,7 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 492
+    Height = 446
     Align = alClient
     Caption = ' '
     TabOrder = 1
@@ -1116,7 +1116,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object Label1: TLabel
       Left = 24
-      Top = 352
+      Top = 328
       Width = 71
       Height = 13
       Caption = 'Ceiling Height: '
@@ -1124,25 +1124,40 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object CeilingHeightLabel: TLabel
       Left = 400
-      Top = 352
+      Top = 328
       Width = 24
       Height = 13
       Caption = '(512)'
     end
     object Label2: TLabel
       Left = 24
-      Top = 392
-      Width = 54
+      Top = 368
+      Width = 58
       Height = 13
-      Caption = 'Light level: '
+      Caption = 'Light Level: '
       FocusControl = LightLevalTrackBar
     end
     object LightLevelLabel: TLabel
       Left = 400
-      Top = 392
+      Top = 368
       Width = 24
       Height = 13
       Caption = '(192)'
+    end
+    object LayerStepLabel: TLabel
+      Left = 400
+      Top = 408
+      Width = 18
+      Height = 13
+      Caption = '(24)'
+    end
+    object Label5: TLabel
+      Left = 24
+      Top = 408
+      Width = 57
+      Height = 13
+      Caption = 'Layer Step: '
+      FocusControl = LayerStepTrackBar
     end
     object EngineRadioGroup: TRadioGroup
       Left = 16
@@ -1256,7 +1271,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object CeilingHeightTrackBar: TTrackBar
       Left = 104
-      Top = 344
+      Top = 320
       Width = 289
       Height = 33
       Max = 1024
@@ -1297,7 +1312,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object LightLevalTrackBar: TTrackBar
       Left = 104
-      Top = 384
+      Top = 360
       Width = 289
       Height = 33
       Max = 255
@@ -1305,6 +1320,18 @@ object ExportWADMapForm: TExportWADMapForm
       Position = 192
       TabOrder = 7
       OnChange = LightLevalTrackBarChange
+    end
+    object LayerStepTrackBar: TTrackBar
+      Left = 104
+      Top = 400
+      Width = 289
+      Height = 33
+      Max = 64
+      Min = 16
+      Frequency = 8
+      Position = 24
+      TabOrder = 8
+      OnChange = LayerStepTrackBarChange
     end
   end
   object SaveWADDialog: TSaveDialog

@@ -497,7 +497,7 @@ begin
   fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
   fexportoptions.defceilingheight := 512;
   fexportoptions.deflightlevel := 192;
-  fexportoptions.layerstep := 16;
+  fexportoptions.layerstep := 24;
 
   bitmapbuffer := TBitmap.Create;
   bitmapbuffer.PixelFormat := pf32bit;

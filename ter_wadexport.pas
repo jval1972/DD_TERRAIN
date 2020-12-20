@@ -323,7 +323,7 @@ var
 
     FreeMem(clines, numclines * SizeOf(countourline_t));
 
-    // Merge co-linear lines 
+    // Merge co-linear lines
     merges := 0;
     for ii := numdoomlinedefs - 1 downto 1 do
       for jj := ii - 1 downto 0 do
@@ -375,6 +375,10 @@ var
     rightN.Sort1;
     bottomN.Sort1;
     leftN.Sort1;
+
+    // Fix first sector of the perimeter
+    if topN.Count > 2 then
+      basesec := topN.Numbers[2].num2;
 
     // Close top of the map
     for ii := 0 to topN.Count - 2 do

@@ -200,6 +200,15 @@ var
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
 
+  procedure FixBlockingLines;
+  var
+    ii: integer;
+  begin
+    for ii := 0 to numdoomlinedefs - 1 do
+      if doomlinedefs[ii].sidenum[1] = -1 then
+        doomlinedefs[ii].flags := doomlinedefs[ii].flags or ML_BLOCKING;
+  end;
+
   procedure TraceContourMap;
   var
     clines: Pcountourline_tArray;
@@ -210,6 +219,7 @@ var
     frontsec, backsec: integer;
     basesec: integer;
     topN, rightN, bottomN, leftN: T2DNumberList;
+    merges: integer;
   begin
     ter_tracecontour(t, t.texturesize, 32, 32, clines, numclines);
 
@@ -311,6 +321,50 @@ var
     end;
 
     FreeMem(clines, numclines * SizeOf(countourline_t));
+
+    merges := 0;
+    for ii := numdoomlinedefs - 1 downto 1 do
+      for jj := ii - 1 downto 0 do
+      begin
+        v1 := doomlinedefs[ii].v1;
+        v2 := doomlinedefs[ii].v2;
+        v3 := doomlinedefs[jj].v1;
+        v4 := doomlinedefs[jj].v2;
+        if v2 = v3 then
+        begin
+          if (doomvertexes[v1].x = doomvertexes[v2].x) and
+             (doomvertexes[v1].x = doomvertexes[v4].x) then
+          begin
+            doomlinedefs[ii].v2 := v4;
+            doomlinedefs[jj].v2 := v3;  // discard this line
+            inc(merges);
+          end
+          else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                  (doomvertexes[v1].y = doomvertexes[v4].y) then
+          begin
+            doomlinedefs[ii].v2 := v4;
+            doomlinedefs[jj].v2 := v3;  // discard this line
+            inc(merges);
+          end;
+        end;
+        if v1 = v4 then
+        begin
+          if (doomvertexes[v1].x = doomvertexes[v2].x) and
+             (doomvertexes[v2].x = doomvertexes[v3].x) then
+          begin
+            doomlinedefs[ii].v2 := v1;  // discard this line
+            doomlinedefs[jj].v2 := v2;
+            inc(merges);
+          end
+          else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                  (doomvertexes[v1].y = doomvertexes[v3].y) then
+          begin
+            doomlinedefs[ii].v2 := v1;  // discard this line
+            doomlinedefs[jj].v2 := v2;
+            inc(merges);
+          end;
+        end;
+      end;
 
     topN.Sort1;
     rightN.Sort1;

@@ -4,18 +4,19 @@
     dsec: Pmapsector_t;
   begin
     if not sloped then
-    begin
-      for j := 0 to numdoomsectors - 1 do
-        if not slopedsectors[j] then
-        begin
-          dsec := @doomsectors[j];
-          if (dsec.floorheight = hfloor) and (dsec.ceilingheight = hceiling) then
+      if options.flags and ETF_MERGEFLATSECTORS <> 0 then
+      begin
+        for j := 0 to numdoomsectors - 1 do
+          if not slopedsectors[j] then
           begin
-            Result := j;
-            Exit;
+            dsec := @doomsectors[j];
+            if (dsec.floorheight = hfloor) and (dsec.ceilingheight = hceiling) then
+            begin
+              Result := j;
+              Exit;
+            end;
           end;
-        end;
-    end;
+      end;
 
     ReallocMem(doomsectors, (numdoomsectors  + 1) * SizeOf(mapsector_t));
     ReallocMem(slopedsectors, (numdoomsectors  + 1) * SizeOf(boolean));

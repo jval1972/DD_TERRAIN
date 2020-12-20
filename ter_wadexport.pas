@@ -322,6 +322,7 @@ var
 
     FreeMem(clines, numclines * SizeOf(countourline_t));
 
+    // Merge co-linear lines 
     merges := 0;
     for ii := numdoomlinedefs - 1 downto 1 do
       for jj := ii - 1 downto 0 do
@@ -330,38 +331,41 @@ var
         v2 := doomlinedefs[ii].v2;
         v3 := doomlinedefs[jj].v1;
         v4 := doomlinedefs[jj].v2;
-        if v2 = v3 then
+        if (v1 <> v2) and (v3 <> v4) then
         begin
-          if (doomvertexes[v1].x = doomvertexes[v2].x) and
-             (doomvertexes[v1].x = doomvertexes[v4].x) then
+          if v2 = v3 then
           begin
-            doomlinedefs[ii].v2 := v4;
-            doomlinedefs[jj].v2 := v3;  // discard this line
-            inc(merges);
-          end
-          else if (doomvertexes[v1].y = doomvertexes[v2].y) and
-                  (doomvertexes[v1].y = doomvertexes[v4].y) then
-          begin
-            doomlinedefs[ii].v2 := v4;
-            doomlinedefs[jj].v2 := v3;  // discard this line
-            inc(merges);
+            if (doomvertexes[v1].x = doomvertexes[v2].x) and
+               (doomvertexes[v1].x = doomvertexes[v4].x) then
+            begin
+              doomlinedefs[ii].v2 := v4;
+              doomlinedefs[jj].v2 := v3;  // discard this line
+              inc(merges);
+            end
+            else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                    (doomvertexes[v1].y = doomvertexes[v4].y) then
+            begin
+              doomlinedefs[ii].v2 := v4;
+              doomlinedefs[jj].v2 := v3;  // discard this line
+              inc(merges);
+            end;
           end;
-        end;
-        if v1 = v4 then
-        begin
-          if (doomvertexes[v1].x = doomvertexes[v2].x) and
-             (doomvertexes[v2].x = doomvertexes[v3].x) then
+          if v1 = v4 then
           begin
-            doomlinedefs[ii].v2 := v1;  // discard this line
-            doomlinedefs[jj].v2 := v2;
-            inc(merges);
-          end
-          else if (doomvertexes[v1].y = doomvertexes[v2].y) and
-                  (doomvertexes[v1].y = doomvertexes[v3].y) then
-          begin
-            doomlinedefs[ii].v2 := v1;  // discard this line
-            doomlinedefs[jj].v2 := v2;
-            inc(merges);
+            if (doomvertexes[v1].x = doomvertexes[v2].x) and
+               (doomvertexes[v2].x = doomvertexes[v3].x) then
+            begin
+              doomlinedefs[ii].v2 := v1;  // discard this line
+              doomlinedefs[jj].v2 := v2;
+              inc(merges);
+            end
+            else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                    (doomvertexes[v1].y = doomvertexes[v3].y) then
+            begin
+              doomlinedefs[ii].v2 := v1;  // discard this line
+              doomlinedefs[jj].v2 := v2;
+              inc(merges);
+            end;
           end;
         end;
       end;

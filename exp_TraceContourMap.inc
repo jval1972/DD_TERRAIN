@@ -65,32 +65,6 @@
         mapymax := clines[ii].y2;
     end;
 
-    {
-    if mapxmax = t.texturesize - 1 then
-    begin
-      for ii := 0 to numclines - 1 do
-      begin
-        if clines[ii].x1 = mapxmax then
-          clines[ii].x1 := mapxmax + 1;
-        if clines[ii].x2 = mapxmax then
-          clines[ii].x2 := mapxmax + 1;
-      end;
-      inc(mapxmax);
-    end;
-
-    if mapymax = t.texturesize - 1 then
-    begin
-      for ii := 0 to numclines - 1 do
-      begin
-        if clines[ii].y1 = mapymax then
-          clines[ii].y1 := mapymax + 1;
-        if clines[ii].y2 = mapymax then
-          clines[ii].y2 := mapymax + 1;
-      end;
-      inc(mapymax);
-    end;
-    }
-
     inc(mapxmax);
     inc(mapymax);
 

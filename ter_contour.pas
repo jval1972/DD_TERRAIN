@@ -254,7 +254,6 @@ begin
     end;
 
   layer := 0;
-//  elevation := -HEIGHTMAPRANGE - 1;
   elevation := - elevstep * (HEIGHTMAPRANGE div elevstep + 1);
   while elevation < HEIGHTMAPRANGE do
   begin

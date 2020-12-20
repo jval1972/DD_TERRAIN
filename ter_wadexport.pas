@@ -45,7 +45,7 @@ const
   ETF_ADDPLAYERSTART = 8;     // Add a player start
   ETF_EXPORTFLAT = 16;        // Export flat?
   ETF_HEXENHEIGHT = 32;       // Use Hexen special 1504
-  ETF_BUILDNODES = 64;       // Build nodes for non advanced ports?
+  ETF_BUILDNODES = 64;        // Build nodes for non advanced ports?
 
 const
   ELEVATIONMETHOD_SLOPES = 0;

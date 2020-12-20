@@ -40,7 +40,7 @@ procedure ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256);
 
 implementation
 
-// Color quantization algorythm from https://rosettacode.org
+// Color quantization algorithm from https://rosettacode.org
 type
   oct_node_p = ^oct_node_t;
   oct_node_t = record

@@ -106,6 +106,8 @@ type
     procedure Add(const nlist: T2DNumberList); overload; virtual;
     function Delete(const Index: integer): boolean;
     function IndexOf(const value1, value2: integer): integer; virtual;
+    function IndexOf1(const value1: integer): integer; virtual;
+    function IndexOf2(const value2: integer): integer; virtual;
     procedure Clear;
     procedure FastClear;
     procedure Sort1;
@@ -536,6 +538,32 @@ var
 begin
   for i := 0 to fNumItems - 1 do
     if (fList[i].num1 = value1) and (fList[i].num2 = value2) then
+    begin
+      result := i;
+      exit;
+    end;
+  result := -1;
+end;
+
+function T2DNumberList.IndexOf1(const value1: integer): integer;
+var
+  i: integer;
+begin
+  for i := 0 to fNumItems - 1 do
+    if fList[i].num1 = value1 then
+    begin
+      result := i;
+      exit;
+    end;
+  result := -1;
+end;
+
+function T2DNumberList.IndexOf2(const value2: integer): integer;
+var
+  i: integer;
+begin
+  for i := 0 to fNumItems - 1 do
+    if fList[i].num2 = value1 then
     begin
       result := i;
       exit;

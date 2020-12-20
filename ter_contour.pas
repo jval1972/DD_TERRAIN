@@ -142,7 +142,7 @@ var
     minor, major: slicetri3d_p;
     i, j: integer;
     crossed_edges: array[0..1] of edge_t;
-    contour_points: array[0..1] of point3d_t;
+    contour_points: array[0..1] of point2d_t;
     f: double;
   begin
     Result := 0;

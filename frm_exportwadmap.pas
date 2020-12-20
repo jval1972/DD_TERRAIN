@@ -60,6 +60,9 @@ type
     CeilingHeightLabel: TLabel;
     GameRadioGroup: TRadioGroup;
     ElevationRadioGroup: TRadioGroup;
+    LightLevalTrackBar: TTrackBar;
+    Label2: TLabel;
+    LightLevelLabel: TLabel;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -70,6 +73,7 @@ type
     procedure ExportFlatCheckBoxClick(Sender: TObject);
     procedure CeilingHeightTrackBarChange(Sender: TObject);
     procedure ElevationRadioGroupClick(Sender: TObject);
+    procedure LightLevalTrackBarChange(Sender: TObject);
   private
     { Private declarations }
     bm, bmTexture: TBitmap;
@@ -107,6 +111,8 @@ begin
     f.ElevationRadioGroup.ItemIndex := options.elevationmethod;
     f.CeilingHeightTrackBar.Position := GetIntInRange(options.defceilingheight, f.CeilingHeightTrackBar.Min, f.CeilingHeightTrackBar.Max);
     f.CeilingHeightLabel.Caption := IntToStr(f.CeilingHeightTrackBar.Position);
+    f.LightLevalTrackBar.Position := GetIntInRange(options.deflightlevel, f.LightLevalTrackBar.Min, f.LightLevalTrackBar.Max);
+    f.LightLevelLabel.Caption := IntToStr(f.LightLevalTrackBar.Position);
     f.DeformationsCheckBox.Checked := options.flags and ETF_CALCDXDY <> 0;
     f.TrueColorFlatCheckBox.Checked := options.flags and ETF_TRUECOLORFLAT <> 0;
     f.MergeFlatSectorsCheckBox.Checked := options.flags and ETF_MERGEFLATSECTORS <> 0;
@@ -124,6 +130,7 @@ begin
       options.game := f.GameRadioGroup.ItemIndex;
       options.elevationmethod := f.ElevationRadioGroup.ItemIndex;
       options.defceilingheight := f.CeilingHeightTrackBar.Position;
+      options.deflightlevel := f.LightLevalTrackBar.Position;
       options.flags := 0;
       if f.DeformationsCheckBox.Checked then
         options.flags := options.flags or ETF_CALCDXDY;
@@ -375,6 +382,12 @@ procedure TExportWADMapForm.ElevationRadioGroupClick(Sender: TObject);
 begin
   GeneratePreview;
   PaintBox1.Invalidate;
+end;
+
+procedure TExportWADMapForm.LightLevalTrackBarChange(Sender: TObject);
+begin
+  LightLevelLabel.Caption := IntToStr(LightLevalTrackBar.Position);
+  LightLevalTrackBar.Hint := IntToStr(LightLevalTrackBar.Position);
 end;
 
 end.

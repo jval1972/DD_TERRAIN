@@ -24,7 +24,7 @@
     dsec.ceilingheight := hceiling;
     dsec.floorpic := stringtochar8(options.levelname + 'TER');
     dsec.ceilingpic := stringtochar8(options.defceilingtex);
-    dsec.lightlevel := 192;
+    dsec.lightlevel := options.deflightlevel;
     dsec.special := 0;
     dsec.tag := 0;
     slopedsectors[numdoomsectors] := sloped;

@@ -1116,7 +1116,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object Label1: TLabel
       Left = 24
-      Top = 440
+      Top = 352
       Width = 71
       Height = 13
       Caption = 'Ceiling Height: '
@@ -1124,10 +1124,25 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object CeilingHeightLabel: TLabel
       Left = 400
-      Top = 440
+      Top = 352
       Width = 24
       Height = 13
       Caption = '(512)'
+    end
+    object Label2: TLabel
+      Left = 24
+      Top = 392
+      Width = 54
+      Height = 13
+      Caption = 'Light level: '
+      FocusControl = LightLevalTrackBar
+    end
+    object LightLevelLabel: TLabel
+      Left = 400
+      Top = 392
+      Width = 24
+      Height = 13
+      Caption = '(192)'
     end
     object EngineRadioGroup: TRadioGroup
       Left = 16
@@ -1241,7 +1256,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object CeilingHeightTrackBar: TTrackBar
       Left = 104
-      Top = 432
+      Top = 344
       Width = 289
       Height = 33
       Max = 1024
@@ -1279,6 +1294,17 @@ object ExportWADMapForm: TExportWADMapForm
         'Trace contour')
       TabOrder = 6
       OnClick = ElevationRadioGroupClick
+    end
+    object LightLevalTrackBar: TTrackBar
+      Left = 104
+      Top = 384
+      Width = 289
+      Height = 33
+      Max = 255
+      Frequency = 8
+      Position = 192
+      TabOrder = 7
+      OnChange = LightLevalTrackBarChange
     end
   end
   object SaveWADDialog: TSaveDialog

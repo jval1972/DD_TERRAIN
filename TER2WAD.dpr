@@ -277,6 +277,7 @@ begin
   fexportoptions.defceilingtex := UpperCase(M_CheckParam('-ctexture', fexportoptions.defceilingtex));
 
   fexportoptions.defceilingheight := 512;
+  fexportoptions.deflightlevel := 192;
 
   write('Opening file ' + finp + '...');
   t := TTerrain.Create;

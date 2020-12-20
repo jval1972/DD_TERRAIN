@@ -76,6 +76,7 @@ type
     flags: integer;
     elevationmethod: integer;
     defceilingheight: integer;
+    deflightlevel: integer;
   end;
   exportwadoptions_p = ^exportwadoptions_t;
 

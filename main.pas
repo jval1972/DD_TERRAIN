@@ -496,6 +496,7 @@ begin
   fexportoptions.flags := ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
   fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
   fexportoptions.defceilingheight := 512;
+  fexportoptions.deflightlevel := 192;
 
   bitmapbuffer := TBitmap.Create;
   bitmapbuffer.PixelFormat := pf32bit;

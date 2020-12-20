@@ -489,10 +489,11 @@ begin
   fexportoptions.levelname := 'E1M1';
   fexportoptions.palette := @RadixPaletteRaw;
   fexportoptions.defsidetex := 'RDXW0012';
-  fexportoptions.deceilingpic := 'F_SKY1';
+  fexportoptions.defceilingtex := 'F_SKY1';
   fexportoptions.lowerid := 1255;
   fexportoptions.raiseid := 1254;
-  fexportoptions.flags := ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
+  fexportoptions.flags := ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
+  fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
   fexportoptions.defceilingheight := 512;
 
   bitmapbuffer := TBitmap.Create;
@@ -2252,50 +2253,25 @@ begin
             ExportTerrainToHexenFile(
               terrain,
               fs,
-              fexportoptions.levelname,
-              fexportoptions.palette,
-              fexportoptions.defsidetex,
-              fexportoptions.deceilingpic,
-              fexportoptions.lowerid,
-              fexportoptions.raiseid,
-              fexportoptions.flags,
-              fexportoptions.defceilingheight
+              @fexportoptions
             )
           else
             ExportTerrainToWADFile(
               terrain,
               fs,
-              fexportoptions.levelname,
-              fexportoptions.palette,
-              fexportoptions.defsidetex,
-              fexportoptions.deceilingpic,
-              fexportoptions.lowerid,
-              fexportoptions.raiseid,
-              fexportoptions.flags,
-              fexportoptions.defceilingheight
+              @fexportoptions
             );
         ENGINE_VAVOOM:
           ExportTerrainToHexenFile(
             terrain,
             fs,
-            fexportoptions.levelname,
-            fexportoptions.palette,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.lowerid,
-            fexportoptions.raiseid,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight
+            @fexportoptions
           );
         ENGINE_UDMF:
           ExportTerrainToUDMFFile(
             terrain,
             fs,
-            fexportoptions.levelname,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight
+            @fexportoptions
           );
         end;
       fs.Free;

@@ -22,8 +22,8 @@
     dsec := @doomsectors[numdoomsectors];
     dsec.floorheight := hfloor;
     dsec.ceilingheight := hceiling;
-    dsec.floorpic := stringtochar8(levelname + 'TER');
-    dsec.ceilingpic := stringtochar8(defceilingtex);
+    dsec.floorpic := stringtochar8(options.levelname + 'TER');
+    dsec.ceilingpic := stringtochar8(options.defceilingtex);
     dsec.lightlevel := 192;
     dsec.special := 0;
     dsec.tag := 0;

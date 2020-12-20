@@ -9,7 +9,7 @@
     p2 := GetHeightmapCoords3D(iX2, iY2);
     p3 := GetHeightmapCoords3D(iX3, iY3);
     p4 := GetHeightmapCoords3D(iX4, iY4);
-    sec := AddSector((p1.Z + p2.Z + p3.Z + p4.Z) div 4, defceilingheight, False);
+    sec := AddSector((p1.Z + p2.Z + p3.Z + p4.Z) div 4, options.defceilingheight, False);
     v1 := AddVertex(p1.X, -p1.Y);
     v2 := AddVertex(p2.X, -p2.Y);
     v3 := AddVertex(p3.X, -p3.Y);

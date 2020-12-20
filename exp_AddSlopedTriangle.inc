@@ -8,12 +8,12 @@
     {$IFDEF HEXEN_FORMAT}
     procedure doaddhexenthing(const p: point3d_p);
     begin
-      if flags and ETF_HEXENHEIGHT <> 0 then
-        AddThing(p.X, -p.Y, 0, p.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+      if options.flags and ETF_HEXENHEIGHT <> 0 then
+        AddThing(p.X, -p.Y, 0, p.Z, options.raiseid, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else if p.Z < 0 then
-        AddThing(p.X, -p.Y, -p.Z, 0, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThing(p.X, -p.Y, -p.Z, 0, options.lowerid, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThing(p.X, -p.Y, p.Z, 0, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThing(p.X, -p.Y, p.Z, 0, options.raiseid, MTF_EASY or MTF_NORMAL or MTF_HARD);
     end;
     {$ENDIF}
   begin
@@ -22,9 +22,9 @@
     p3 := GetHeightmapCoords3D(iX3, iY3);
     issloped := (p1.Z <> p2.Z) or (p1.Z <> p3.Z);
     if issloped then
-      sec := AddSector(0, defceilingheight, True)
+      sec := AddSector(0, options.defceilingheight, True)
     else
-      sec := AddSector(p1.Z, defceilingheight, False);
+      sec := AddSector(p1.Z, options.defceilingheight, False);
     v1 := AddVertex(p1.X, -p1.Y);
     v2 := AddVertex(p2.X, -p2.Y);
     v3 := AddVertex(p3.X, -p3.Y);
@@ -65,17 +65,17 @@
       doaddhexenthing(@p3);
       {$ELSE}
       if p1.Z < 0 then
-        AddThing(p1.X, -p1.Y, -p1.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThing(p1.X, -p1.Y, -p1.Z, options.lowerid, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThing(p1.X, -p1.Y, p1.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThing(p1.X, -p1.Y, p1.Z, options.raiseid, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p2.Z < 0 then
-        AddThing(p2.X, -p2.Y, -p2.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThing(p2.X, -p2.Y, -p2.Z, options.lowerid, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThing(p2.X, -p2.Y, p2.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThing(p2.X, -p2.Y, p2.Z, options.raiseid, MTF_EASY or MTF_NORMAL or MTF_HARD);
       if p3.Z < 0 then
-        AddThing(p3.X, -p3.Y, -p3.Z, _LOWERID, MTF_EASY or MTF_NORMAL or MTF_HARD)
+        AddThing(p3.X, -p3.Y, -p3.Z, options.lowerid, MTF_EASY or MTF_NORMAL or MTF_HARD)
       else
-        AddThing(p3.X, -p3.Y, p3.Z, _RAISEID, MTF_EASY or MTF_NORMAL or MTF_HARD);
+        AddThing(p3.X, -p3.Y, p3.Z, options.raiseid, MTF_EASY or MTF_NORMAL or MTF_HARD);
       {$ENDIF}
       {$ENDIF}
     end;

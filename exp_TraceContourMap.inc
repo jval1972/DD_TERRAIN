@@ -18,28 +18,28 @@
       v1 := AddVertex(0, 0);
       v2 := AddVertex(t.texturesize - 1, 0);
       ll := AddLinedef(v1, v2);
-      frontsec := AddSector(0, defceilingheight, False);
+      frontsec := AddSector(0, options.defceilingheight, False);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
       doomlinedefs[ll].sidenum[1] := -1;
 
       v1 := AddVertex(t.texturesize - 1, 0);
       v2 := AddVertex(t.texturesize - 1, t.texturesize - 1);
       ll := AddLinedef(v1, v2);
-      frontsec := AddSector(0, defceilingheight, False);
+      frontsec := AddSector(0, options.defceilingheight, False);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
       doomlinedefs[ll].sidenum[1] := -1;
 
       v1 := AddVertex(t.texturesize - 1, 1 - t.texturesize);
       v2 := AddVertex(0, 1 - t.texturesize);
       ll := AddLinedef(v1, v2);
-      frontsec := AddSector(0, defceilingheight, False);
+      frontsec := AddSector(0, options.defceilingheight, False);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
       doomlinedefs[ll].sidenum[1] := -1;
 
       v1 := AddVertex(0, 1 - t.texturesize);
       v2 := AddVertex(0, 0);
       ll := AddLinedef(v1, v2);
-      frontsec := AddSector(0, defceilingheight, False);
+      frontsec := AddSector(0, options.defceilingheight, False);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
       doomlinedefs[ll].sidenum[1] := -1;
 
@@ -63,12 +63,12 @@
     leftN.Add(1 - t.texturesize, -1);
 
     // Base sector
-    basesec := AddSector(clines[0].backheight, defceilingheight, False);
+    basesec := AddSector(clines[0].backheight, options.defceilingheight, False);
 
     for ii := 0 to numclines - 1 do
     begin
-      frontsec := AddSector(clines[ii].frontheight, defceilingheight, False);
-      backsec := AddSector(clines[ii].backheight, defceilingheight, False);
+      frontsec := AddSector(clines[ii].frontheight, options.defceilingheight, False);
+      backsec := AddSector(clines[ii].backheight, options.defceilingheight, False);
       if clines[ii].orientation > 0 then
       begin
         v1 := AddVertex(clines[ii].x1, -clines[ii].y1);

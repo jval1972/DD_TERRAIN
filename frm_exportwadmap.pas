@@ -43,7 +43,6 @@ type
     MainPanel: TPanel;
     EngineRadioGroup: TRadioGroup;
     OptionsGroupBox: TGroupBox;
-    SlopedSectorsCheckBox: TCheckBox;
     DeformationsCheckBox: TCheckBox;
     TrueColorFlatCheckBox: TCheckBox;
     MergeFlatSectorsCheckBox: TCheckBox;
@@ -60,6 +59,7 @@ type
     CeilingHeightTrackBar: TTrackBar;
     CeilingHeightLabel: TLabel;
     GameRadioGroup: TRadioGroup;
+    ElevationRadioGroup: TRadioGroup;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -69,6 +69,7 @@ type
     procedure FileNameEditChange(Sender: TObject);
     procedure ExportFlatCheckBoxClick(Sender: TObject);
     procedure CeilingHeightTrackBarChange(Sender: TObject);
+    procedure ElevationRadioGroupClick(Sender: TObject);
   private
     { Private declarations }
     bm, bmTexture: TBitmap;
@@ -103,9 +104,9 @@ begin
     f.FileNameEdit.Text := fname;
     f.EngineRadioGroup.ItemIndex := options.engine;
     f.GameRadioGroup.ItemIndex := options.game;
+    f.ElevationRadioGroup.ItemIndex := options.elevationmethod;
     f.CeilingHeightTrackBar.Position := GetIntInRange(options.defceilingheight, f.CeilingHeightTrackBar.Min, f.CeilingHeightTrackBar.Max);
     f.CeilingHeightLabel.Caption := IntToStr(f.CeilingHeightTrackBar.Position);
-    f.SlopedSectorsCheckBox.Checked := options.flags and ETF_SLOPED <> 0;
     f.DeformationsCheckBox.Checked := options.flags and ETF_CALCDXDY <> 0;
     f.TrueColorFlatCheckBox.Checked := options.flags and ETF_TRUECOLORFLAT <> 0;
     f.MergeFlatSectorsCheckBox.Checked := options.flags and ETF_MERGEFLATSECTORS <> 0;
@@ -121,10 +122,9 @@ begin
       fname := f.FileNameEdit.Text;
       options.engine := f.EngineRadioGroup.ItemIndex;
       options.game := f.GameRadioGroup.ItemIndex;
+      options.elevationmethod := f.ElevationRadioGroup.ItemIndex;
       options.defceilingheight := f.CeilingHeightTrackBar.Position;
       options.flags := 0;
-      if f.SlopedSectorsCheckBox.Checked then
-        options.flags := options.flags or ETF_SLOPED;
       if f.DeformationsCheckBox.Checked then
         options.flags := options.flags or ETF_CALCDXDY;
       if f.TrueColorFlatCheckBox.Checked then
@@ -142,35 +142,35 @@ begin
           options.palette := @RadixPaletteRaw;
           options.levelname := 'E1M1';
           options.defsidetex := 'RDXW0012';
-          options.deceilingpic := 'F_SKY1';
+          options.defceilingtex := 'F_SKY1';
         end;
       GAME_DOOM:
         begin
           options.palette := @DoomPaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'METAL1';
-          options.deceilingpic := 'F_SKY1';
+          options.defceilingtex := 'F_SKY1';
         end;
       GAME_HERETIC:
         begin
           options.palette := @HereticPaletteRaw;
           options.levelname := 'E1M1';
           options.defsidetex := 'CSTLRCK';
-          options.deceilingpic := 'F_SKY1';
+          options.defceilingtex := 'F_SKY1';
         end;
       GAME_HEXEN:
         begin
           options.palette := @HexenPaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'FOREST02';
-          options.deceilingpic := 'F_SKY';
+          options.defceilingtex := 'F_SKY';
         end;
       GAME_STRIFE:
         begin
           options.palette := @StrifePaletteRaw;
           options.levelname := 'MAP01';
           options.defsidetex := 'BRKGRY01';
-          options.deceilingpic := 'F_SKY001';
+          options.defceilingtex := 'F_SKY001';
         end;
       end;
 
@@ -237,7 +237,7 @@ end;
 procedure TExportWADMapForm.GeneratePreview;
 var
   strm: TMemoryStream;
-  flags: LongWord;
+  tmpoptions: exportwadoptions_t;
   wadreader: TWADReader;
   p: pointer;
   vsize: integer;
@@ -257,13 +257,15 @@ begin
   begin
     strm := TMemoryStream.Create;
 
-    flags := 0;
+    ZeroMemory(@tmpoptions, SizeOf(exportwadoptions_t));
+    tmpoptions.elevationmethod := ElevationRadioGroup.ItemIndex;
+    tmpoptions.flags := 0;
     if DeformationsCheckBox.Checked then
-      flags := flags or ETF_CALCDXDY;
+      tmpoptions.flags := tmpoptions.flags or ETF_CALCDXDY;
     if MergeFlatSectorsCheckBox.Checked then
-      flags := flags or ETF_MERGEFLATSECTORS;
+      tmpoptions.flags := tmpoptions.flags or ETF_MERGEFLATSECTORS;
 
-    ExportTerrainToWADFile(t, strm, 'MAP01', nil, '', '', 0, 0, flags);
+    ExportTerrainToWADFile(t, strm, @tmpoptions);
 
     wadreader := TWADReader.Create;
     strm.Position := 0;
@@ -367,6 +369,12 @@ procedure TExportWADMapForm.CeilingHeightTrackBarChange(Sender: TObject);
 begin
   CeilingHeightLabel.Caption := IntToStr(CeilingHeightTrackBar.Position);
   CeilingHeightTrackBar.Hint := IntToStr(CeilingHeightTrackBar.Position);
+end;
+
+procedure TExportWADMapForm.ElevationRadioGroupClick(Sender: TObject);
+begin
+  GeneratePreview;
+  PaintBox1.Invalidate;
 end;
 
 end.

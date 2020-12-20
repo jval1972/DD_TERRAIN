@@ -39,15 +39,18 @@ uses
   ter_wad;
 
 const
-  ETF_SLOPED = 1;             // Generates maps with slopes
-  ETF_CALCDXDY = 2;           // Takes into accound the deformations
-  ETF_TRUECOLORFLAT = 4;      // Export true color flat
-  ETF_MERGEFLATSECTORS = 8;   // Merge flat sectors
-  ETF_ADDPLAYERSTART = 16;    // Add a player start
-  ETF_EXPORTFLAT = 32;        // Export flat?
-  ETF_HEXENHEIGHT = 64;       // Use Hexen special 1504
-  ETF_BUILDNODES = 128;       // Build nodes for non advanced ports?
-  ETF_TRACECONTOUR = 256;     // Use trace contour method?
+  ETF_CALCDXDY = 1;           // Takes into accound the deformations
+  ETF_TRUECOLORFLAT = 2;      // Export true color flat
+  ETF_MERGEFLATSECTORS = 4;   // Merge flat sectors
+  ETF_ADDPLAYERSTART = 8;     // Add a player start
+  ETF_EXPORTFLAT = 16;        // Export flat?
+  ETF_HEXENHEIGHT = 32;       // Use Hexen special 1504
+  ETF_BUILDNODES = 64;       // Build nodes for non advanced ports?
+
+const
+  ELEVATIONMETHOD_SLOPES = 0;
+  ELEVATIONMETHOD_MINECRAFT = 1;
+  ELEVATIONMETHOD_TRACECONTOUR = 2;
 
 const
   ENGINE_RAD = 0;             // WAD format for RAD & DelphiDoom
@@ -68,9 +71,10 @@ type
     levelname: string[8];
     palette: PByteArray;
     defsidetex: string[8];
-    deceilingpic: string[8];
+    defceilingtex: string[8];
     lowerid, raiseid: integer;
     flags: integer;
+    elevationmethod: integer;
     defceilingheight: integer;
   end;
   exportwadoptions_p = ^exportwadoptions_t;
@@ -86,20 +90,23 @@ type
   wadexportstats_p = ^wadexportstats_t;
 
 procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const options: exportwadoptions_p;
+{  const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 
 procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const options: exportwadoptions_p;
+{  const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const defsidetex: string; const defceilingtex: string;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const options: exportwadoptions_p;
+{  const levelname: string; const defsidetex: string; const defceilingtex: string;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 
 implementation
@@ -157,9 +164,10 @@ type
 {$UNDEF HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
 procedure ExportTerrainToWADFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const options: exportwadoptions_p;
+{  const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 var
   doomthings: Pmapthing_tArray;
@@ -204,7 +212,7 @@ var
 {$I exp_TraceContourMap.inc}
 
 begin
-  sidetex := stringtochar8(defsidetex);
+  sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
 
@@ -222,21 +230,21 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_EXPORTFLAT <> 0 then
+  if options.flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create Palette
     for i := 0 to 255 do
     begin
-      r := palette[3 * i];
+      r := options.palette[3 * i];
       if r > 255 then r := 255;
-      g := palette[3 * i + 1];
+      g := options.palette[3 * i + 1];
       if g > 255 then g := 255;
-      b := palette[3 * i + 2];
+      b := options.palette[3 * i + 2];
       if b > 255 then b := 255;
       def_palL[i] := (r shl 16) + (g shl 8) + (b);
     end;
 
-    if flags and ETF_TRUECOLORFLAT <> 0 then
+    if options.flags and ETF_TRUECOLORFLAT <> 0 then
     begin
       // Create flat - 32 bit color - inside HI_START - HI_END namespace
       png := TPngObject.Create;
@@ -247,7 +255,7 @@ begin
       png.SaveToStream(ms);
 
       wadwriter.AddSeparator('HI_START');
-      wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+      wadwriter.AddData(options.levelname + 'TER', ms.Memory, ms.Size);
       wadwriter.AddSeparator('HI_END');
 
       ms.Free;
@@ -271,14 +279,14 @@ begin
     end;
 
     wadwriter.AddSeparator('F_START');
-    wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
+    wadwriter.AddData(options.levelname + 'TER', flattexture, bm.Width * bm.Height);
     wadwriter.AddSeparator('F_END');
 
     FreeMem(flattexture, bm.Width * bm.Height);
   end;
 
   // Create Map
-  if flags and ETF_TRACECONTOUR <> 0 then
+  if options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR then
     TraceContourMap
   else
     for x := 0 to t.heightmapsize - 2 do
@@ -286,11 +294,11 @@ begin
         AddHeightmapItem(x, y);
 
   // Player start
-  if flags and ETF_ADDPLAYERSTART <> 0 then
+  if options.flags and ETF_ADDPLAYERSTART <> 0 then
     AddThing(64, -64, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
 
   // Remove unneeded lines
-  if flags and ETF_MERGEFLATSECTORS <> 0 then
+  if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
 
   // Remove all other unused elements
@@ -318,7 +326,7 @@ begin
   end;
 
   // Flash data to wad
-  wadwriter.AddSeparator(levelname);
+  wadwriter.AddSeparator(options.levelname);
   wadwriter.AddData('THINGS', doomthings, numdoomthings * SizeOf(mapthing_t));
   wadwriter.AddData('LINEDEFS', doomlinedefs, numdoomlinedefs * SizeOf(maplinedef_t));
   wadwriter.AddData('SIDEDEFS', doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
@@ -357,9 +365,10 @@ end;
 {$DEFINE HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
 procedure ExportTerrainToHexenFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const palette: PByteArray; const defsidetex: string;
+  const options: exportwadoptions_p;
+{  const levelname: string; const palette: PByteArray; const defsidetex: string;
   const defceilingtex: string; const _LOWERID, _RAISEID: integer;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 var
   doomthings: Phmapthing_tArray;
@@ -404,7 +413,7 @@ var
 {$I exp_TraceContourMap.inc}
 
 begin
-  sidetex := stringtochar8(defsidetex);
+  sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
 
@@ -422,21 +431,21 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_EXPORTFLAT <> 0 then
+  if options.flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create Palette
     for i := 0 to 255 do
     begin
-      r := palette[3 * i];
+      r := options.palette[3 * i];
       if r > 255 then r := 255;
-      g := palette[3 * i + 1];
+      g := options.palette[3 * i + 1];
       if g > 255 then g := 255;
-      b := palette[3 * i + 2];
+      b := options.palette[3 * i + 2];
       if b > 255 then b := 255;
       def_palL[i] := (r shl 16) + (g shl 8) + (b);
     end;
 
-    if flags and ETF_TRUECOLORFLAT <> 0 then
+    if options.flags and ETF_TRUECOLORFLAT <> 0 then
     begin
       // Create flat - 32 bit color - inside HI_START - HI_END namespace
       png := TPngObject.Create;
@@ -447,15 +456,15 @@ begin
       png.SaveToStream(ms);
 
       wadwriter.AddSeparator('HI_START');
-      wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+      wadwriter.AddData(options.levelname + 'TER', ms.Memory, ms.Size);
       wadwriter.AddSeparator('HI_END');
 
       wadwriter.AddString('TEXTURES',
-        'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
+        'flat ' + options.levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
         '{' + #13#10 +
         '   XScale 1.0' + #13#10 +
         '   YScale 1.0' + #13#10 +
-        '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
+        '   Patch ' + options.levelname + 'TER, 0, 0' + #13#10 +
         '}' + #13#10
       );
 
@@ -480,14 +489,14 @@ begin
     end;
 
     wadwriter.AddSeparator('F_START');
-    wadwriter.AddData(levelname + 'TER', flattexture, bm.Width * bm.Height);
+    wadwriter.AddData(options.levelname + 'TER', flattexture, bm.Width * bm.Height);
     wadwriter.AddSeparator('F_END');
 
     FreeMem(flattexture, bm.Width * bm.Height);
   end;
 
   // Create Map
-  if flags and ETF_TRACECONTOUR <> 0 then
+  if options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR then
     TraceContourMap
   else
     for x := 0 to t.heightmapsize - 2 do
@@ -495,11 +504,11 @@ begin
         AddHeightmapItem(x, y);
 
   // Player start
-  if flags and ETF_ADDPLAYERSTART <> 0 then
+  if options.flags and ETF_ADDPLAYERSTART <> 0 then
     AddThing(64, -64, 0, 0, 1, MTF_EASY or MTF_NORMAL or MTF_HARD);
 
   // Remove unneeded lines
-  if flags and ETF_MERGEFLATSECTORS <> 0 then
+  if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
 
   // Remove all other unused elements
@@ -527,7 +536,7 @@ begin
   end;
 
   // Flash data to wad
-  wadwriter.AddSeparator(levelname);
+  wadwriter.AddSeparator(options.levelname);
   wadwriter.AddData('THINGS', doomthings, numdoomthings * SizeOf(hmapthing_t));
   wadwriter.AddData('LINEDEFS', doomlinedefs, numdoomlinedefs * SizeOf(hmaplinedef_t));
   wadwriter.AddData('SIDEDEFS', doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));
@@ -567,8 +576,9 @@ end;
 {$UNDEF HEXEN_FORMAT}
 {$DEFINE UDMF_FORMAT}
 procedure ExportTerrainToUDMFFile(const t: TTerrain; const strm: TStream;
-  const levelname: string; const defsidetex: string; const defceilingtex: string;
-  const flags: LongWord; const defceilingheight: integer = 512;
+  const options: exportwadoptions_p;
+{  const levelname: string; const defsidetex: string; const defceilingtex: string;
+  const flags: LongWord; const defceilingheight: integer = 512;}
   const stats: wadexportstats_p = nil);
 var
   doomlinedefs: Pmaplinedef_tArray;
@@ -693,7 +703,7 @@ var
   end;
 
 begin
-  sidetex := stringtochar8(defsidetex);
+  sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
 
@@ -709,11 +719,11 @@ begin
 
   wadwriter := TWadWriter.Create;
 
-  if flags and ETF_EXPORTFLAT <> 0 then
+  if options.flags and ETF_EXPORTFLAT <> 0 then
   begin
     // Create flat
     png := TPngObject.Create;
-    if flags and ETF_TRUECOLORFLAT = 0 then
+    if options.flags and ETF_TRUECOLORFLAT = 0 then
     begin
       bm := TBitmap.Create;
       try
@@ -730,11 +740,11 @@ begin
     ms := TMemoryStream.Create;
 
     wadwriter.AddString('TEXTURES',
-      'flat ' + levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
+      'flat ' + options.levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
       '{' + #13#10 +
       '   XScale 1.0' + #13#10 +
       '   YScale 1.0' + #13#10 +
-      '   Patch ' + levelname + 'TER, 0, 0' + #13#10 +
+      '   Patch ' + options.levelname + 'TER, 0, 0' + #13#10 +
       '}' + #13#10
     );
 
@@ -742,14 +752,14 @@ begin
     png.Free;
 
     wadwriter.AddSeparator('P_START');
-    wadwriter.AddData(levelname + 'TER', ms.Memory, ms.Size);
+    wadwriter.AddData(options.levelname + 'TER', ms.Memory, ms.Size);
     wadwriter.AddSeparator('P_END');
 
     ms.Free;
   end;
 
   // Create Map
-  if flags and ETF_TRACECONTOUR <> 0 then
+  if options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR then
     TraceContourMap
   else
     for x := 0 to t.heightmapsize - 2 do
@@ -764,11 +774,11 @@ begin
   udmfmap.Add('');
 
   // Player start
-  if flags and ETF_ADDPLAYERSTART <> 0 then
+  if options.flags and ETF_ADDPLAYERSTART <> 0 then
     AddPlayerStartToUDMF(64, -64, 0, 1);
 
   // Remove unneeded lines
-  if flags and ETF_MERGEFLATSECTORS <> 0 then
+  if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
 
   // Remove all other unused elements
@@ -793,7 +803,7 @@ begin
   end;
 
   // Flash data to wad
-  wadwriter.AddSeparator(levelname);
+  wadwriter.AddSeparator(options.levelname);
 
   for i := 0 to numdoomvertexes - 1 do
     FlashUDMFVertext(i);
@@ -822,7 +832,7 @@ begin
 
   if stats <> nil then
   begin
-    if flags and ETF_ADDPLAYERSTART <> 0 then
+    if options.flags and ETF_ADDPLAYERSTART <> 0 then
       stats.numthings := 1
     else
       stats.numthings := 0;

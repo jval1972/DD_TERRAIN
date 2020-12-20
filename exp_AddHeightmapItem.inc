@@ -2,7 +2,7 @@
   begin
     if pass[iX, iY] then
       Exit;
-    if flags and ETF_SLOPED <> 0 then
+    if options.elevationmethod = ELEVATIONMETHOD_SLOPES then
     begin
       if not TryFlatRange(iX, iY) then
       begin

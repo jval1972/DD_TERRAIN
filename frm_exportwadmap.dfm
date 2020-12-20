@@ -4,7 +4,7 @@ object ExportWADMapForm: TExportWADMapForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 536
+  ClientHeight = 533
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1052,7 +1052,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 495
+    Top = 492
     Width = 681
     Height = 41
     Align = alBottom
@@ -1094,7 +1094,7 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 495
+    Height = 492
     Align = alClient
     Caption = ' '
     TabOrder = 1
@@ -1133,7 +1133,7 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 16
       Top = 56
       Width = 201
-      Height = 121
+      Height = 89
       Caption = ' Engine '
       ItemIndex = 0
       Items.Strings = (
@@ -1144,72 +1144,62 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object OptionsGroupBox: TGroupBox
       Left = 240
-      Top = 56
+      Top = 160
       Width = 185
-      Height = 169
+      Height = 145
       Caption = ' Options '
       TabOrder = 2
-      object SlopedSectorsCheckBox: TCheckBox
-        Left = 16
-        Top = 16
-        Width = 153
-        Height = 17
-        Caption = 'Sloped Sectors'
-        Checked = True
-        State = cbChecked
-        TabOrder = 0
-      end
       object DeformationsCheckBox: TCheckBox
         Left = 16
-        Top = 40
+        Top = 16
         Width = 153
         Height = 17
         Caption = 'Deformations'
         Checked = True
         State = cbChecked
-        TabOrder = 1
+        TabOrder = 0
         OnClick = DeformationsCheckBoxClick
       end
       object TrueColorFlatCheckBox: TCheckBox
         Left = 16
-        Top = 64
+        Top = 40
         Width = 153
         Height = 17
         Caption = 'True Color Flat'
         Checked = True
         State = cbChecked
-        TabOrder = 2
+        TabOrder = 1
       end
       object MergeFlatSectorsCheckBox: TCheckBox
         Left = 16
-        Top = 88
+        Top = 64
         Width = 153
         Height = 17
         Caption = 'Merge Flat Sectors'
         Checked = True
         State = cbChecked
-        TabOrder = 3
+        TabOrder = 2
         OnClick = MergeFlatSectorsCheckBoxClick
       end
       object AddPlayerStartCheckBox: TCheckBox
         Left = 16
-        Top = 112
+        Top = 88
         Width = 153
         Height = 17
         Caption = 'Add Player Start'
         Checked = True
         State = cbChecked
-        TabOrder = 4
+        TabOrder = 3
       end
       object ExportFlatCheckBox: TCheckBox
         Left = 16
-        Top = 136
+        Top = 112
         Width = 153
         Height = 17
         Caption = 'Export Flat'
         Checked = True
         State = cbChecked
-        TabOrder = 5
+        TabOrder = 4
         OnClick = ExportFlatCheckBoxClick
       end
     end
@@ -1263,7 +1253,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object GameRadioGroup: TRadioGroup
       Left = 16
-      Top = 192
+      Top = 160
       Width = 201
       Height = 153
       Caption = ' Game '
@@ -1275,6 +1265,20 @@ object ExportWADMapForm: TExportWADMapForm
         'Strife'
         'Radix')
       TabOrder = 5
+    end
+    object ElevationRadioGroup: TRadioGroup
+      Left = 240
+      Top = 56
+      Width = 185
+      Height = 89
+      Caption = ' Elevation Method '
+      ItemIndex = 0
+      Items.Strings = (
+        'Sloped sectors'
+        'Flat sectors'
+        'Trace contour')
+      TabOrder = 6
+      OnClick = ElevationRadioGroupClick
     end
   end
   object SaveWADDialog: TSaveDialog

@@ -189,7 +189,7 @@ begin
         ExitProgram(1);
       end;
 
-  fexportoptions.flags := ETF_SLOPED or ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
+  fexportoptions.flags := ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
   if engine = 'UDMF' then
     fexportoptions.engine := ENGINE_UDMF
   else if engine = 'HEXEN' then
@@ -230,7 +230,7 @@ begin
   begin
     fexportoptions.palette := @RadixPaletteRaw;
     fexportoptions.defsidetex := 'RDXW0012';
-    fexportoptions.deceilingpic := 'F_SKY1';
+    fexportoptions.defceilingtex := 'F_SKY1';
     fexportoptions.levelname := 'MAP01';
   end
   else if game = 'DOOM' then
@@ -238,32 +238,33 @@ begin
     fexportoptions.palette := @DoomPaletteRaw;
     fexportoptions.levelname := 'MAP01';
     fexportoptions.defsidetex := 'METAL1';
-    fexportoptions.deceilingpic := 'F_SKY1';
+    fexportoptions.defceilingtex := 'F_SKY1';
   end
   else if game = 'HERETIC' then
   begin
     fexportoptions.palette := @HereticPaletteRaw;
     fexportoptions.levelname := 'E1M1';
     fexportoptions.defsidetex := 'CSTLRCK';
-    fexportoptions.deceilingpic := 'F_SKY1';
+    fexportoptions.defceilingtex := 'F_SKY1';
   end
   else if game = 'HEXEN' then
   begin
     fexportoptions.palette := @HexenPaletteRaw;
     fexportoptions.levelname := 'MAP01';
     fexportoptions.defsidetex := 'FOREST02';
-    fexportoptions.deceilingpic := 'F_SKY';
+    fexportoptions.defceilingtex := 'F_SKY';
   end
   else if game = 'STRIFE' then
   begin
     fexportoptions.palette := @StrifePaletteRaw;
     fexportoptions.levelname := 'MAP01';
     fexportoptions.defsidetex := 'BRKGRY01';
-    fexportoptions.deceilingpic := 'F_SKY001';
+    fexportoptions.defceilingtex := 'F_SKY001';
   end;
 
+  fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
   if M_CheckOption('-noslope') then
-    fexportoptions.flags := fexportoptions.flags and not ETF_SLOPED;
+    fexportoptions.elevationmethod := ELEVATIONMETHOD_MINECRAFT;
   if M_CheckOption('-nodeformation') then
     fexportoptions.flags := fexportoptions.flags and not ETF_CALCDXDY;
   if M_CheckOption('-notexture') then
@@ -273,7 +274,7 @@ begin
 
   fexportoptions.levelname := UpperCase(M_CheckParam('-l', fexportoptions.levelname));
   fexportoptions.defsidetex := UpperCase(M_CheckParam('-stexture', fexportoptions.defsidetex));
-  fexportoptions.deceilingpic := UpperCase(M_CheckParam('-ctexture', fexportoptions.deceilingpic));
+  fexportoptions.defceilingtex := UpperCase(M_CheckParam('-ctexture', fexportoptions.defceilingtex));
 
   fexportoptions.defceilingheight := 512;
 
@@ -292,39 +293,21 @@ begin
           ExportTerrainToUDMFFile(
             t,
             fs,
-            fexportoptions.levelname,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight,
+            @fexportoptions,
             @stats
           );
         ENGINE_RAD:
           ExportTerrainToWADFile(
             t,
             fs,
-            fexportoptions.levelname,
-            fexportoptions.palette,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.lowerid,
-            fexportoptions.raiseid,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight,
+            @fexportoptions,
             @stats
           );
         ENGINE_VAVOOM:
           ExportTerrainToHexenFile(
             t,
             fs,
-            fexportoptions.levelname,
-            fexportoptions.palette,
-            fexportoptions.defsidetex,
-            fexportoptions.deceilingpic,
-            fexportoptions.lowerid,
-            fexportoptions.raiseid,
-            fexportoptions.flags,
-            fexportoptions.defceilingheight,
+            @fexportoptions,
             @stats
           );
       end;

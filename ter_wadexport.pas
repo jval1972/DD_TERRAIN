@@ -213,8 +213,8 @@ var
   var
     clines: Pcountourline_tArray;
     numclines: integer;
-    ii: integer;
-    v1, v2: integer;
+    ii, jj: integer;
+    v1, v2, v3, v4: integer;
     ll: integer;
     frontsec, backsec: integer;
     basesec: integer;
@@ -518,6 +518,9 @@ begin
 
   // Fix texture offsets
   FixTextureOffsets;
+
+  // Set the ML_BLOCKING flag for single sided lines
+  FixBlockingLines;
 
   // Add wall textures
   for i := 0 to numdoomlinedefs - 1 do

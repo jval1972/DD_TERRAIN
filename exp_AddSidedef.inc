@@ -3,7 +3,7 @@
     j: integer;
     pside: Pmapsidedef_t;
   begin
-    if not force_new then // JVAL: 20200309 - If we pack sidedefs of radix level, the triggers may not work :(
+    if not force_new or (numdoomsidedefs > 32000) then // JVAL: 20200309 - If we pack sidedefs of radix level, the triggers may not work :(
       for j := 0 to numdoomsidedefs - 1 do
         if doomsidedefs[j].sector = sector then
         begin

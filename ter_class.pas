@@ -63,7 +63,7 @@ type
     X, Y: integer;
   end;
   point2d_p = ^point2d_t;
-  
+
   point3d_t = record
     X, Y, Z: integer;
   end;

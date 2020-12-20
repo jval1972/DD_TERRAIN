@@ -126,24 +126,38 @@ var
   end;
 
   // Finds orientation of 3 Points
-  // Returns:
-  // 0 --> Colinear
-  // positive --> Clockwise
-  // negative --> Counterclockwise
-  function TriOrientation(const x1, y1, x2, y2, x3, y3: integer): integer;
+  // Return values:
+  //  0 --> Colinear
+  //  1 --> Clockwise
+  // -1 --> Counterclockwise
+  function TriOrientation(const x1, y1, x2, y2, x3, y3: Extended): integer;
+  var
+    ori: Extended;
   begin
-    Result := (y2 - y1) * (x3 - x2) -
-              (x2 - x1) * (y3 - y2);
+    ori := (y2 - y1) * (x3 - x2) -
+           (x2 - x1) * (y3 - y2);
+    if ori < 0 then
+      Result := -1
+    else if ori > 0 then
+      Result := 1
+    else
+      Result := 0;
   end;
 
   function ProcessLayer: integer;
+  type
+    point2de_t = record
+      X, Y: Extended;
+    end;
+    point2de_p = ^point2de_t;
   var
     above, below: slicetri3d_t;
     minor, major: slicetri3d_p;
     i, j: integer;
     crossed_edges: array[0..1] of edge_t;
-    contour_points: array[0..1] of point2d_t;
-    f: double;
+    contourI: array[0..1] of point2d_t;
+    contourE: array[0..1] of point2de_t;
+    f: Extended;
   begin
     Result := 0;
     for i := 0 to numtris - 1 do
@@ -182,18 +196,20 @@ var
         for j := 0 to 1 do
         begin
           f := (elevation - crossed_edges[j].e2.Z) / (crossed_edges[j].e1.Z - crossed_edges[j].e2.Z);
-          contour_points[j].X := Round(f * crossed_edges[j].e1.X + (1 - f) * crossed_edges[j].e2.X);
-          contour_points[j].Y := Round(f * crossed_edges[j].e1.Y + (1 - f) * crossed_edges[j].e2.Y);
+          contourE[j].X := f * crossed_edges[j].e1.X + (1 - f) * crossed_edges[j].e2.X;
+          contourE[j].Y := f * crossed_edges[j].e1.Y + (1 - f) * crossed_edges[j].e2.Y;
+          contourI[j].X := Round(contourE[j].X);
+          contourI[j].Y := Round(contourE[j].Y);
         end;
 
-        if (contour_points[0].X <> contour_points[1].X) or
-           (contour_points[0].Y <> contour_points[1].Y) then
+        if (contourI[0].X <> contourI[1].X) or
+           (contourI[0].Y <> contourI[1].Y) then
         begin
           ReallocMem(lines, (numlines + 1) * SizeOf(countourline_t));
-          lines[numlines].x1 := contour_points[0].X;
-          lines[numlines].y1 := contour_points[0].Y;
-          lines[numlines].x2 := contour_points[1].X;
-          lines[numlines].y2 := contour_points[1].Y;
+          lines[numlines].x1 := contourI[0].X;
+          lines[numlines].y1 := contourI[0].Y;
+          lines[numlines].x2 := contourI[1].X;
+          lines[numlines].y2 := contourI[1].Y;
           lines[numlines].frontheight := elevation;
           lines[numlines].frontside := layer;
           lines[numlines].backheight := elevation - elevstep;
@@ -202,8 +218,8 @@ var
           lines[numlines].orientation :=
                 TriOrientation(
                   below.v1.X, below.v1.Y,
-                  contour_points[0].X, contour_points[0].Y,
-                  contour_points[1].X, contour_points[1].Y
+                  contourE[0].X, contourE[0].Y,
+                  contourE[1].X, contourE[1].Y
                 );
           inc(numlines);
           inc(Result);

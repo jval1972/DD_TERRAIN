@@ -236,7 +236,7 @@ type
     Import1: TMenuItem;
     MNImportTexture1: TMenuItem;
     MNImportHeightmap1: TMenuItem;
-    Label7: TLabel;
+    TextureScaleResetLabel: TLabel;
     TextureScalePaintBox: TPaintBox;
     TextureScaleLabel: TLabel;
     WAADFlatNameLabel: TLabel;
@@ -341,6 +341,7 @@ type
     procedure ColorPaletteImageMouseUp(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Hiresheightmap1Click(Sender: TObject);
+    procedure TextureScaleResetLabelDblClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -2888,6 +2889,13 @@ begin
     Screen.Cursor := crDefault;
   end;
 
+end;
+
+procedure TForm1.TextureScaleResetLabelDblClick(Sender: TObject);
+begin
+  ftexturescale := 100;
+  UpdateSliders;
+  SlidersToLabels;
 end;
 
 end.

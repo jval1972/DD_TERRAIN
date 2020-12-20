@@ -2589,12 +2589,13 @@ object Form1: TForm1
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
             OnClick = PenSpeedButton4Click
           end
-          object Label7: TLabel
+          object TextureScaleResetLabel: TLabel
             Left = 8
             Top = 88
             Width = 32
             Height = 13
             Caption = 'Scale: '
+            OnDblClick = TextureScaleResetLabelDblClick
           end
           object TextureScalePaintBox: TPaintBox
             Left = 56

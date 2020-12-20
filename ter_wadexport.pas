@@ -197,6 +197,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
 
@@ -517,6 +518,9 @@ begin
   if flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
 
+  // Remove all other unused elements
+  RemoveUnusedElements;
+
   // Fix flat triangle sectors
   FixTrangleSectors;
 
@@ -618,6 +622,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
 
@@ -716,6 +721,9 @@ begin
   // Remove unneeded lines
   if flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
+
+  // Remove all other unused elements
+  RemoveUnusedElements;
 
   // Fix flat triangle sectors
   FixTrangleSectors;
@@ -840,6 +848,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
 
@@ -974,6 +983,9 @@ begin
   // Remove unneeded lines
   if flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
+
+  // Remove all other unused elements
+  RemoveUnusedElements;
 
   // Fix flat triangle sectors
   FixTrangleSectors;

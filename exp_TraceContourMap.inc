@@ -9,61 +9,101 @@
     basesec: integer;
     topN, rightN, bottomN, leftN: T2DNumberList;
     merges: integer;
+    mapxmax, mapymax: integer;
   begin
-    ter_tracecontour(t, t.texturesize, 32, 32, clines, numclines);
+    ter_tracecontour(t, t.texturesize, 8, 8, clines, numclines);
 
     if numclines = 0 then
     begin
       // Special case, flat terrain
       v1 := AddVertex(0, 0);
-      v2 := AddVertex(t.texturesize - 1, 0);
+      v2 := AddVertex(t.texturesize, 0);
       ll := AddLinedef(v1, v2);
       frontsec := AddSector(0, options.defceilingheight, False);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, False);
       doomlinedefs[ll].sidenum[1] := -1;
 
-      v1 := AddVertex(t.texturesize - 1, 0);
-      v2 := AddVertex(t.texturesize - 1, t.texturesize - 1);
+      v1 := AddVertex(t.texturesize, 0);
+      v2 := AddVertex(t.texturesize, t.texturesize);
       ll := AddLinedef(v1, v2);
       frontsec := AddSector(0, options.defceilingheight, False);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, False);
       doomlinedefs[ll].sidenum[1] := -1;
 
-      v1 := AddVertex(t.texturesize - 1, 1 - t.texturesize);
+      v1 := AddVertex(t.texturesize, -t.texturesize);
       v2 := AddVertex(0, 1 - t.texturesize);
       ll := AddLinedef(v1, v2);
       frontsec := AddSector(0, options.defceilingheight, False);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, False);
       doomlinedefs[ll].sidenum[1] := -1;
 
-      v1 := AddVertex(0, 1 - t.texturesize);
+      v1 := AddVertex(0, -t.texturesize);
       v2 := AddVertex(0, 0);
       ll := AddLinedef(v1, v2);
       frontsec := AddSector(0, options.defceilingheight, False);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec, False);
       doomlinedefs[ll].sidenum[1] := -1;
 
       Exit;
     end;
 
+    // Base sector
+    basesec := AddSector(clines[0].backheight, options.defceilingheight, False);
+
+    mapxmax := t.texturesize - 1;
+    mapymax := t.texturesize - 1;
+    for ii := 0 to numclines - 1 do
+    begin
+      if clines[ii].x1 > mapxmax then
+        mapxmax := clines[ii].x1;
+      if clines[ii].x2 > mapxmax then
+        mapxmax := clines[ii].x2;
+      if clines[ii].y1 > mapymax then
+        mapymax := clines[ii].y1;
+      if clines[ii].y2 > mapymax then
+        mapymax := clines[ii].y2;
+    end;
+
+    if mapxmax = t.texturesize - 1 then
+    begin
+      for ii := 0 to numclines - 1 do
+      begin
+        if clines[ii].x1 = mapxmax then
+          clines[ii].x1 := mapxmax + 1;
+        if clines[ii].x2 = mapxmax then
+          clines[ii].x2 := mapxmax + 1;
+      end;
+      inc(mapxmax);
+    end;
+
+    if mapymax = t.texturesize - 1 then
+    begin
+      for ii := 0 to numclines - 1 do
+      begin
+        if clines[ii].y1 = mapymax then
+          clines[ii].y1 := mapymax + 1;
+        if clines[ii].y2 = mapymax then
+          clines[ii].y2 := mapymax + 1;
+      end;
+      inc(mapymax);
+    end;
+
     topN := T2DNumberList.Create;
     topN.Add(0, -1);
-    topN.Add(t.texturesize - 1, -1);
+    topN.Add(mapxmax, -1);
 
     rightN := T2DNumberList.Create;
     rightN.Add(0, -1);
-    rightN.Add(1 - t.texturesize, -1);
+    rightN.Add(-mapymax, -1);
 
     bottomN := T2DNumberList.Create;
     bottomN.Add(0, -1);
-    bottomN.Add(t.texturesize - 1, -1);
+    bottomN.Add(mapxmax, -1);
 
     leftN := T2DNumberList.Create;
     leftN.Add(0, -1);
-    leftN.Add(1 - t.texturesize, -1);
+    leftN.Add(-mapymax, -1);
 
-    // Base sector
-    basesec := AddSector(clines[0].backheight, options.defceilingheight, False);
 
     for ii := 0 to numclines - 1 do
     begin
@@ -92,16 +132,16 @@
       else if doomvertexes[v2].y = 0 then
         topN.Add(doomvertexes[v2].x, frontsec);
 
-      // Check if touches right bound (x = t.texturesize - 1)
-      if doomvertexes[v1].x = t.texturesize - 1 then
+      // Check if touches right bound (x = mapxmax)
+      if doomvertexes[v1].x = mapxmax then
         rightN.Add(doomvertexes[v1].y, backsec)
-      else if doomvertexes[v2].x = t.texturesize - 1 then
+      else if doomvertexes[v2].x = mapxmax then
         rightN.Add(doomvertexes[v2].y, frontsec);
 
-      // Check if touches bottom bound (y = 1 - texturesize)
-      if doomvertexes[v1].y = 1 - t.texturesize then
+      // Check if touches bottom bound (y = -mapymax)
+      if doomvertexes[v1].y = -mapymax then
         bottomN.Add(doomvertexes[v1].x, backsec)
-      else if doomvertexes[v2].y = 1 - t.texturesize then
+      else if doomvertexes[v2].y = -mapymax then
         bottomN.Add(doomvertexes[v2].x, frontsec);
 
       // Check if touches left bound (x = 0)
@@ -122,7 +162,13 @@
         v2 := doomlinedefs[ii].v2;
         v3 := doomlinedefs[jj].v1;
         v4 := doomlinedefs[jj].v2;
-        if (v1 <> v2) and (v3 <> v4) then
+        if (v1 = v4) and (v2 = v3) then
+        begin
+          // discard both line
+          doomlinedefs[ii].v2 := v1;
+          doomlinedefs[jj].v2 := v3;
+        end
+        else if (v1 <> v2) and (v3 <> v4) then
         begin
           if v2 = v3 then
           begin
@@ -176,7 +222,7 @@
       v1 := AddVertex(topN.Numbers[ii].num1, 0);
       v2 := AddVertex(topN.Numbers[ii + 1].num1, 0);
       ll := AddLinedef(v1, v2);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
       if topN.Numbers[ii + 1].num2 >= 0 then
         basesec := topN.Numbers[ii + 1].num2;
@@ -185,10 +231,10 @@
     // Close right of the map
     for ii := rightN.Count - 1 downto 1 do
     begin
-      v1 := AddVertex(t.texturesize - 1, rightN.Numbers[ii].num1);
-      v2 := AddVertex(t.texturesize - 1, rightN.Numbers[ii - 1].num1);
+      v1 := AddVertex(mapxmax, rightN.Numbers[ii].num1);
+      v2 := AddVertex(mapxmax, rightN.Numbers[ii - 1].num1);
       ll := AddLinedef(v1, v2);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
       if rightN.Numbers[ii].num2 >= 0 then
         basesec := rightN.Numbers[ii].num2;
@@ -197,10 +243,10 @@
     // Close bottom of the map
     for ii := bottomN.Count - 1 downto 1 do
     begin
-      v1 := AddVertex(bottomN.Numbers[ii].num1, 1 - t.texturesize);
-      v2 := AddVertex(bottomN.Numbers[ii - 1].num1, 1 - t.texturesize);
+      v1 := AddVertex(bottomN.Numbers[ii].num1, -mapymax);
+      v2 := AddVertex(bottomN.Numbers[ii - 1].num1, -mapymax);
       ll := AddLinedef(v1, v2);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
       if bottomN.Numbers[ii].num2 >= 0 then
         basesec := bottomN.Numbers[ii].num2;
@@ -212,7 +258,7 @@
       v1 := AddVertex(0, leftN.Numbers[ii].num1);
       v2 := AddVertex(0, leftN.Numbers[ii + 1].num1);
       ll := AddLinedef(v1, v2);
-      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec, false);
+      doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
       if leftN.Numbers[ii + 1].num2 >= 0 then
         basesec := leftN.Numbers[ii + 1].num2;

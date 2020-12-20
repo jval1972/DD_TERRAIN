@@ -200,15 +200,7 @@ var
 {$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
-
-  procedure FixBlockingLines;
-  var
-    ii: integer;
-  begin
-    for ii := 0 to numdoomlinedefs - 1 do
-      if doomlinedefs[ii].sidenum[1] = -1 then
-        doomlinedefs[ii].flags := doomlinedefs[ii].flags or ML_BLOCKING;
-  end;
+{$I exp_FixBlockingLines.inc}
 
   procedure TraceContourMap;
   var
@@ -631,6 +623,7 @@ var
 {$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
 {$I exp_FixTextureOffsets.inc}
+{$I exp_FixBlockingLines.inc}
 
 begin
   sidetex := stringtochar8(defsidetex);
@@ -736,6 +729,9 @@ begin
 
   // Fix texture offsets
   FixTextureOffsets;
+
+  // Set the ML_BLOCKING flag for single sided lines
+  FixBlockingLines;
 
   // Add wall textures
   for i := 0 to numdoomlinedefs - 1 do

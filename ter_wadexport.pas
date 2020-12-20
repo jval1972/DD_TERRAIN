@@ -291,6 +291,8 @@ var
         v2 := AddVertex(clines[ii].x1, -clines[ii].y1);
         v1 := AddVertex(clines[ii].x2, -clines[ii].y2);
       end;
+      if v1 = v2 then
+        Continue;
       ll := AddLinedef(v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec);
       doomlinedefs[ll].sidenum[1] := AddSidedef(backsec);

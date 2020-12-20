@@ -63,6 +63,9 @@ type
     LightLevalTrackBar: TTrackBar;
     Label2: TLabel;
     LightLevelLabel: TLabel;
+    LayerStepLabel: TLabel;
+    LayerStepTrackBar: TTrackBar;
+    Label5: TLabel;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -74,6 +77,7 @@ type
     procedure CeilingHeightTrackBarChange(Sender: TObject);
     procedure ElevationRadioGroupClick(Sender: TObject);
     procedure LightLevalTrackBarChange(Sender: TObject);
+    procedure LayerStepTrackBarChange(Sender: TObject);
   private
     { Private declarations }
     bm, bmTexture: TBitmap;
@@ -113,6 +117,8 @@ begin
     f.CeilingHeightLabel.Caption := IntToStr(f.CeilingHeightTrackBar.Position);
     f.LightLevalTrackBar.Position := GetIntInRange(options.deflightlevel, f.LightLevalTrackBar.Min, f.LightLevalTrackBar.Max);
     f.LightLevelLabel.Caption := IntToStr(f.LightLevalTrackBar.Position);
+    f.LayerStepTrackBar.Position := GetIntInRange(options.layerstep, f.LayerStepTrackBar.Min, f.LayerStepTrackBar.Max);
+    f.LayerStepLabel.Caption := IntToStr(f.LayerStepTrackBar.Position);
     f.DeformationsCheckBox.Checked := options.flags and ETF_CALCDXDY <> 0;
     f.TrueColorFlatCheckBox.Checked := options.flags and ETF_TRUECOLORFLAT <> 0;
     f.MergeFlatSectorsCheckBox.Checked := options.flags and ETF_MERGEFLATSECTORS <> 0;
@@ -131,6 +137,7 @@ begin
       options.elevationmethod := f.ElevationRadioGroup.ItemIndex;
       options.defceilingheight := f.CeilingHeightTrackBar.Position;
       options.deflightlevel := f.LightLevalTrackBar.Position;
+      options.layerstep := f.LayerStepTrackBar.Position;
       options.flags := 0;
       if f.DeformationsCheckBox.Checked then
         options.flags := options.flags or ETF_CALCDXDY;
@@ -258,64 +265,70 @@ var
   v1, v2: integer;
   x1, y1, x2, y2: integer;
 begin
-  bm.Canvas.Draw(0, 0, bmTexture);
+  Screen.Cursor := crHourglass;
+  try
+    bm.Canvas.Draw(0, 0, bmTexture);
 
-  if t <> nil then
-  begin
-    strm := TMemoryStream.Create;
-
-    ZeroMemory(@tmpoptions, SizeOf(exportwadoptions_t));
-    tmpoptions.elevationmethod := ElevationRadioGroup.ItemIndex;
-    tmpoptions.flags := 0;
-    if DeformationsCheckBox.Checked then
-      tmpoptions.flags := tmpoptions.flags or ETF_CALCDXDY;
-    if MergeFlatSectorsCheckBox.Checked then
-      tmpoptions.flags := tmpoptions.flags or ETF_MERGEFLATSECTORS;
-
-    ExportTerrainToWADFile(t, strm, @tmpoptions);
-
-    wadreader := TWADReader.Create;
-    strm.Position := 0;
-    wadreader.LoadFromStream(strm);
-    strm.Free;
-
-    wadreader.ReadEntry('VERTEXES', p, vsize);
-    vertexes := p;
-    numvertexes := vsize div SizeOf(mapvertex_t);
-
-    wadreader.ReadEntry('LINEDEFS', p, lsize);
-    linedefs := p;
-    numlinedefs := lsize div SizeOf(maplinedef_t);
-
-    wadreader.Free;
-
-    scalex := PaintBox1.Width / t.texturesize;
-    scaley := PaintBox1.Height / t.texturesize;
-
-    bm.Canvas.Pen.Color := RGB(0, 255, 0);
-    bm.Canvas.Pen.Style := psSolid;
-    // Draw 2d map
-    for i := 0 to numlinedefs - 1 do
+    if t <> nil then
     begin
-      v1 := linedefs[i].v1;
-      v2 := linedefs[i].v2;
-      if IsIntInRange(v1, 0, numvertexes - 1) and IsIntInRange(v2, 0, numvertexes - 1) then
-      begin
-        x1 := vertexes[v1].x;
-        y1 := vertexes[v1].y;
-        x2 := vertexes[v2].x;
-        y2 := vertexes[v2].y;
-        x1 := GetIntInRange(Round(x1 * scalex), 0, bm.Width - 1);
-        y1 := GetIntInRange(-Round(y1 * scaley), 0, bm.Height - 1);
-        x2 := GetIntInRange(Round(x2 * scalex), 0, bm.Width - 1);
-        y2 := GetIntInRange(-Round(y2 * scaley), 0, bm.Height - 1);
-        bm.Canvas.MoveTo(x1, y1);
-        bm.Canvas.LineTo(x2, y2);
-      end;
-    end;
+      strm := TMemoryStream.Create;
 
-    FreeMem(vertexes, vsize);
-    FreeMem(linedefs, lsize);
+      ZeroMemory(@tmpoptions, SizeOf(exportwadoptions_t));
+      tmpoptions.elevationmethod := ElevationRadioGroup.ItemIndex;
+      tmpoptions.layerstep := LayerStepTrackBar.Position;
+      tmpoptions.flags := 0;
+      if DeformationsCheckBox.Checked then
+        tmpoptions.flags := tmpoptions.flags or ETF_CALCDXDY;
+      if MergeFlatSectorsCheckBox.Checked then
+        tmpoptions.flags := tmpoptions.flags or ETF_MERGEFLATSECTORS;
+
+      ExportTerrainToWADFile(t, strm, @tmpoptions);
+
+      wadreader := TWADReader.Create;
+      strm.Position := 0;
+      wadreader.LoadFromStream(strm);
+      strm.Free;
+
+      wadreader.ReadEntry('VERTEXES', p, vsize);
+      vertexes := p;
+      numvertexes := vsize div SizeOf(mapvertex_t);
+
+      wadreader.ReadEntry('LINEDEFS', p, lsize);
+      linedefs := p;
+      numlinedefs := lsize div SizeOf(maplinedef_t);
+
+      wadreader.Free;
+
+      scalex := PaintBox1.Width / t.texturesize;
+      scaley := PaintBox1.Height / t.texturesize;
+
+      bm.Canvas.Pen.Color := RGB(0, 255, 0);
+      bm.Canvas.Pen.Style := psSolid;
+      // Draw 2d map
+      for i := 0 to numlinedefs - 1 do
+      begin
+        v1 := linedefs[i].v1;
+        v2 := linedefs[i].v2;
+        if IsIntInRange(v1, 0, numvertexes - 1) and IsIntInRange(v2, 0, numvertexes - 1) then
+        begin
+          x1 := vertexes[v1].x;
+          y1 := vertexes[v1].y;
+          x2 := vertexes[v2].x;
+          y2 := vertexes[v2].y;
+          x1 := GetIntInRange(Round(x1 * scalex), 0, bm.Width - 1);
+          y1 := GetIntInRange(-Round(y1 * scaley), 0, bm.Height - 1);
+          x2 := GetIntInRange(Round(x2 * scalex), 0, bm.Width - 1);
+          y2 := GetIntInRange(-Round(y2 * scaley), 0, bm.Height - 1);
+          bm.Canvas.MoveTo(x1, y1);
+          bm.Canvas.LineTo(x2, y2);
+        end;
+      end;
+
+      FreeMem(vertexes, vsize);
+      FreeMem(linedefs, lsize);
+    end;
+  finally
+    Screen.Cursor := crDefault;
   end;
 end;
 
@@ -388,6 +401,17 @@ procedure TExportWADMapForm.LightLevalTrackBarChange(Sender: TObject);
 begin
   LightLevelLabel.Caption := IntToStr(LightLevalTrackBar.Position);
   LightLevalTrackBar.Hint := IntToStr(LightLevalTrackBar.Position);
+end;
+
+procedure TExportWADMapForm.LayerStepTrackBarChange(Sender: TObject);
+begin
+  LayerStepLabel.Caption := IntToStr(LayerStepTrackBar.Position);
+  LayerStepTrackBar.Hint := IntToStr(LayerStepTrackBar.Position);
+  if ElevationRadioGroup.ItemIndex = ELEVATIONMETHOD_TRACECONTOUR then
+  begin
+    GeneratePreview;
+    PaintBox1.Invalidate;
+  end;
 end;
 
 end.

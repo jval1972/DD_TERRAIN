@@ -84,6 +84,38 @@ type
   end;
 
 type
+  twointeger_t = record
+    num1, num2: integer;
+  end;
+  twointeger_tArray = array[0..$FFFF] of twointeger_t;
+  Ptwointeger_tArray = ^twointeger_tArray;
+
+  T2DNumberList = class
+  private
+    fList: Ptwointeger_tArray;
+    fNumItems: integer;
+    fRealNumItems: integer;
+  protected
+    function Get(Index: Integer): twointeger_t; virtual;
+    procedure Put(Index: Integer; const value: twointeger_t); virtual;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+    function Add(const value1, value2: integer): integer; overload; virtual;
+    function Add(const value: twointeger_t): integer; overload; virtual;
+    procedure Add(const nlist: T2DNumberList); overload; virtual;
+    function Delete(const Index: integer): boolean;
+    function IndexOf(const value1, value2: integer): integer; virtual;
+    procedure Clear;
+    procedure FastClear;
+    procedure Sort1;
+    procedure Sort2;
+    property Count: integer read fNumItems;
+    property Numbers[Index: Integer]: twointeger_t read Get write Put; default;
+    property List: Ptwointeger_tArray read fList;
+  end;
+
+type
   TString = class
     str: string;
     constructor Create(const astring: string);
@@ -281,7 +313,6 @@ begin
 end;
 
 // TDNumberList
-// TDNumberList
 constructor TDNumberList.Create;
 begin
   fList := nil;
@@ -412,6 +443,177 @@ begin
     Result := Result + fList[i];
 end;
 
+// T2DNumberList
+constructor T2DNumberList.Create;
+begin
+  fList := nil;
+  fNumItems := 0;
+  fRealNumItems := 0;
+end;
+
+destructor T2DNumberList.Destroy;
+begin
+  Clear;
+end;
+
+function T2DNumberList.Get(Index: Integer): twointeger_t;
+begin
+  if (Index < 0) or (Index >= fNumItems) then
+  begin
+    result.num1 := 0;
+    result.num2 := 0;
+  end
+  else
+    result := fList[Index];
+end;
+
+procedure T2DNumberList.Put(Index: Integer; const value: twointeger_t);
+begin
+  fList[Index] := value;
+end;
+
+function T2DNumberList.Add(const value1, value2: integer): integer;
+var
+  newrealitems: integer;
+  value: twointeger_t;
+begin
+  if fNumItems >= fRealNumItems then
+  begin
+    if fRealNumItems < 4 then
+      newrealitems := 4
+    else if fRealNumItems < 8 then
+      newrealitems := 8
+    else if fRealNumItems < 32 then
+      newrealitems := 32
+    else if fRealNumItems < 128 then
+      newrealitems := fRealNumItems + 32
+    else
+      newrealitems := fRealNumItems + 64;
+    ReallocMem(fList, newrealitems * SizeOf(twointeger_t));
+    fRealNumItems := newrealitems;
+  end;
+  value.num1 := value1;
+  value.num2 := value2;
+  Put(fNumItems, value);
+  result := fNumItems;
+  inc(fNumItems);
+end;
+
+function T2DNumberList.Add(const value: twointeger_t): integer;
+begin
+  result := Add(value.num1, value.num2);
+end;
+
+procedure T2DNumberList.Add(const nlist: T2DNumberList);
+var
+  i: integer;
+begin
+  for i := 0 to nlist.Count - 1 do
+    Add(nlist[i]);
+end;
+
+function T2DNumberList.Delete(const Index: integer): boolean;
+var
+  i: integer;
+begin
+  if (Index < 0) or (Index >= fNumItems) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  for i := Index + 1 to fNumItems - 1 do
+    fList[i - 1] := fList[i];
+
+  dec(fNumItems);
+
+  result := true;
+end;
+
+function T2DNumberList.IndexOf(const value1, value2: integer): integer;
+var
+  i: integer;
+begin
+  for i := 0 to fNumItems - 1 do
+    if (fList[i].num1 = value1) and (fList[i].num2 = value2) then
+    begin
+      result := i;
+      exit;
+    end;
+  result := -1;
+end;
+
+procedure T2DNumberList.Clear;
+begin
+  ReallocMem(fList, 0);
+  fList := nil;
+  fNumItems := 0;
+  fRealNumItems := 0;
+end;
+
+procedure QSort2Integers(const A: Ptwointeger_tArray; const Len: integer; const idx: integer);
+
+  procedure qsortI(l, r: Integer);
+  var
+    i, j: integer;
+    t: twointeger_t;
+    d: twointeger_t;
+  begin
+    repeat
+      i := l;
+      j := r;
+      d := A[(l + r) shr 1];
+      repeat
+        if idx = 1 then
+        begin
+          while A[i].num1 < d.num1 do
+            inc(i);
+          while A[j].num1 > d.num1 do
+            dec(j);
+        end
+        else
+        begin
+          while A[i].num2 < d.num2 do
+            inc(i);
+          while A[j].num2 > d.num2 do
+            dec(j);
+        end;
+        if i <= j then
+        begin
+          t := A[i];
+          A[i] := A[j];
+          A[j] := t;
+          inc(i);
+          dec(j);
+        end;
+      until i > j;
+      if l < j then
+        qsortI(l, j);
+      l := i;
+    until i >= r;
+  end;
+
+begin
+  if Len > 1 then
+    qsortI(0, Len - 1);
+end;
+
+procedure T2DNumberList.Sort1;
+begin
+  QSort2Integers(fList, fNumItems, 1);
+end;
+
+procedure T2DNumberList.Sort2;
+begin
+  QSort2Integers(fList, fNumItems, 2);
+end;
+
+procedure T2DNumberList.FastClear;
+begin
+  fNumItems := 0;
+end;
+
+// TString
 constructor TString.Create(const astring: string);
 begin
   str := astring;

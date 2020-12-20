@@ -12,7 +12,7 @@
     mapxmax, mapymax: integer;
     dx1, dx2, dy1, dy2: integer;
   begin
-    ter_tracecontour(t, t.texturesize, 32, 16, clines, numclines);
+    ter_tracecontour(t, t.texturesize, 32, options.layerstep, clines, numclines);
 
     if numclines = 0 then
     begin

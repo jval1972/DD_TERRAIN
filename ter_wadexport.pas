@@ -77,6 +77,7 @@ type
     elevationmethod: integer;
     defceilingheight: integer;
     deflightlevel: integer;
+    layerstep: integer; // Trace contour & layered sectors
   end;
   exportwadoptions_p = ^exportwadoptions_t;
 

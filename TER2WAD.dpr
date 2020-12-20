@@ -278,6 +278,7 @@ begin
 
   fexportoptions.defceilingheight := 512;
   fexportoptions.deflightlevel := 192;
+  fexportoptions.layerstep := 16;
 
   write('Opening file ' + finp + '...');
   t := TTerrain.Create;

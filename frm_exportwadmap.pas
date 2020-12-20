@@ -407,7 +407,7 @@ procedure TExportWADMapForm.LayerStepTrackBarChange(Sender: TObject);
 begin
   LayerStepLabel.Caption := IntToStr(LayerStepTrackBar.Position);
   LayerStepTrackBar.Hint := IntToStr(LayerStepTrackBar.Position);
-  if ElevationRadioGroup.ItemIndex = ELEVATIONMETHOD_TRACECONTOUR then
+  if ElevationRadioGroup.ItemIndex in [ELEVATIONMETHOD_TRACECONTOUR, ELEVATIONMETHOD_MINECRAFT] then
   begin
     GeneratePreview;
     PaintBox1.Invalidate;

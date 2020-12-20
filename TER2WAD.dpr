@@ -264,7 +264,7 @@ begin
 
   fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
   if M_CheckOption('-noslope') then
-    fexportoptions.elevationmethod := ELEVATIONMETHOD_MINECRAFT;
+    fexportoptions.elevationmethod := ELEVATIONMETHOD_FLATSECTORS;
   if M_CheckOption('-nodeformation') then
     fexportoptions.flags := fexportoptions.flags and not ETF_CALCDXDY;
   if M_CheckOption('-notexture') then

@@ -1174,7 +1174,7 @@ object ExportWADMapForm: TExportWADMapForm
     end
     object OptionsGroupBox: TGroupBox
       Left = 240
-      Top = 160
+      Top = 168
       Width = 185
       Height = 145
       Caption = ' Options '
@@ -1300,13 +1300,14 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 240
       Top = 56
       Width = 185
-      Height = 89
+      Height = 97
       Caption = ' Elevation Method '
       ItemIndex = 0
       Items.Strings = (
         'Sloped sectors'
         'Flat sectors'
-        'Trace contour')
+        'Trace contour'
+        'Minecraft')
       TabOrder = 6
       OnClick = ElevationRadioGroupClick
     end

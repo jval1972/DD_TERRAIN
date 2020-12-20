@@ -49,8 +49,9 @@ const
 
 const
   ELEVATIONMETHOD_SLOPES = 0;
-  ELEVATIONMETHOD_MINECRAFT = 1;
+  ELEVATIONMETHOD_FLATSECTORS = 1;
   ELEVATIONMETHOD_TRACECONTOUR = 2;
+  ELEVATIONMETHOD_MINECRAFT = 3;
 
 const
   ENGINE_RAD = 0;             // WAD format for RAD & DelphiDoom
@@ -202,7 +203,9 @@ var
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
+{$I exp_AddFlatTriangle.inc}
 {$I exp_AddFlatQuad.inc}
+{$I exp_AddMinecraftQuad.inc}
 {$I exp_TryFlatRange.inc}
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
@@ -403,7 +406,9 @@ var
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
+{$I exp_AddFlatTriangle.inc}
 {$I exp_AddFlatQuad.inc}
+{$I exp_AddMinecraftQuad.inc}
 {$I exp_TryFlatRange.inc}
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
@@ -638,7 +643,9 @@ var
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
+{$I exp_AddFlatTriangle.inc}
 {$I exp_AddFlatQuad.inc}
+{$I exp_AddMinecraftQuad.inc}
 {$I exp_TryFlatRange.inc}
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}

@@ -10,7 +10,14 @@
         AddSlopedTriangle(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
       end;
     end
-    else
-      AddFlatQuad(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1);
+    else if options.elevationmethod = ELEVATIONMETHOD_MINECRAFT then
+    begin
+      AddMinecraftQuad(iX, iY, iX + 1, iY, iX + 1, iY + 1, iX, iY + 1);
+    end
+    else  // ELEVATIONMETHOD_FLATSECTORS
+    begin
+      AddFlatTriangle(iX, iY, iX + 1, iY, iX, iY + 1);
+      AddFlatTriangle(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
+    end;
     pass[iX, iY] := True;
   end;

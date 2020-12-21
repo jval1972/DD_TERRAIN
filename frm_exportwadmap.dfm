@@ -1110,6 +1110,7 @@ object ExportWADMapForm: TExportWADMapForm
       Top = 16
       Width = 23
       Height = 22
+      Hint = 'Select output WAD file'
       Caption = '...'
       Flat = True
       OnClick = SelectFileButtonClick

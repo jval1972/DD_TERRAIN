@@ -11,6 +11,85 @@
     merges: integer;
     mapxmax, mapymax: integer;
     dx1, dx2, dy1, dy2: integer;
+    lastline: integer;
+    lastside: integer;
+
+    function findbasesec(const s1, s2: integer; const vv: integer): integer;
+    var
+      k: integer;
+      ln: integer;
+      ss0, ss1: integer;
+    begin
+      ln := -1;
+      for k := 0 to numdoomlinedefs - 1 do
+        if (doomlinedefs[k].v1 = vv) or (doomlinedefs[k].v2 = vv) then
+        begin
+          ln := k;
+          lastline := k;
+          break;
+        end;
+      if (ln = -1) or (doomlinedefs[ln].sidenum[1] = -1) then
+      begin
+        Result := s2;
+        Exit;
+      end;
+      ss0 := doomsidedefs[doomlinedefs[ln].sidenum[0]].sector;
+      ss1 := doomsidedefs[doomlinedefs[ln].sidenum[1]].sector;
+      if s2 = ss0 then
+        Result := ss1
+      else
+        Result := ss0;
+    end;
+
+    function findnextsec(const ss: integer; const vv: integer): integer;
+    var
+      k: integer;
+      ln: integer;
+      lss0, lss1: integer;
+      ss0, ss1: integer;
+    begin
+      ln := -1;
+      for k := 0 to numdoomlinedefs - 1 do
+        if (doomlinedefs[k].v1 = vv) or (doomlinedefs[k].v2 = vv) then
+        begin
+          ln := k;
+          break;
+        end;
+        topn.sort1;
+      if (ln = -1) or (doomlinedefs[ln].sidenum[1] = -1) then
+      begin
+        Result := ss;
+        Exit;
+      end;
+        topn.sort1;
+      lss0 := doomsidedefs[doomlinedefs[lastline].sidenum[0]].sector;
+      lss1 := doomsidedefs[doomlinedefs[lastline].sidenum[1]].sector;
+      ss0 := doomsidedefs[doomlinedefs[ln].sidenum[0]].sector;
+      ss1 := doomsidedefs[doomlinedefs[ln].sidenum[1]].sector;
+
+      if lastside = 1 then // last back sector
+      begin
+        if lss1 = ss0 then
+          Result := ss1
+        else
+        begin
+          Result := ss0;
+          lastside := 0;
+        end
+      end
+      else  // last front sector
+      begin
+        if lss0 = ss0 then
+        begin
+          Result := ss1;
+          lastside := 1;
+        end
+        else
+          Result := ss0;
+      end;
+      lastline := ln;
+    end;
+
   begin
     ter_tracecontour(t, t.texturesize, 32, options.layerstep,  bmh, clines,numclines);
 
@@ -65,8 +144,17 @@
         mapymax := clines[ii].y2;
     end;
 
-    inc(mapxmax);
-    inc(mapymax);
+    for ii := 0 to numclines - 1 do
+    begin
+      if clines[ii].x1 >= t.texturesize - 1 then
+        clines[ii].x1 := mapxmax;
+      if clines[ii].x2 >= t.texturesize - 1 then
+        clines[ii].x2 := mapxmax;
+      if clines[ii].y1 >= t.texturesize - 1 then
+        clines[ii].y1 := mapymax;
+      if clines[ii].y2 >= t.texturesize - 1 then
+        clines[ii].y2 := mapymax;
+    end;
 
     topN := T2DNumberList.Create;
     topN.Add(0, -1);
@@ -101,6 +189,17 @@
       end;
       if v1 = v2 then
         Continue;
+
+      // Discard lines that will be set on the perimeter trace
+      if (doomvertexes[v1].x = mapxmax) and (doomvertexes[v2].x = mapxmax) then
+        Continue;
+      if (doomvertexes[v1].y = -mapymax) and (doomvertexes[v2].y = -mapymax) then
+        Continue;
+      if (doomvertexes[v1].x = 0) and (doomvertexes[v2].x = 0) then
+        Continue;
+      if (doomvertexes[v1].y = 0) and (doomvertexes[v2].y = 0) then
+        Continue;
+
       ll := AddLinedef(v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(frontsec);
       doomlinedefs[ll].sidenum[1] := AddSidedef(backsec);
@@ -220,18 +319,26 @@
 
     // Fix first sector of the perimeter
     if topN.Count > 2 then
-      basesec := topN.Numbers[2].num2;
+      basesec := topN.Numbers[1].num2;
+
+    v1 := AddVertex(topN.Numbers[0].num1, 0);
+    v2 := AddVertex(topN.Numbers[1].num1, 0);
+    ll := AddLinedef(v1, v2);
+    lastline := ll;
+    basesec := findbasesec(basesec, topN.Numbers[1].num2, v2);
+    lastside := 1; // back
+    doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
+    doomlinedefs[ll].sidenum[1] := -1;
 
     // Close top of the map
-    for ii := 0 to topN.Count - 2 do
+    for ii := 1 to topN.Count - 2 do
     begin
       v1 := AddVertex(topN.Numbers[ii].num1, 0);
       v2 := AddVertex(topN.Numbers[ii + 1].num1, 0);
       ll := AddLinedef(v1, v2);
+      basesec := findnextsec(basesec, v1);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
-      if topN.Numbers[ii + 1].num2 >= 0 then
-        basesec := topN.Numbers[ii + 1].num2;
     end;
 
     // Close right of the map
@@ -240,22 +347,20 @@
       v1 := AddVertex(mapxmax, rightN.Numbers[ii].num1);
       v2 := AddVertex(mapxmax, rightN.Numbers[ii - 1].num1);
       ll := AddLinedef(v1, v2);
+      basesec := findnextsec(basesec, v1);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
-      if rightN.Numbers[ii].num2 >= 0 then
-        basesec := rightN.Numbers[ii].num2;
     end;
-
+            topn.sort2;
     // Close bottom of the map
     for ii := bottomN.Count - 1 downto 1 do
     begin
       v1 := AddVertex(bottomN.Numbers[ii].num1, -mapymax);
       v2 := AddVertex(bottomN.Numbers[ii - 1].num1, -mapymax);
       ll := AddLinedef(v1, v2);
+      basesec := findnextsec(basesec, v1);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
-      if bottomN.Numbers[ii].num2 >= 0 then
-        basesec := bottomN.Numbers[ii].num2;
     end;
 
     // Close left of the map
@@ -264,10 +369,9 @@
       v1 := AddVertex(0, leftN.Numbers[ii].num1);
       v2 := AddVertex(0, leftN.Numbers[ii + 1].num1);
       ll := AddLinedef(v1, v2);
+      basesec := findnextsec(basesec, v1);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
-      if leftN.Numbers[ii + 1].num2 >= 0 then
-        basesec := leftN.Numbers[ii + 1].num2;
     end;
 
     topN.Free;

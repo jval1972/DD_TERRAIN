@@ -210,6 +210,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
 {$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
@@ -306,6 +307,9 @@ begin
   // Remove unneeded lines
   if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
+
+  // Merge lines
+  MergeLines;
 
   // Remove zero length lines
   RemoveZeroLengthLines;
@@ -417,6 +421,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
 {$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
@@ -522,6 +527,9 @@ begin
   // Remove unneeded lines
   if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
+
+  // Merge lines
+  MergeLines;
 
   // Remove zero length lines
   RemoveZeroLengthLines;
@@ -658,6 +666,7 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
+{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
 {$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
@@ -798,6 +807,9 @@ begin
   // Remove unneeded lines
   if options.flags and ETF_MERGEFLATSECTORS <> 0 then
     RemoveUnNeededLines;
+
+  // Merge lines
+  MergeLines;
 
   // Remove zero length lines
   RemoveZeroLengthLines;

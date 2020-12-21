@@ -181,23 +181,12 @@
     p0.Y := (p1.Y + p2.Y + p3.Y + p4.Y) div 4;
     p0.Z := (p1.Z + p2.Z + p3.Z + p4.Z) div 4;
 
-    if not _inside_box(@p0) then
-    begin
-      p0.X := (boxRight + boxLeft) div 2;
-      p0.Y := (boxTop + boxBottom) div 2;
-      if not _inside_box(@p0) then
-      begin
-        _add_minecraft_sector_8(@p1, @p15, @p2, @p25, @p3, @p35, @p4, @p45);
-        Exit;
-      end;
-    end;
-
-    if not _point_in_points(@p0, @p1, @p2, @p3, @p4) or not _inside_box(@p0) then
+    if not _point_in_points(@p0, @p1, @p2, @p3, @p4) then
     begin
       p0.X := (p1.X + p3.X) div 2;
       p0.Y := (p1.Y + p3.Y) div 2;
       p0.Z := (p1.Z + p3.Z) div 4;
-      if not _point_in_points(@p0, @p1, @p2, @p3, @p4) or not _inside_box(@p0) then
+      if not _point_in_points(@p0, @p1, @p2, @p3, @p4) then
       begin
         p0.X := (p2.X + p4.X) div 2;
         p0.Y := (p2.Y + p4.Y) div 2;
@@ -230,26 +219,28 @@
     p45.Z := _calc_minecraft_z(p45.Z);
     p0.Z := _calc_minecraft_z(p0.Z);
 
-    if (p1.Z <= p3.Z) and (p1.Z <= p4.Z) and (p2.Z <= p3.Z) and (p2.Z <= p4.Z) then
+    if (p1.Z < p3.Z) and (p1.Z < p4.Z) and (p2.Z < p3.Z) and (p2.Z < p4.Z) then
     begin
       _add_minecraft_sector_6(@p1, @p15, @p2, @p25, @p0, @p45);
       _add_minecraft_sector_6(@p45, @p0, @p25, @p3, @p35, @p4);
     end
-    else if (p1.Z >= p3.Z) and (p1.Z >= p4.Z) and (p2.Z >= p3.Z) and (p2.Z >= p4.Z) then
+    else if (p1.Z > p3.Z) and (p1.Z > p4.Z) and (p2.Z > p3.Z) and (p2.Z > p4.Z) then
     begin
       _add_minecraft_sector_6(@p1, @p15, @p2, @p25, @p0, @p45);
       _add_minecraft_sector_6(@p45, @p0, @p25, @p3, @p35, @p4);
     end
-    else if (p1.Z <= p2.Z) and (p1.Z <= p3.Z) and (p4.Z <= p2.Z) and (p4.Z <= p3.Z) then
+    else if (p1.Z < p2.Z) and (p1.Z < p3.Z) and (p4.Z < p2.Z) and (p4.Z < p3.Z) then
     begin
       _add_minecraft_sector_6(@p1, @p15, @p0, @p35, @p4, @p45);
       _add_minecraft_sector_6(@p35, @p0, @p15, @p2, @p25, @p3);
     end
-    else if (p1.Z >= p2.Z) and (p1.Z >= p3.Z) and (p4.Z >= p2.Z) and (p4.Z >= p3.Z) then
+    else if (p1.Z > p2.Z) and (p1.Z > p3.Z) and (p4.Z > p2.Z) and (p4.Z > p3.Z) then
     begin
       _add_minecraft_sector_6(@p1, @p15, @p0, @p35, @p4, @p45);
       _add_minecraft_sector_6(@p35, @p0, @p15, @p2, @p25, @p3);
     end
+    else if (p1.Z = p2.Z) and (p2.Z = p3.Z) and (p3.Z = p4.Z) then
+      _add_minecraft_sector_8(@p1, @p15, @p2, @p25, @p3, @p35, @p4, @p45)
     else if (p1.Z = p2.Z) and (p2.Z = p4.Z) then
     begin
       _add_minecraft_sector_6(@p1, @p15, @p2, @p0, @p4, @p45);

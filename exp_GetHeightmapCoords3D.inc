@@ -4,8 +4,9 @@
       Result := t.HeightmapCoords3D(iX, iY)
     else
     begin
+
       Result.X := t.HeightmapToCoord(iX);
       Result.Y := t.HeightmapToCoord(iY);
-      Result.Z := t.Heightmap[iX, iY].height;
+      Result.Z := bmh[Result.X, Result.Y];// t.Heightmap[iX, iY].height;
     end;
   end;

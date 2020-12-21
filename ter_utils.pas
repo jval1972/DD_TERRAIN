@@ -680,4 +680,26 @@ begin
     b.SaveToFile(imgfname);
 end;
 
+function _min4i(const i1, i2, i3, i4: integer): integer;
+begin
+  Result := i1;
+  if i2 < Result then
+    Result := i2;
+  if i3 < Result then
+    Result := i3;
+  if i4 < Result then
+    Result := i4;
+end;
+
+function _max4i(const i1, i2, i3, i4: integer): integer;
+begin
+  Result := i1;
+  if i2 > Result then
+    Result := i2;
+  if i3 > Result then
+    Result := i3;
+  if i4 > Result then
+    Result := i4;
+end;
+
 end.

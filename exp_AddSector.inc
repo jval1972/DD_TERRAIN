@@ -4,7 +4,7 @@
     dsec: Pmapsector_t;
   begin
     if not sloped then
-      if options.flags and ETF_MERGEFLATSECTORS <> 0 then
+      if (options.flags and ETF_MERGEFLATSECTORS <> 0) or (options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR) then
       begin
         for j := 0 to numdoomsectors - 1 do
           if not slopedsectors[j] then

@@ -84,6 +84,8 @@ type
     t: TTerrain;
     procedure GeneratePreview;
     procedure GenerateFlatTexture;
+  protected
+    procedure UpdateSlides;
   public
     { Public declarations }
     procedure SetTerrain(const aterrain: TTerrain);
@@ -126,6 +128,7 @@ begin
     f.ExportFlatCheckBox.Checked := options.flags and ETF_EXPORTFLAT <> 0;
 
     f.SetTerrain(t);
+    f.UpdateSlides;
 
     f.ShowModal;
     if f.ModalResult = mrOK then
@@ -393,6 +396,7 @@ end;
 
 procedure TExportWADMapForm.ElevationRadioGroupClick(Sender: TObject);
 begin
+  UpdateSlides;
   GeneratePreview;
   PaintBox1.Invalidate;
 end;
@@ -412,6 +416,13 @@ begin
     GeneratePreview;
     PaintBox1.Invalidate;
   end;
+end;
+
+procedure TExportWADMapForm.UpdateSlides;
+begin
+  LayerStepTrackBar.Enabled := ElevationRadioGroup.ItemIndex in [ELEVATIONMETHOD_TRACECONTOUR, ELEVATIONMETHOD_MINECRAFT];
+  DeformationsCheckBox.Enabled := ElevationRadioGroup.ItemIndex <> ELEVATIONMETHOD_TRACECONTOUR;
+  MergeFlatSectorsCheckBox.Enabled := ElevationRadioGroup.ItemIndex <> ELEVATIONMETHOD_TRACECONTOUR;
 end;
 
 end.

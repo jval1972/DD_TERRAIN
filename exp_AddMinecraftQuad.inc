@@ -2,6 +2,48 @@
   var
     p1, p2, p3, p4: point3d_t;
     p0, p15, p25, p35, p45: point3d_t;
+    boxLeft, boxRight, boxTop, boxBottom: integer;
+
+    function _point_in_points(const p: point3d_p; const pp1, pp2, pp3, pp4: point3d_p): boolean;
+    var
+      minX, maxX, minY, maxY: integer;
+      i, j: integer;
+      poly: array[0..3] of point3d_p;
+    begin
+      poly[0] := pp1;
+      poly[1] := pp2;
+      poly[2] := pp3;
+      poly[3] := pp4;
+      minX := poly[0].x;
+      maxX := poly[0].x;
+      minY := poly[0].Y;
+      maxY := poly[0].Y;
+      for i := 1 to 3 do
+      begin
+        minX := MinI(poly[i].x, minX);
+        maxX := MaxI(poly[i].x, maxX);
+        minY := MinI(poly[i].y, minY);
+        maxY := MaxI(poly[i].y, maxY);
+      end;
+
+      if (p.x <= minX) or (p.x >= maxX) or (p.y <= minY) or (p.Y >= maxY) then
+      begin
+        Result := False;
+        Exit;
+      end;
+
+      Result := False;
+      i := 0;
+      j := 3;
+      while i < 4 do
+      begin
+        if (poly[i].y >= p.y ) <> (poly[j].y >= p.y) then
+          if p.X <= (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x then
+            Result := not Result;
+        j := i;
+        inc(i);
+      end;
+    end;
 
     function _calc_minecraft_z(const zz: integer): integer;
     begin
@@ -71,6 +113,47 @@
       _fix_minecraft_side(ll6, sec);
     end;
 
+    procedure _add_minecraft_sector_8(const pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8: point3d_p);
+    var
+      zz: integer;
+      vv1, vv2, vv3, vv4, vv5, vv6, vv7, vv8: integer;
+      ll1, ll2, ll3, ll4, ll5, ll6, ll7, ll8: integer;
+      sec: integer;
+    begin
+      zz := _calc_minecraft_z((pp1.Z + pp2.Z + pp3.Z + pp4.Z + pp5.Z + pp6.Z + pp7.Z + pp8.Z) div 8);
+      sec := AddSector(zz, options.defceilingheight, False);
+      vv1 := AddVertex(pp1.X, -pp1.Y);
+      vv2 := AddVertex(pp2.X, -pp2.Y);
+      vv3 := AddVertex(pp3.X, -pp3.Y);
+      vv4 := AddVertex(pp4.X, -pp4.Y);
+      vv5 := AddVertex(pp5.X, -pp5.Y);
+      vv6 := AddVertex(pp6.X, -pp6.Y);
+      vv7 := AddVertex(pp7.X, -pp7.Y);
+      vv8 := AddVertex(pp8.X, -pp8.Y);
+      ll1 := AddLinedef(vv1, vv2);
+      ll2 := AddLinedef(vv2, vv3);
+      ll3 := AddLinedef(vv3, vv4);
+      ll4 := AddLinedef(vv4, vv5);
+      ll5 := AddLinedef(vv5, vv6);
+      ll6 := AddLinedef(vv6, vv7);
+      ll7 := AddLinedef(vv7, vv8);
+      ll8 := AddLinedef(vv8, vv1);
+      _fix_minecraft_side(ll1, sec);
+      _fix_minecraft_side(ll2, sec);
+      _fix_minecraft_side(ll3, sec);
+      _fix_minecraft_side(ll4, sec);
+      _fix_minecraft_side(ll5, sec);
+      _fix_minecraft_side(ll6, sec);
+      _fix_minecraft_side(ll7, sec);
+      _fix_minecraft_side(ll8, sec);
+    end;
+
+    function _inside_box(const p: point3d_p): boolean;
+    begin
+      Result := (p.X > boxLeft) and (p.X < boxRight) and
+                (p.Y > boxTop) and (p.Y < boxBottom);
+    end;
+
   begin
     p1 := GetHeightmapCoords3D(iX1, iY1);
     p2 := GetHeightmapCoords3D(iX2, iY2);
@@ -88,9 +171,44 @@
     p45.X := (p4.X + p1.X) div 2;
     p45.Y := (p4.Y + p1.Y) div 2;
     p45.Z := (p4.Z + p1.Z) div 2;
+
+    boxLeft := MaxI(p1.X, p4.X);
+    boxRight := MinI(p2.X, p3.X);
+    boxTop := MaxI(p1.Y, p2.Y);
+    boxBottom := MinI(p3.Y, p4.Y);
+
     p0.X := (p1.X + p2.X + p3.X + p4.X) div 4;
     p0.Y := (p1.Y + p2.Y + p3.Y + p4.Y) div 4;
     p0.Z := (p1.Z + p2.Z + p3.Z + p4.Z) div 4;
+
+    if not _inside_box(@p0) then
+    begin
+      p0.X := (boxRight + boxLeft) div 2;
+      p0.Y := (boxTop + boxBottom) div 2;
+      if not _inside_box(@p0) then
+      begin
+        _add_minecraft_sector_8(@p1, @p15, @p2, @p25, @p3, @p35, @p4, @p45);
+        Exit;
+      end;
+    end;
+
+    if not _point_in_points(@p0, @p1, @p2, @p3, @p4) or not _inside_box(@p0) then
+    begin
+      p0.X := (p1.X + p3.X) div 2;
+      p0.Y := (p1.Y + p3.Y) div 2;
+      p0.Z := (p1.Z + p3.Z) div 4;
+      if not _point_in_points(@p0, @p1, @p2, @p3, @p4) or not _inside_box(@p0) then
+      begin
+        p0.X := (p2.X + p4.X) div 2;
+        p0.Y := (p2.Y + p4.Y) div 2;
+        p0.Z := (p2.Z + p4.Z) div 4;
+        if not _point_in_points(@p0, @p1, @p2, @p3, @p4) or not _inside_box(@p0) then
+        begin
+          _add_minecraft_sector_8(@p1, @p15, @p2, @p25, @p3, @p35, @p4, @p45);
+          Exit;
+        end;
+      end;
+    end;
 
     AddVertex(p1.X, -p1.Y);
     AddVertex(p2.X, -p2.Y);

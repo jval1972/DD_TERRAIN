@@ -52,6 +52,7 @@ procedure ter_tracecontour(
   const imgsize: integer; // Size of hi-res heightmap to use
   const tristep: integer; // Size of each triangle to use
   const elevstep: integer;  // Elevation step
+  const bmh: bitmapheightmap_p;
   out lines: Pcountourline_tArray;  // Output lines
   out numlines: integer             // Num output lines
 );
@@ -83,11 +84,11 @@ procedure ter_tracecontour(
   const imgsize: integer; // Size of hi-res heightmap to use
   const tristep: integer; // Size of each triangle to use
   const elevstep: integer;  // Elevation step
+  const bmh: bitmapheightmap_p;
   out lines: Pcountourline_tArray;  // Output lines
   out numlines: integer             // Num output lines
 );
 var
-  bmh: bitmapheightmap_p;
   numtrisX, numtrisY: integer;
   numtris: integer;
   triangles: Ptri3d_tArray;
@@ -232,12 +233,6 @@ begin
   lines := nil;
   numlines := 0;
 
-  // Allocate hi-res heightmap buffer
-  GetMem(bmh, SizeOf(bitmapheightmap_t));
-
-  // Generate hi-res heightmap buffer
-  t.GenerateBitmapHeightmap(bmh, imgsize);
-
   // Calculate triangles
   numtrisX := imgsize div tristep;
   numtrisY := numtrisX;
@@ -263,7 +258,6 @@ begin
   end;
 
   FreeMem(triangles, numtrisX * numtrisY * 2 * SizeOf(tri3d_t));
-  FreeMem(bmh, SizeOf(bitmapheightmap_t));
 end;
 
 end.

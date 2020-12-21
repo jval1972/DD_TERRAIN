@@ -196,6 +196,7 @@ var
   sidetex: char8_t;
   pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  bmh: bitmapheightmap_p;
 
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
@@ -219,6 +220,12 @@ var
 {$I exp_TraceContourMap.inc}
 
 begin
+  // Allocate hi-res heightmap buffer
+  GetMem(bmh, SizeOf(bitmapheightmap_t));
+
+  // Generate hi-res heightmap buffer
+  t.GenerateBitmapHeightmap(bmh, t.texturesize);
+
   sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
@@ -372,6 +379,8 @@ begin
     stats.numvertexes := numdoomvertexes;
     stats.numsectors := numdoomsectors;
   end;
+
+  FreeMem(bmh, SizeOf(bitmapheightmap_t));
 end;
 
 {$UNDEF DOOM_FORMAT}
@@ -407,6 +416,7 @@ var
   sidetex: char8_t;
   pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
+  bmh: bitmapheightmap_p;
 
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
@@ -430,6 +440,12 @@ var
 {$I exp_TraceContourMap.inc}
 
 begin
+  // Allocate hi-res heightmap buffer
+  GetMem(bmh, SizeOf(bitmapheightmap_t));
+
+  // Generate hi-res heightmap buffer
+  t.GenerateBitmapHeightmap(bmh, t.texturesize);
+
   sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
@@ -593,6 +609,8 @@ begin
     stats.numvertexes := numdoomvertexes;
     stats.numsectors := numdoomsectors;
   end;
+
+  FreeMem(bmh, SizeOf(bitmapheightmap_t));
 end;
 
 {$UNDEF DOOM_FORMAT}
@@ -622,6 +640,7 @@ var
   pass: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   udmfmap: TStringList;
+  bmh: bitmapheightmap_p;
 
   procedure AddPlayerStartToUDMF(const x, y: integer; const angle: smallint; const pno: integer);
   begin
@@ -730,6 +749,12 @@ var
   end;
 
 begin
+  // Allocate hi-res heightmap buffer
+  GetMem(bmh, SizeOf(bitmapheightmap_t));
+
+  // Generate hi-res heightmap buffer
+  t.GenerateBitmapHeightmap(bmh, t.texturesize);
+
   sidetex := stringtochar8(options.defsidetex);
   FillChar(pass, SizeOf(pass), 0);
   FillChar(flat, SizeOf(flat), 0);
@@ -874,6 +899,8 @@ begin
     stats.numvertexes := numdoomvertexes;
     stats.numsectors := numdoomsectors;
   end;
+
+  FreeMem(bmh, SizeOf(bitmapheightmap_t));
 end;
 
 end.

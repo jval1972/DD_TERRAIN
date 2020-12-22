@@ -55,13 +55,11 @@
           ln := k;
           break;
         end;
-        topn.sort1;
       if (ln = -1) or (doomlinedefs[ln].sidenum[1] = -1) then
       begin
         Result := ss;
         Exit;
       end;
-        topn.sort1;
       lss0 := doomsidedefs[doomlinedefs[lastline].sidenum[0]].sector;
       lss1 := doomsidedefs[doomlinedefs[lastline].sidenum[1]].sector;
       ss0 := doomsidedefs[doomlinedefs[ln].sidenum[0]].sector;
@@ -144,6 +142,7 @@
         mapymax := clines[ii].y2;
     end;
 
+    // Avoid precision errors on map boundaries
     for ii := 0 to numclines - 1 do
     begin
       if clines[ii].x1 >= t.texturesize - 1 then
@@ -272,7 +271,7 @@
               dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
               dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
               if (dy1 <> 0) and (dy2 <> 0) then
-                if abs(dx1 / dy1 - dx2 / dy2) <= 0.1 then
+                if abs(dx1 / dy1 - dx2 / dy2) <= 0.05 then
                 begin
                   doomlinedefs[ii].v2 := v4;
                   doomlinedefs[jj].v2 := v3;  // discard this line
@@ -302,7 +301,7 @@
               dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
               dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
               if (dy1 <> 0) and (dy2 <> 0) then
-                if abs(dx1 / dy1 - dx2 / dy2) < 0.1 then
+                if abs(dx1 / dy1 - dx2 / dy2) < 0.05 then
                 begin
                   doomlinedefs[ii].v2 := v1;  // discard this line
                   doomlinedefs[jj].v2 := v2;
@@ -351,7 +350,7 @@
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
     end;
-            topn.sort2;
+
     // Close bottom of the map
     for ii := bottomN.Count - 1 downto 1 do
     begin

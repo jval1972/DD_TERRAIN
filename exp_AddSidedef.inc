@@ -14,6 +14,7 @@
     newsidedefs: Pmapsidedef_tArray;
     numnewsidedefs: integer;
     hashtable: array[0..SIDESHASHSIZE] of sideshashlist_t;
+    sd0, sd1: integer;
 
     function sidesequal(const s1, s2: Pmapsidedef_t): boolean;
     begin
@@ -46,7 +47,7 @@
       result := result and (SIDESHASHSIZE - 1);
     end;
 
-    function AddSideToHash(const id: integer): integer;
+    function AddSideToHash(const id: integer; const other: integer): integer;
     var
       ii: integer;
       h: integer;
@@ -57,7 +58,8 @@
         Exit;
       end;
 
-      if doomsidedefs[id].sector = sector then  // Special case, current sector
+      // Special case, current sector or single sided, do not merge
+      if (other < 1) or (doomsidedefs[id].sector = sector) then
         h := SIDESHASHSIZE
       else
       begin
@@ -99,8 +101,10 @@
 
       for k := 0 to numdoomlinedefs - 1 do
       begin
-        doomlinedefs[k].sidenum[0] := AddSideToHash(doomlinedefs[k].sidenum[0]);
-        doomlinedefs[k].sidenum[1] := AddSideToHash(doomlinedefs[k].sidenum[1]);
+        sd0 := doomlinedefs[k].sidenum[0];
+        sd1 := doomlinedefs[k].sidenum[1];
+        doomlinedefs[k].sidenum[0] := AddSideToHash(sd0, sd1);
+        doomlinedefs[k].sidenum[1] := AddSideToHash(sd1, sd0);
       end;
 
       FreeMem(doomsidedefs, numdoomsidedefs * SizeOf(mapsidedef_t));

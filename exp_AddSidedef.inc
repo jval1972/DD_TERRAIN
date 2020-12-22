@@ -13,7 +13,7 @@
     pside: Pmapsidedef_t;
     newsidedefs: Pmapsidedef_tArray;
     numnewsidedefs: integer;
-    hashtable: array[0..SIDESHASHSIZE - 1] of sideshashlist_t;
+    hashtable: array[0..SIDESHASHSIZE] of sideshashlist_t;
 
     function sidesequal(const s1, s2: Pmapsidedef_t): boolean;
     begin
@@ -57,14 +57,19 @@
         Exit;
       end;
 
-      h := hash(id);
+      if doomsidedefs[id].sector = sector then  // Special case, current sector
+        h := SIDESHASHSIZE
+      else
+      begin
+        h := hash(id);
 
-      for ii := 0 to hashtable[h].count - 1 do
-        if sidesequal(@doomsidedefs[id], @hashtable[h].sides[ii]) then
-        begin
-          Result := hashtable[h].ids[ii];
-          Exit;
-        end;
+        for ii := 0 to hashtable[h].count - 1 do
+          if sidesequal(@doomsidedefs[id], @hashtable[h].sides[ii]) then
+          begin
+            Result := hashtable[h].ids[ii];
+            Exit;
+          end;
+      end;
 
       Result := numnewsidedefs;
       ReallocMem(newsidedefs, (numnewsidedefs + 1) * SizeOf(mapsidedef_t));
@@ -85,7 +90,7 @@
     begin
       newsidedefs := nil;
       numnewsidedefs := 0;
-      for j := 0 to SIDESHASHSIZE - 1 do
+      for j := 0 to SIDESHASHSIZE do
       begin
         hashtable[j].sides := nil;
         hashtable[j].ids := nil;
@@ -102,7 +107,7 @@
       doomsidedefs := newsidedefs;
       numdoomsidedefs := numnewsidedefs;
 
-      for j := 0 to SIDESHASHSIZE - 1 do
+      for j := 0 to SIDESHASHSIZE do
       begin
         ReallocMem(hashtable[j].sides, 0);
         ReallocMem(hashtable[j].ids, 0);

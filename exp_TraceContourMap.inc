@@ -41,7 +41,7 @@
         Result := ss0;
     end;
 
-    function findnextsec(const ss: integer; const vv: integer): integer;
+    function findnextsec(const ss: integer; const vv, vvnext: integer): integer;
     var
       k: integer;
       ln: integer;
@@ -53,6 +53,22 @@
         if (doomlinedefs[k].v1 = vv) or (doomlinedefs[k].v2 = vv) then
         begin
           ln := k;
+          if doomlinedefs[k].v1 = vv then
+          begin
+            if (doomvertexes[vv].x = doomvertexes[vvnext].x) and (doomvertexes[vv].y = doomvertexes[vvnext].y) then
+              Result := doomsidedefs[doomlinedefs[k].sidenum[0]].sector
+            else
+              Result := doomsidedefs[doomlinedefs[k].sidenum[1]].sector;
+            Exit;
+          end
+          else if doomlinedefs[k].sidenum[1] <> -1 then
+          begin
+            if (doomvertexes[vv].x = doomvertexes[vvnext].x) and (doomvertexes[vv].y = doomvertexes[vvnext].y) then
+              Result := doomsidedefs[doomlinedefs[k].sidenum[1]].sector
+            else
+              Result := doomsidedefs[doomlinedefs[k].sidenum[0]].sector;
+            Exit;
+          end;
           break;
         end;
       if (ln = -1) or (doomlinedefs[ln].sidenum[1] = -1) then
@@ -240,77 +256,83 @@
         v2 := doomlinedefs[ii].v2;
         v3 := doomlinedefs[jj].v1;
         v4 := doomlinedefs[jj].v2;
-        if (v1 = v4) and (v2 = v3) then
+        if IsIntInRange(doomvertexes[v1].x, 1, mapxmax - 1) and
+           IsIntInRange(doomvertexes[v1].y, -mapymax + 1, -1) and
+           IsIntInRange(doomvertexes[v2].x, 1, mapxmax - 1) and
+           IsIntInRange(doomvertexes[v2].y, -mapymax + 1, -1) then
         begin
-          // discard both lines
-          doomlinedefs[ii].v2 := v1;
-          doomlinedefs[jj].v2 := v3;
-        end
-        else if (v1 <> v2) and (v3 <> v4) then
-        begin
-          if v2 = v3 then
+          if (v1 = v4) and (v2 = v3) then
           begin
-            if (doomvertexes[v1].x = doomvertexes[v2].x) and
-               (doomvertexes[v1].x = doomvertexes[v4].x) then
+            // discard both lines
+            doomlinedefs[ii].v2 := v1;
+            doomlinedefs[jj].v2 := v3;
+          end
+          else if (v1 <> v2) and (v3 <> v4) then
+          begin
+            if v2 = v3 then
             begin
-              doomlinedefs[ii].v2 := v4;
-              doomlinedefs[jj].v2 := v3;  // discard this line
-              inc(merges);
-            end
-            else if (doomvertexes[v1].y = doomvertexes[v2].y) and
-                    (doomvertexes[v1].y = doomvertexes[v4].y) then
-            begin
-              doomlinedefs[ii].v2 := v4;
-              doomlinedefs[jj].v2 := v3;  // discard this line
-              inc(merges);
-            end
-            else
-            begin
-              dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
-              dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
-              dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
-              dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
-              if (dy1 <> 0) and (dy2 <> 0) then
-                if abs(dx1 / dy1 - dx2 / dy2) <= 0.05 then
-                begin
-                  doomlinedefs[ii].v2 := v4;
-                  doomlinedefs[jj].v2 := v3;  // discard this line
-                end;
+              if (doomvertexes[v1].x = doomvertexes[v2].x) and
+                 (doomvertexes[v1].x = doomvertexes[v4].x) then
+              begin
+                doomlinedefs[ii].v2 := v4;
+                doomlinedefs[jj].v2 := v3;  // discard this line
+                inc(merges);
+              end
+              else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                      (doomvertexes[v1].y = doomvertexes[v4].y) then
+              begin
+                doomlinedefs[ii].v2 := v4;
+                doomlinedefs[jj].v2 := v3;  // discard this line
+                inc(merges);
+              end
+              else
+              begin
+                dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
+                dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
+                dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
+                dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
+                if (dy1 <> 0) and (dy2 <> 0) then
+                  if abs(dx1 / dy1 - dx2 / dy2) <= 0.05 then
+                  begin
+                    doomlinedefs[ii].v2 := v4;
+                    doomlinedefs[jj].v2 := v3;  // discard this line
+                  end;
+              end;
             end;
-          end;
-          if v1 = v4 then
-          begin
-            if (doomvertexes[v1].x = doomvertexes[v2].x) and
-               (doomvertexes[v2].x = doomvertexes[v3].x) then
+            if v1 = v4 then
             begin
-              doomlinedefs[ii].v2 := v1;  // discard this line
-              doomlinedefs[jj].v2 := v2;
-              inc(merges);
-            end
-            else if (doomvertexes[v1].y = doomvertexes[v2].y) and
-                    (doomvertexes[v1].y = doomvertexes[v3].y) then
-            begin
-              doomlinedefs[ii].v2 := v1;  // discard this line
-              doomlinedefs[jj].v2 := v2;
-              inc(merges);
-            end
-            else
-            begin
-              dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
-              dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
-              dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
-              dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
-              if (dy1 <> 0) and (dy2 <> 0) then
-                if abs(dx1 / dy1 - dx2 / dy2) < 0.05 then
-                begin
-                  doomlinedefs[ii].v2 := v1;  // discard this line
-                  doomlinedefs[jj].v2 := v2;
-                end;
+              if (doomvertexes[v1].x = doomvertexes[v2].x) and
+                 (doomvertexes[v2].x = doomvertexes[v3].x) then
+              begin
+                doomlinedefs[ii].v2 := v1;  // discard this line
+                doomlinedefs[jj].v2 := v2;
+                inc(merges);
+              end
+              else if (doomvertexes[v1].y = doomvertexes[v2].y) and
+                      (doomvertexes[v1].y = doomvertexes[v3].y) then
+              begin
+                doomlinedefs[ii].v2 := v1;  // discard this line
+                doomlinedefs[jj].v2 := v2;
+                inc(merges);
+              end
+              else
+              begin
+                dx1 := doomvertexes[v3].x - doomvertexes[v4].x;
+                dy1 := doomvertexes[v3].y - doomvertexes[v4].y;
+                dx2 := doomvertexes[v1].x - doomvertexes[v2].x;
+                dy2 := doomvertexes[v1].y - doomvertexes[v2].y;
+                if (dy1 <> 0) and (dy2 <> 0) then
+                  if abs(dx1 / dy1 - dx2 / dy2) < 0.05 then
+                  begin
+                    doomlinedefs[ii].v2 := v1;  // discard this line
+                    doomlinedefs[jj].v2 := v2;
+                  end;
+              end;
             end;
           end;
         end;
       end;
-
+      
     topN.Sort1;
     rightN.Sort1;
     bottomN.Sort1;
@@ -335,7 +357,7 @@
       v1 := AddVertex(topN.Numbers[ii].num1, 0);
       v2 := AddVertex(topN.Numbers[ii + 1].num1, 0);
       ll := AddLinedef(v1, v2);
-      basesec := findnextsec(basesec, v1);
+      basesec := findnextsec(basesec, v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
     end;
@@ -346,7 +368,7 @@
       v1 := AddVertex(mapxmax, rightN.Numbers[ii].num1);
       v2 := AddVertex(mapxmax, rightN.Numbers[ii - 1].num1);
       ll := AddLinedef(v1, v2);
-      basesec := findnextsec(basesec, v1);
+      basesec := findnextsec(basesec, v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
     end;
@@ -357,7 +379,7 @@
       v1 := AddVertex(bottomN.Numbers[ii].num1, -mapymax);
       v2 := AddVertex(bottomN.Numbers[ii - 1].num1, -mapymax);
       ll := AddLinedef(v1, v2);
-      basesec := findnextsec(basesec, v1);
+      basesec := findnextsec(basesec, v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
     end;
@@ -368,7 +390,7 @@
       v1 := AddVertex(0, leftN.Numbers[ii].num1);
       v2 := AddVertex(0, leftN.Numbers[ii + 1].num1);
       ll := AddLinedef(v1, v2);
-      basesec := findnextsec(basesec, v1);
+      basesec := findnextsec(basesec, v1, v2);
       doomlinedefs[ll].sidenum[0] := AddSidedef(basesec);
       doomlinedefs[ll].sidenum[1] := -1;
     end;

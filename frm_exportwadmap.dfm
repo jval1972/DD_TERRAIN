@@ -1246,7 +1246,7 @@ object ExportWADMapForm: TExportWADMapForm
       Left = 448
       Top = 56
       Width = 196
-      Height = 209
+      Height = 369
       Caption = ' Preview '
       TabOrder = 4
       object Panel3: TPanel
@@ -1254,7 +1254,7 @@ object ExportWADMapForm: TExportWADMapForm
         Top = 15
         Width = 192
         Height = 192
-        Align = alClient
+        Align = alTop
         BevelOuter = bvNone
         BorderWidth = 4
         Caption = ' '
@@ -1267,6 +1267,120 @@ object ExportWADMapForm: TExportWADMapForm
           Cursor = crCross
           Align = alLeft
           OnPaint = PaintBox1Paint
+        end
+      end
+      object Panel1: TPanel
+        Left = 2
+        Top = 207
+        Width = 192
+        Height = 160
+        Align = alClient
+        BevelOuter = bvNone
+        Caption = ' '
+        TabOrder = 1
+        object Label4: TLabel
+          Left = 8
+          Top = 40
+          Width = 38
+          Height = 13
+          Caption = 'Things: '
+          FocusControl = StatThingsEdit1
+        end
+        object Label6: TLabel
+          Left = 8
+          Top = 64
+          Width = 46
+          Height = 13
+          Caption = 'Linedefs: '
+          FocusControl = StatLinedefsEdit1
+        end
+        object Label7: TLabel
+          Left = 8
+          Top = 88
+          Width = 47
+          Height = 13
+          Caption = 'Sidedefs: '
+          FocusControl = StatSidedefsEdit1
+        end
+        object Label8: TLabel
+          Left = 8
+          Top = 112
+          Width = 47
+          Height = 13
+          Caption = 'Vertexes: '
+          FocusControl = StatVertexesEdit1
+        end
+        object Label9: TLabel
+          Left = 8
+          Top = 136
+          Width = 42
+          Height = 13
+          Caption = 'Sectors: '
+          FocusControl = StatSectorsEdit1
+        end
+        object Panel2: TPanel
+          Left = 0
+          Top = 0
+          Width = 192
+          Height = 25
+          Align = alTop
+          Caption = 'Statistics'
+          TabOrder = 0
+        end
+        object StatThingsEdit1: TEdit
+          Left = 80
+          Top = 40
+          Width = 49
+          Height = 17
+          TabStop = False
+          BorderStyle = bsNone
+          ReadOnly = True
+          TabOrder = 1
+          Text = ' '
+        end
+        object StatLinedefsEdit1: TEdit
+          Left = 80
+          Top = 64
+          Width = 49
+          Height = 17
+          TabStop = False
+          BorderStyle = bsNone
+          ReadOnly = True
+          TabOrder = 2
+          Text = ' '
+        end
+        object StatSidedefsEdit1: TEdit
+          Left = 80
+          Top = 88
+          Width = 49
+          Height = 17
+          TabStop = False
+          BorderStyle = bsNone
+          ReadOnly = True
+          TabOrder = 3
+          Text = ' '
+        end
+        object StatVertexesEdit1: TEdit
+          Left = 80
+          Top = 112
+          Width = 49
+          Height = 17
+          TabStop = False
+          BorderStyle = bsNone
+          ReadOnly = True
+          TabOrder = 4
+          Text = ' '
+        end
+        object StatSectorsEdit1: TEdit
+          Left = 80
+          Top = 136
+          Width = 49
+          Height = 17
+          TabStop = False
+          BorderStyle = bsNone
+          ReadOnly = True
+          TabOrder = 5
+          Text = ' '
         end
       end
     end

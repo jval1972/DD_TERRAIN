@@ -66,6 +66,18 @@ type
     LayerStepLabel: TLabel;
     LayerStepTrackBar: TTrackBar;
     Label5: TLabel;
+    Panel1: TPanel;
+    Panel2: TPanel;
+    Label4: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    StatThingsEdit1: TEdit;
+    StatLinedefsEdit1: TEdit;
+    StatSidedefsEdit1: TEdit;
+    StatVertexesEdit1: TEdit;
+    StatSectorsEdit1: TEdit;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -255,6 +267,7 @@ procedure TExportWADMapForm.GeneratePreview;
 var
   strm: TMemoryStream;
   tmpoptions: exportwadoptions_t;
+  tmpstats: wadexportstats_t;
   wadreader: TWADReader;
   p: pointer;
   vsize: integer;
@@ -285,7 +298,14 @@ begin
       if MergeFlatSectorsCheckBox.Checked then
         tmpoptions.flags := tmpoptions.flags or ETF_MERGEFLATSECTORS;
 
-      ExportTerrainToWADFile(t, strm, @tmpoptions);
+      ExportTerrainToWADFile(t, strm, @tmpoptions, @tmpstats);
+
+      // Display statistics
+      StatThingsEdit1.Text := IntToStr(tmpstats.numthings);
+      StatLinedefsEdit1.Text := IntToStr(tmpstats.numlinedefs);
+      StatSidedefsEdit1.Text := IntToStr(tmpstats.numsidedefs);
+      StatVertexesEdit1.Text := IntToStr(tmpstats.numvertexes);
+      StatSectorsEdit1.Text := IntToStr(tmpstats.numsectors);
 
       wadreader := TWADReader.Create;
       strm.Position := 0;

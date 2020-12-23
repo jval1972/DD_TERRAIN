@@ -159,6 +159,7 @@ var
     contourI: array[0..1] of point2d_t;
     contourE: array[0..1] of point2de_t;
     f: Extended;
+    pline: countourline_p;
   begin
     Result := 0;
     for i := 0 to numtris - 1 do
@@ -208,47 +209,52 @@ var
         begin
           if (contourI[0].Y = 0) and (contourI[1].Y <> 0) then
           begin
+            pline := @lines[0];
             for k := 0 to numlines - 1 do
             begin
-              if (lines[k].y1 = 0) and (lines[k].x1 = contourI[0].X) then
+              if (pline.y1 = 0) and (pline.x1 = contourI[0].X) then
               begin
-                lines[k].y1 := 1;
+                pline.y1 := 1;
                 contourI[0].Y := 1;
               end;
-              if (lines[k].y2 = 0) and (lines[k].x2 = contourI[0].X) then
+              if (pline.y2 = 0) and (pline.x2 = contourI[0].X) then
               begin
-                lines[k].y2 := 1;
+                pline.y2 := 1;
                 contourI[0].Y := 1;
               end;
+              inc(pline);
             end;
           end;
           if (contourI[0].Y <> 0) and (contourI[1].Y = 0) then
           begin
+            pline := @lines[0];
             for k := 0 to numlines - 1 do
             begin
-              if (lines[k].y1 = 0) and (lines[k].x1 = contourI[1].X) then
+              if (pline.y1 = 0) and (pline.x1 = contourI[1].X) then
               begin
-                lines[k].y1 := 1;
+                pline.y1 := 1;
                 contourI[1].Y := 1;
               end;
-              if (lines[k].y2 = 0) and (lines[k].x2 = contourI[1].X) then
+              if (pline.y2 = 0) and (pline.x2 = contourI[1].X) then
               begin
-                lines[k].y2 := 1;
+                pline.y2 := 1;
                 contourI[1].Y := 1;
               end;
+              inc(pline);
             end;
           end;
           ReallocMem(lines, (numlines + 1) * SizeOf(countourline_t));
-          lines[numlines].x1 := contourI[0].X;
-          lines[numlines].y1 := contourI[0].Y;
-          lines[numlines].x2 := contourI[1].X;
-          lines[numlines].y2 := contourI[1].Y;
-          lines[numlines].frontheight := elevation;
-          lines[numlines].frontside := layer;
-          lines[numlines].backheight := elevation - elevstep;
-          lines[numlines].backside := layer - 1;
+          pline := @lines[numlines];
+          pline.x1 := contourI[0].X;
+          pline.y1 := contourI[0].Y;
+          pline.x2 := contourI[1].X;
+          pline.y2 := contourI[1].Y;
+          pline.frontheight := elevation;
+          pline.frontside := layer;
+          pline.backheight := elevation - elevstep;
+          pline.backside := layer - 1;
           // This will help the WAD generator
-          lines[numlines].orientation :=
+          pline.orientation :=
                 TriOrientation(
                   below.v1.X, below.v1.Y,
                   contourE[0].X, contourE[0].Y,

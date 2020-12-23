@@ -22,6 +22,7 @@
     else
     begin
       doomlinedefs[l1].sidenum[1] := AddSidedef(sec);
+      doomlinedefs[l1].flags := doomlinedefs[l1].flags and not ML_BLOCKING;
       doomlinedefs[l1].flags := doomlinedefs[l1].flags or ML_TWOSIDED;
     end;
     if doomlinedefs[l2].sidenum[0] < 0 then
@@ -29,6 +30,7 @@
     else
     begin
       doomlinedefs[l2].sidenum[1] := AddSidedef(sec);
+      doomlinedefs[l2].flags := doomlinedefs[l2].flags and not ML_BLOCKING;
       doomlinedefs[l2].flags := doomlinedefs[l2].flags or ML_TWOSIDED;
     end;
     if doomlinedefs[l3].sidenum[0] < 0 then
@@ -36,6 +38,7 @@
     else
     begin
       doomlinedefs[l3].sidenum[1] := AddSidedef(sec);
+      doomlinedefs[l3].flags := doomlinedefs[l3].flags and not ML_BLOCKING;
       doomlinedefs[l3].flags := doomlinedefs[l3].flags or ML_TWOSIDED;
     end;
   end;

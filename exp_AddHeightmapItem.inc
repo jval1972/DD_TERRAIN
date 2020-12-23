@@ -20,4 +20,6 @@
       AddFlatTriangle(iX, iY + 1, iX + 1, iY, iX + 1, iY + 1);
     end;
     pass[iX, iY] := True;
+    if numdoomsidedefs > SIDEDEFPACKLIMIT then
+      PackSidedefs;
   end;

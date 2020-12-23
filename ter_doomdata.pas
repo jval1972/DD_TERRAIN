@@ -151,6 +151,8 @@ const
 //JVAL: Script Events
 //line triggers
   ML_TRIGGERSCRIPTS = 1024;
+// Don't pack (Terrain Editor)
+  ML_DONTPACK = 2048;
 
 type
 // Sector definition, from editing.

@@ -163,6 +163,9 @@ type
   TBooleanArray = packed array[0..$FFF] of boolean;
   PBooleanArray = ^TBooleanArray;
 
+const
+  SIDEDEFPACKLIMIT = 32000;
+    
 {$DEFINE DOOM_FORMAT}
 {$UNDEF HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
@@ -201,6 +204,12 @@ var
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
+{$I exp_FixBlockingLines.inc}
+{$I exp_AddWallTextures.inc}
+{$I exp_RemoveUnusedElements.inc}
+{$I exp_MergeLines.inc}
+{$I exp_FixTextureOffsets.inc}
+{$I exp_PackSidedefs.inc}
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
@@ -211,12 +220,8 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
-{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
-{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
-{$I exp_FixTextureOffsets.inc}
-{$I exp_FixBlockingLines.inc}
 {$I exp_TraceContourMap.inc}
 
 begin
@@ -334,16 +339,7 @@ begin
   FixBlockingLines;
 
   // Add wall textures
-  for i := 0 to numdoomlinedefs - 1 do
-  begin
-    if doomlinedefs[i].flags and ML_TWOSIDED = 0 then
-      doomsidedefs[doomlinedefs[i].sidenum[0]].midtexture := sidetex
-    else
-    begin
-      doomsidedefs[doomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
-      doomsidedefs[doomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
-    end;
-  end;
+  AddWallTextures;
 
   // Flash data to wad
   wadwriter.AddSeparator(options.levelname);
@@ -421,6 +417,12 @@ var
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
+{$I exp_FixBlockingLines.inc}
+{$I exp_AddWallTextures.inc}
+{$I exp_RemoveUnusedElements.inc}
+{$I exp_MergeLines.inc}
+{$I exp_FixTextureOffsets.inc}
+{$I exp_PackSidedefs.inc}
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
@@ -431,12 +433,8 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
-{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
-{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
-{$I exp_FixTextureOffsets.inc}
-{$I exp_FixBlockingLines.inc}
 {$I exp_TraceContourMap.inc}
 
 begin
@@ -563,16 +561,7 @@ begin
   FixBlockingLines;
 
   // Add wall textures
-  for i := 0 to numdoomlinedefs - 1 do
-  begin
-    if doomlinedefs[i].flags and ML_TWOSIDED = 0 then
-      doomsidedefs[doomlinedefs[i].sidenum[0]].midtexture := sidetex
-    else
-    begin
-      doomsidedefs[doomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
-      doomsidedefs[doomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
-    end;
-  end;
+  AddWallTextures;
 
   // Flash data to wad
   wadwriter.AddSeparator(options.levelname);
@@ -675,6 +664,12 @@ var
 
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
+{$I exp_FixBlockingLines.inc}
+{$I exp_AddWallTextures.inc}
+{$I exp_RemoveUnusedElements.inc}
+{$I exp_MergeLines.inc}
+{$I exp_FixTextureOffsets.inc}
+{$I exp_PackSidedefs.inc}
 {$I exp_AddSidedef.inc}
 {$I exp_AddLinedef.inc}
 {$I exp_GetHeightmapCoords3D.inc}
@@ -685,11 +680,8 @@ var
 {$I exp_AddSlopedTriangle.inc}
 {$I exp_AddHeightmapItem.inc}
 {$I exp_RemoveUnNeededLines.inc}
-{$I exp_MergeLines.inc}
 {$I exp_RemoveZeroLengthLines.inc}
-{$I exp_RemoveUnusedElements.inc}
 {$I exp_FixTrangleSectors.inc}
-{$I exp_FixTextureOffsets.inc}
 {$I exp_TraceContourMap.inc}
 
   procedure FlashUDMFVertext(const ii: integer);
@@ -848,17 +840,11 @@ begin
   // Fix Texture Offsets
   FixTextureOffsets;
 
+  // Set the ML_BLOCKING flag for single sided lines
+  FixBlockingLines;
+
   // Add wall textures
-  for i := 0 to numdoomlinedefs - 1 do
-  begin
-    if doomlinedefs[i].flags and ML_TWOSIDED = 0 then
-      doomsidedefs[doomlinedefs[i].sidenum[0]].midtexture := sidetex
-    else
-    begin
-      doomsidedefs[doomlinedefs[i].sidenum[0]].bottomtexture := sidetex;
-      doomsidedefs[doomlinedefs[i].sidenum[1]].bottomtexture := sidetex;
-    end;
-  end;
+  AddWallTextures;
 
   // Flash data to wad
   wadwriter.AddSeparator(options.levelname);

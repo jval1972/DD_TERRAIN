@@ -47,7 +47,7 @@
 
     function _calc_minecraft_z(const zz: integer): integer;
     begin
-      Result := ((zz + options.layerstep div 2) div options.layerstep) * options.layerstep;
+      Result := GetIntInRange(((zz + options.layerstep div 2) div options.layerstep) * options.layerstep, -HEIGHTMAPRANGE, HEIGHTMAPRANGE);
     end;
 
     procedure _fix_minecraft_side(const ll, ss: integer);
@@ -57,6 +57,7 @@
       else
       begin
         doomlinedefs[ll].sidenum[1] := AddSidedef(ss);
+        doomlinedefs[ll].flags := doomlinedefs[ll].flags and not ML_BLOCKING;
         doomlinedefs[ll].flags := doomlinedefs[ll].flags or ML_TWOSIDED;
       end;
     end;
@@ -75,13 +76,39 @@
       vv3 := AddVertex(pp3.X, -pp3.Y);
       vv4 := AddVertex(pp4.X, -pp4.Y);
       ll1 := AddLinedef(vv1, vv2);
-      ll2 := AddLinedef(vv2, vv3);
-      ll3 := AddLinedef(vv3, vv4);
-      ll4 := AddLinedef(vv4, vv1);
       _fix_minecraft_side(ll1, sec);
+      ll2 := AddLinedef(vv2, vv3);
       _fix_minecraft_side(ll2, sec);
+      ll3 := AddLinedef(vv3, vv4);
       _fix_minecraft_side(ll3, sec);
+      ll4 := AddLinedef(vv4, vv1);
       _fix_minecraft_side(ll4, sec);
+    end;
+
+    procedure _add_minecraft_sector_5(const pp1, pp2, pp3, pp4, pp5: point3d_p);
+    var
+      zz: integer;
+      vv1, vv2, vv3, vv4, vv5: integer;
+      ll1, ll2, ll3, ll4, ll5: integer;
+      sec: integer;
+    begin
+      zz := _calc_minecraft_z((pp1.Z + pp2.Z + pp3.Z + pp4.Z + pp5.Z) div 5);
+      sec := AddSector(zz, options.defceilingheight, False);
+      vv1 := AddVertex(pp1.X, -pp1.Y);
+      vv2 := AddVertex(pp2.X, -pp2.Y);
+      vv3 := AddVertex(pp3.X, -pp3.Y);
+      vv4 := AddVertex(pp4.X, -pp4.Y);
+      vv5 := AddVertex(pp5.X, -pp5.Y);
+      ll1 := AddLinedef(vv1, vv2);
+      _fix_minecraft_side(ll1, sec);
+      ll2 := AddLinedef(vv2, vv3);
+      _fix_minecraft_side(ll2, sec);
+      ll3 := AddLinedef(vv3, vv4);
+      _fix_minecraft_side(ll3, sec);
+      ll4 := AddLinedef(vv4, vv5);
+      _fix_minecraft_side(ll4, sec);
+      ll5 := AddLinedef(vv5, vv1);
+      _fix_minecraft_side(ll5, sec);
     end;
 
     procedure _add_minecraft_sector_6(const pp1, pp2, pp3, pp4, pp5, pp6: point3d_p);
@@ -100,16 +127,16 @@
       vv5 := AddVertex(pp5.X, -pp5.Y);
       vv6 := AddVertex(pp6.X, -pp6.Y);
       ll1 := AddLinedef(vv1, vv2);
-      ll2 := AddLinedef(vv2, vv3);
-      ll3 := AddLinedef(vv3, vv4);
-      ll4 := AddLinedef(vv4, vv5);
-      ll5 := AddLinedef(vv5, vv6);
-      ll6 := AddLinedef(vv6, vv1);
       _fix_minecraft_side(ll1, sec);
+      ll2 := AddLinedef(vv2, vv3);
       _fix_minecraft_side(ll2, sec);
+      ll3 := AddLinedef(vv3, vv4);
       _fix_minecraft_side(ll3, sec);
+      ll4 := AddLinedef(vv4, vv5);
       _fix_minecraft_side(ll4, sec);
+      ll5 := AddLinedef(vv5, vv6);
       _fix_minecraft_side(ll5, sec);
+      ll6 := AddLinedef(vv6, vv1);
       _fix_minecraft_side(ll6, sec);
     end;
 
@@ -131,20 +158,20 @@
       vv7 := AddVertex(pp7.X, -pp7.Y);
       vv8 := AddVertex(pp8.X, -pp8.Y);
       ll1 := AddLinedef(vv1, vv2);
-      ll2 := AddLinedef(vv2, vv3);
-      ll3 := AddLinedef(vv3, vv4);
-      ll4 := AddLinedef(vv4, vv5);
-      ll5 := AddLinedef(vv5, vv6);
-      ll6 := AddLinedef(vv6, vv7);
-      ll7 := AddLinedef(vv7, vv8);
-      ll8 := AddLinedef(vv8, vv1);
       _fix_minecraft_side(ll1, sec);
+      ll2 := AddLinedef(vv2, vv3);
       _fix_minecraft_side(ll2, sec);
+      ll3 := AddLinedef(vv3, vv4);
       _fix_minecraft_side(ll3, sec);
+      ll4 := AddLinedef(vv4, vv5);
       _fix_minecraft_side(ll4, sec);
+      ll5 := AddLinedef(vv5, vv6);
       _fix_minecraft_side(ll5, sec);
+      ll6 := AddLinedef(vv6, vv7);
       _fix_minecraft_side(ll6, sec);
+      ll7 := AddLinedef(vv7, vv8);
       _fix_minecraft_side(ll7, sec);
+      ll8 := AddLinedef(vv8, vv1);
       _fix_minecraft_side(ll8, sec);
     end;
 
@@ -243,23 +270,23 @@
       _add_minecraft_sector_8(@p1, @p15, @p2, @p25, @p3, @p35, @p4, @p45)
     else if (p1.Z = p2.Z) and (p2.Z = p4.Z) then
     begin
-      _add_minecraft_sector_6(@p1, @p15, @p2, @p0, @p4, @p45);
-      _add_minecraft_sector_6(@p4, @p0, @p2, @p25, @p3, @p35);
+      _add_minecraft_sector_5(@p1, @p15, @p2, @p4, @p45);
+      _add_minecraft_sector_5(@p4, @p2, @p25, @p3, @p35);
     end
     else if (p1.Z = p2.Z) and (p2.Z = p3.Z) then
     begin
-      _add_minecraft_sector_6(@p1, @p15, @p2, @p25, @p3, @p0);
-      _add_minecraft_sector_6(@p1, @p0, @p3, @p35, @p4, @p45);
+      _add_minecraft_sector_5(@p1, @p15, @p2, @p25, @p3);
+      _add_minecraft_sector_5(@p1, @p3, @p35, @p4, @p45);
     end
     else if (p2.Z = p3.Z) and (p3.Z = p4.Z) then
     begin
-      _add_minecraft_sector_6(@p2, @p25, @p3, @p35, @p4, @p0);
-      _add_minecraft_sector_6(@p2, @p0, @p4, @p45, @p1, @p15);
+      _add_minecraft_sector_5(@p2, @p25, @p3, @p35, @p4);
+      _add_minecraft_sector_5(@p2, @p4, @p45, @p1, @p15);
     end
     else if (p3.Z = p4.Z) and (p4.Z = p1.Z) then
     begin
-      _add_minecraft_sector_6(@p3, @p35, @p4, @p45, @p1, @p0);
-      _add_minecraft_sector_6(@p3, @p0, @p1, @p15, @p2, @p25);
+      _add_minecraft_sector_5(@p3, @p35, @p4, @p45, @p1);
+      _add_minecraft_sector_5(@p3, @p1, @p15, @p2, @p25);
     end
     else
     begin

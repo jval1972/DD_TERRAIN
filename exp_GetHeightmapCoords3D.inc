@@ -7,6 +7,6 @@
 
       Result.X := t.HeightmapToCoord(iX);
       Result.Y := t.HeightmapToCoord(iY);
-      Result.Z := bmh[Result.X, Result.Y];// t.Heightmap[iX, iY].height;
+      Result.Z := bmh[Result.X, Result.Y];
     end;
   end;

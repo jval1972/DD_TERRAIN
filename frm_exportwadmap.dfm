@@ -1285,6 +1285,7 @@ object ExportWADMapForm: TExportWADMapForm
           Height = 13
           Caption = 'Things: '
           FocusControl = StatThingsEdit1
+          Visible = False
         end
         object Label6: TLabel
           Left = 8
@@ -1337,6 +1338,7 @@ object ExportWADMapForm: TExportWADMapForm
           ReadOnly = True
           TabOrder = 1
           Text = ' '
+          Visible = False
         end
         object StatLinedefsEdit1: TEdit
           Left = 80

@@ -154,7 +154,7 @@ var
   var
     above, below: slicetri3d_t;
     minor, major: slicetri3d_p;
-    i, j: integer;
+    i, j, k: integer;
     crossed_edges: array[0..1] of edge_t;
     contourI: array[0..1] of point2d_t;
     contourE: array[0..1] of point2de_t;
@@ -203,9 +203,41 @@ var
           contourI[j].Y := Round(contourE[j].Y);
         end;
 
-        if (contourI[0].X <> contourI[1].X) or
+        if (contourI[0].X <> contourI[1].X) or    // No zero length
            (contourI[0].Y <> contourI[1].Y) then
         begin
+          if (contourI[0].Y = 0) and (contourI[1].Y <> 0) then
+          begin
+            for k := 0 to numlines - 1 do
+            begin
+              if (lines[k].y1 = 0) and (lines[k].x1 = contourI[0].X) then
+              begin
+                lines[k].y1 := 1;
+                contourI[0].Y := 1;
+              end;
+              if (lines[k].y2 = 0) and (lines[k].x2 = contourI[0].X) then
+              begin
+                lines[k].y2 := 1;
+                contourI[0].Y := 1;
+              end;
+            end;
+          end;
+          if (contourI[0].Y <> 0) and (contourI[1].Y = 0) then
+          begin
+            for k := 0 to numlines - 1 do
+            begin
+              if (lines[k].y1 = 0) and (lines[k].x1 = contourI[1].X) then
+              begin
+                lines[k].y1 := 1;
+                contourI[1].Y := 1;
+              end;
+              if (lines[k].y2 = 0) and (lines[k].x2 = contourI[1].X) then
+              begin
+                lines[k].y2 := 1;
+                contourI[1].Y := 1;
+              end;
+            end;
+          end;
           ReallocMem(lines, (numlines + 1) * SizeOf(countourline_t));
           lines[numlines].x1 := contourI[0].X;
           lines[numlines].y1 := contourI[0].Y;

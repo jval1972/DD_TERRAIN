@@ -160,7 +160,7 @@ type
     PenSpeedButton4: TSpeedButton;
     MNTools1: TMenuItem;
     Scaleheightmap1: TMenuItem;
-    RadixWADFile1: TMenuItem;
+    ExportWADFile1: TMenuItem;
     SaveWADDialog: TSaveDialog;
     N3: TMenuItem;
     N4: TMenuItem;
@@ -254,6 +254,8 @@ type
     PickColorRGBLabel: TLabel;
     Hiresheightmap1: TMenuItem;
     SavePictureDialog2: TSavePictureDialog;
+    ToolButton5: TToolButton;
+    ExportWADButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -307,7 +309,7 @@ type
     procedure PasteTexture1Click(Sender: TObject);
     procedure PasteHeightmap1Click(Sender: TObject);
     procedure Scaleheightmap1Click(Sender: TObject);
-    procedure RadixWADFile1Click(Sender: TObject);
+    procedure ExportWADFile1Click(Sender: TObject);
     procedure Copy3dview1Click(Sender: TObject);
     procedure CopyHeightmap1Click(Sender: TObject);
     procedure PaletteSpeedButton1Click(Sender: TObject);
@@ -2239,7 +2241,7 @@ begin
   end;
 end;
 
-procedure TForm1.RadixWADFile1Click(Sender: TObject);
+procedure TForm1.ExportWADFile1Click(Sender: TObject);
 var
   fs: TFileStream;
   ename: string;

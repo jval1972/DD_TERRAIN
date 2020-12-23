@@ -252,10 +252,13 @@ type
     ColorPanel1: TPanel;
     ColorPaletteImage: TImage;
     PickColorRGBLabel: TLabel;
-    Hiresheightmap1: TMenuItem;
+    ExportHeightmap1: TMenuItem;
     SavePictureDialog2: TSavePictureDialog;
     ToolButton5: TToolButton;
     ExportWADButton1: TSpeedButton;
+    N10: TMenuItem;
+    MNExpoortTexture1: TMenuItem;
+    SavePictureDialog3: TSavePictureDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -342,8 +345,9 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure ColorPaletteImageMouseUp(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure Hiresheightmap1Click(Sender: TObject);
+    procedure ExportHeightmap1Click(Sender: TObject);
     procedure TextureScaleResetLabelDblClick(Sender: TObject);
+    procedure MNExpoortTexture1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -2854,7 +2858,7 @@ begin
   end;
 end;
 
-procedure TForm1.Hiresheightmap1Click(Sender: TObject);
+procedure TForm1.ExportHeightmap1Click(Sender: TObject);
 var
   bmh: bitmapheightmap_p;
   x, y: integer;
@@ -2900,6 +2904,23 @@ begin
   ftexturescale := 100;
   UpdateSliders;
   SlidersToLabels;
+end;
+
+procedure TForm1.MNExpoortTexture1Click(Sender: TObject);
+var
+  imgfname: string;
+begin
+  if SavePictureDialog3.Execute then
+  begin
+    Screen.Cursor := crHourglass;
+    try
+      imgfname := SavePictureDialog3.FileName;
+      BackupFile(imgfname);
+      SaveImageToDisk(terrain.Texture, imgfname);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
 end;
 
 end.

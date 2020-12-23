@@ -1801,7 +1801,7 @@ object Form1: TForm1
       Top = 2
       Width = 34
       Height = 34
-      Hint = 'Export terrain in a WAD file'
+      Hint = 'Export Terrain in a WAD file'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -8121,13 +8121,20 @@ object Form1: TForm1
         object N3: TMenuItem
           Caption = '-'
         end
+        object MNExpoortTexture1: TMenuItem
+          Caption = 'Terrain Texture'
+          OnClick = MNExpoortTexture1Click
+        end
+        object ExportHeightmap1: TMenuItem
+          Caption = 'Heightmap'
+          OnClick = ExportHeightmap1Click
+        end
+        object N10: TMenuItem
+          Caption = '-'
+        end
         object ExportScreenshot1: TMenuItem
           Caption = 'Screenshot (3D View)'
           OnClick = ExportScreenshot1Click
-        end
-        object Hiresheightmap1: TMenuItem
-          Caption = 'Hi res heightmap'
-          OnClick = Hiresheightmap1Click
         end
       end
       object N2: TMenuItem
@@ -8648,6 +8655,15 @@ object Form1: TForm1
       ')|*.tif;*.tiff|Bitmaps (*.bmp)|*.bmp'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 401
+    Top = 153
+  end
+  object SavePictureDialog3: TSavePictureDialog
+    DefaultExt = 'png'
+    Filter = 
+      'PNG Images (*.png)|*.png|Tagged Image File Format (*.tif; *.tiff' +
+      ')|*.tif;*.tiff|Bitmaps (*.bmp)|*.bmp'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
+    Left = 441
     Top = 153
   end
 end

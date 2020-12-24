@@ -201,7 +201,7 @@ var
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   bmh: bitmapheightmap_p;
 
-{$I exp_ExportFlatTexure.inc}
+{$I exp_ExportFlatTexture.inc}
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
@@ -363,7 +363,7 @@ var
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   bmh: bitmapheightmap_p;
 
-{$I exp_ExportFlatTexure.inc}
+{$I exp_ExportFlatTexture.inc}
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}

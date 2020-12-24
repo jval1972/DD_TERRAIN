@@ -201,6 +201,7 @@ var
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   bmh: bitmapheightmap_p;
 
+{$I exp_ExportFlatTexure.inc}
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
@@ -250,59 +251,7 @@ begin
   wadwriter := TWadWriter.Create;
 
   if options.flags and ETF_EXPORTFLAT <> 0 then
-  begin
-    // Create Palette
-    for i := 0 to 255 do
-    begin
-      r := options.palette[3 * i];
-      if r > 255 then r := 255;
-      g := options.palette[3 * i + 1];
-      if g > 255 then g := 255;
-      b := options.palette[3 * i + 2];
-      if b > 255 then b := 255;
-      def_palL[i] := (r shl 16) + (g shl 8) + (b);
-    end;
-
-    if options.flags and ETF_TRUECOLORFLAT <> 0 then
-    begin
-      // Create flat - 32 bit color - inside HI_START - HI_END namespace
-      png := TPngObject.Create;
-      png.Assign(t.Texture);
-
-      ms := TMemoryStream.Create;
-
-      png.SaveToStream(ms);
-
-      wadwriter.AddSeparator('HI_START');
-      wadwriter.AddData(options.levelname + 'TER', ms.Memory, ms.Size);
-      wadwriter.AddSeparator('HI_END');
-
-      ms.Free;
-      png.Free;
-    end;
-
-    // Create flat - 8 bit
-    bm := t.Texture;
-    GetMem(flattexture, bm.Width * bm.Height);
-
-    i := 0;
-    for y := 0 to t.texturesize - 1 do
-    begin
-      scanline := t.Texture.ScanLine[y];
-      for x := 0 to t.texturesize - 1 do
-      begin
-        c := scanline[x];
-        flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
-        inc(i);
-      end;
-    end;
-
-    wadwriter.AddSeparator('F_START');
-    wadwriter.AddData(options.levelname + 'TER', flattexture, bm.Width * bm.Height);
-    wadwriter.AddSeparator('F_END');
-
-    FreeMem(flattexture, bm.Width * bm.Height);
-  end;
+    ExportFlatTexture;
 
   // Create Map
   if options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR then
@@ -414,6 +363,7 @@ var
   flat: array[0..MAXHEIGHTMAPSIZE - 1, 0..MAXHEIGHTMAPSIZE - 1] of boolean;
   bmh: bitmapheightmap_p;
 
+{$I exp_ExportFlatTexure.inc}
 {$I exp_AddThing.inc}
 {$I exp_AddSector.inc}
 {$I exp_AddVertex.inc}
@@ -463,68 +413,7 @@ begin
   wadwriter := TWadWriter.Create;
 
   if options.flags and ETF_EXPORTFLAT <> 0 then
-  begin
-    // Create Palette
-    for i := 0 to 255 do
-    begin
-      r := options.palette[3 * i];
-      if r > 255 then r := 255;
-      g := options.palette[3 * i + 1];
-      if g > 255 then g := 255;
-      b := options.palette[3 * i + 2];
-      if b > 255 then b := 255;
-      def_palL[i] := (r shl 16) + (g shl 8) + (b);
-    end;
-
-    if options.flags and ETF_TRUECOLORFLAT <> 0 then
-    begin
-      // Create flat - 32 bit color - inside HI_START - HI_END namespace
-      png := TPngObject.Create;
-      png.Assign(t.Texture);
-
-      ms := TMemoryStream.Create;
-
-      png.SaveToStream(ms);
-
-      wadwriter.AddSeparator('HI_START');
-      wadwriter.AddData(options.levelname + 'TER', ms.Memory, ms.Size);
-      wadwriter.AddSeparator('HI_END');
-
-      wadwriter.AddString('TEXTURES',
-        'flat ' + options.levelname + 'TER,' + IntToStr(png.Width) + ',' + IntToStr(png.Height) + #13#10 +
-        '{' + #13#10 +
-        '   XScale 1.0' + #13#10 +
-        '   YScale 1.0' + #13#10 +
-        '   Patch ' + options.levelname + 'TER, 0, 0' + #13#10 +
-        '}' + #13#10
-      );
-
-      ms.Free;
-      png.Free;
-    end;
-
-    // Create flat - 8 bit
-    bm := t.Texture;
-    GetMem(flattexture, bm.Width * bm.Height);
-
-    i := 0;
-    for y := 0 to t.texturesize - 1 do
-    begin
-      scanline := t.Texture.ScanLine[y];
-      for x := 0 to t.texturesize - 1 do
-      begin
-        c := scanline[x];
-        flattexture[i] := V_FindAproxColorIndex(@def_palL, c);
-        inc(i);
-      end;
-    end;
-
-    wadwriter.AddSeparator('F_START');
-    wadwriter.AddData(options.levelname + 'TER', flattexture, bm.Width * bm.Height);
-    wadwriter.AddSeparator('F_END');
-
-    FreeMem(flattexture, bm.Width * bm.Height);
-  end;
+    ExportFlatTexture;
 
   // Create Map
   if options.elevationmethod = ELEVATIONMETHOD_TRACECONTOUR then

@@ -75,6 +75,7 @@ uses
   SysUtils,
   Classes,
   Math,
+  ter_utils,
   ter_defs;
 
 procedure ResetCamera;
@@ -277,10 +278,6 @@ begin
   glDisable(GL_TEXTURE_2D);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 end;
-
-type
-  PLongWordArray = ^TLongWordArray;
-  TLongWordArray = array[0..$FFFF] of LongWord;
 
 function RGBSwap(const l: LongWord): LongWord;
 var

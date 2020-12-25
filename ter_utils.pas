@@ -128,10 +128,12 @@ type
   PLongWordArray = ^TLongWordArray;
 
 type
-  TByteArray = array[0..$FFF] of LongWord;
+  TByteArray = array[0..$FFFF] of LongWord;
   PByteArray = ^TByteArray;
 
 procedure SaveImageToDisk(const b: TBitmap; const imgfname: string);
+
+procedure FlipBitmapVertical(const b: TBitmap);
 
 implementation
 
@@ -704,6 +706,27 @@ begin
     Result := i3;
   if i4 > Result then
     Result := i4;
+end;
+
+procedure FlipBitmapVertical(const b: TBitmap);
+var
+  i, j: integer;
+  tmp: LongWord;
+  l1, l2: PLongWordArray;
+begin
+  b.PixelFormat := pf32bit;
+
+  for j := 0 to b.Height div 2 - 1 do
+  begin
+    l1 := b.ScanLine[j];
+    l2 := b.ScanLine[b.Height - 1 - j];
+    for i := 0 to b.Height - 1 do
+    begin
+      tmp := l1[i];
+      l1[i] := l2[i];
+      l2[i] := tmp;
+    end;
+  end;
 end;
 
 end.

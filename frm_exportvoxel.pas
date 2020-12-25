@@ -32,62 +32,247 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Buttons, ter_class, ter_voxelexport,
+  ter_voxels;
 
 type
   TExportVoxelForm = class(TForm)
-    MainPanel: TPanel;
-    Label3: TLabel;
-    SelectFileButton: TSpeedButton;
-    Label1: TLabel;
-    CeilingHeightLabel: TLabel;
-    Label2: TLabel;
-    LightLevelLabel: TLabel;
-    LayerStepLabel: TLabel;
-    Label5: TLabel;
-    EngineRadioGroup: TRadioGroup;
-    OptionsGroupBox: TGroupBox;
-    DeformationsCheckBox: TCheckBox;
-    TrueColorFlatCheckBox: TCheckBox;
-    MergeFlatSectorsCheckBox: TCheckBox;
-    AddPlayerStartCheckBox: TCheckBox;
-    ExportFlatCheckBox: TCheckBox;
-    FileNameEdit: TEdit;
-    PreviewGroupBox: TGroupBox;
-    Panel3: TPanel;
-    PaintBox1: TPaintBox;
-    Panel1: TPanel;
-    Label4: TLabel;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
-    Panel2: TPanel;
-    StatThingsEdit1: TEdit;
-    StatLinedefsEdit1: TEdit;
-    StatSidedefsEdit1: TEdit;
-    StatVertexesEdit1: TEdit;
-    StatSectorsEdit1: TEdit;
-    CeilingHeightTrackBar: TTrackBar;
-    GameRadioGroup: TRadioGroup;
-    ElevationRadioGroup: TRadioGroup;
-    LightLevalTrackBar: TTrackBar;
-    LayerStepTrackBar: TTrackBar;
     BottomPanel: TPanel;
     ButtonPanel: TPanel;
     OKButton1: TButton;
     CancelButton1: TButton;
+    MainPanel: TPanel;
+    GroupBox1: TGroupBox;
+    TrackBar1: TTrackBar;
+    TrackBar2: TTrackBar;
+    GroupBox2: TGroupBox;
+    Image1: TImage;
+    Panel3: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Panel1: TPanel;
+    Bevel2: TBevel;
+    Label3: TLabel;
+    FileNameEdit: TEdit;
+    SelectFileButton: TSpeedButton;
+    SaveVoxelDialog: TSaveDialog;
+    SizeRadioGroup: TRadioGroup;
+    procedure FormCreate(Sender: TObject);
+    procedure TrackBarChange(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FileNameEditChange(Sender: TObject);
+    procedure SelectFileButtonClick(Sender: TObject);
   private
     { Private declarations }
+    amin, amax: integer;
+    sample: TBitmap;
+    destroying: boolean;
+  protected
+    procedure SetMinMax(mn, mx: Integer);
+    procedure SetSample(const asample: TBitmap);
+    procedure UpdateControls;
   public
     { Public declarations }
   end;
 
-var
-  ExportVoxelForm: TExportVoxelForm;
+function GetVoxelExportOptions(const t: TTerrain; const buf: voxelbuffer_p;
+  const options: exportvoxeloptions_p; var fname: string): boolean;
 
 implementation
 
 {$R *.dfm}
 
+uses
+  ter_gl,
+  ter_utils;
+
+function GetVoxelExportOptions(const t: TTerrain; const buf: voxelbuffer_p;
+  const options: exportvoxeloptions_p; var fname: string): boolean;
+var
+  f: TExportVoxelForm;
+  bm: TBitmap;
+  tmpoptions: exportvoxeloptions_t;
+  frontview: voxelbuffer2d_p;
+  line: PLongWordArray;
+  i, j: integer;
+begin
+  Result := False;
+  f := TExportVoxelForm.Create(nil);
+  try
+    f.FileNameEdit.Text := fname;
+    f.TrackBar1.Position := options.minz;
+    f.TrackBar2.Position := options.maxz;
+
+    tmpoptions.size := 256;
+    tmpoptions.minz := 0;
+    tmpoptions.maxz := 255;
+
+    Screen.Cursor := crHourglass;
+    try
+      ExportTerrainToVoxel(t, buf, @tmpoptions);
+
+      bm := TBitmap.Create;
+      bm.Width := 256;
+      bm.Height := 256;
+      bm.PixelFormat := pf32bit;
+
+      GetMem(frontview, SizeOf(voxelbuffer2d_t));
+      vox_getviewbuffer(buf, tmpoptions.size, frontview, vv_front);
+
+      for j := 0 to tmpoptions.size - 1 do
+      begin
+        line := bm.ScanLine[j];
+        for i := 0 to tmpoptions.size - 1 do
+          line[i] := RGBSwap(frontview[i, j]);
+      end;
+      FreeMem(frontview, SizeOf(voxelbuffer2d_t));
+      f.SetSample(bm);
+      bm.Free;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+
+    f.SetMinMax(options.minz, options.maxz);
+
+    if f.ShowModal = mrOK then
+    begin
+      options.size := 256;
+      options.minz := f.amin;
+      options.maxz := f.amax;
+      fname := f.FileNameEdit.Text;
+      Result := True;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+procedure TExportVoxelForm.FormCreate(Sender: TObject);
+begin
+  destroying := false;
+  sample := TBitmap.Create;
+  sample.Width := 256;
+  sample.Height := 256;
+  sample.PixelFormat := pf32bit;
+  sample.Canvas.Brush.Style := bsSolid;
+  sample.Canvas.Brush.Color := clBlack;
+  sample.Canvas.Pen.Style := psSolid;
+  sample.Canvas.Pen.Color := clBlack;
+  sample.Canvas.FillRect(Rect(0, 0, 255, 255));
+  amin := 0;
+  amax := 255;
+  Image1.Picture.Bitmap.PixelFormat := pf32bit;
+  UpdateControls;
+end;
+
+procedure TExportVoxelForm.TrackBarChange(Sender: TObject);
+var
+  mn, mx: integer;
+begin
+  mn := TrackBar1.Position;
+  mx := TrackBar2.Position;
+  SetMinMax(mn, mx);
+end;
+
+procedure TExportVoxelForm.SetMinMax(mn, mx: Integer);
+var
+  tmp: integer;
+begin
+  if mn < 0 then
+    mn := 0
+  else if mn > 255 then
+    mn := 255;
+
+  if mx < 0 then
+    mx := 0
+  else if mx > 255 then
+    mx := 255;
+
+  if mn > mx then
+  begin
+    tmp := mn;
+    mn := mx;
+    mx := tmp;
+  end;
+
+  if (mn = amin) and (mx = amax) then
+    exit;
+
+  amin := mn;
+  amax := mx;
+
+  UpdateControls;
+end;
+
+procedure TExportVoxelForm.SetSample(const asample: TBitmap);
+begin
+  if asample = nil then
+    Exit;
+
+  sample.Canvas.StretchDraw(Rect(0, 0, 255, 255), asample);
+  UpdateControls;
+end;
+
+procedure TExportVoxelForm.UpdateControls;
+var
+  b: TBitmap;
+begin
+  Label1.Caption := Format('Top: %.*d/255', [3, amin]);
+  Label2.Caption := Format('Bottom: %.*d/255', [3, amax]);
+
+  b := TBitmap.Create;
+  try
+    b.Width := 256;
+    b.Height := 256;
+    b.PixelFormat := pf32bit;
+    b.Canvas.Brush.Style := bsSolid;
+    b.Canvas.Brush.Color := clBlack;
+    b.Canvas.Pen.Style := psSolid;
+    b.Canvas.Pen.Color := clBlack;
+    b.Canvas.FillRect(Rect(0, 0, 255, 255));
+    if not destroying then
+      b.Canvas.StretchDraw(Rect(0, amin, 255, amax), sample);
+    b.Canvas.Brush.Style := bsDiagCross;
+    b.Canvas.Brush.Color := clBlue;
+    b.Canvas.FillRect(Rect(0, 0, 255, amin));
+    b.Canvas.FillRect(Rect(0, amax, 255, 255));
+    b.Canvas.Pen.Color := clYellow;
+    b.Canvas.MoveTo(0, amin);
+    b.Canvas.LineTo(255, amin);
+    b.Canvas.MoveTo(0, amax);
+    b.Canvas.LineTo(255, amax);
+    Image1.Picture.Bitmap.Canvas.Draw(0, 0, b);
+    Image1.Invalidate;
+  finally
+    b.Free;
+  end;
+end;
+
+procedure TExportVoxelForm.FormDestroy(Sender: TObject);
+begin
+  destroying := true;
+  sample.Free;
+end;
+
+procedure TExportVoxelForm.FormShow(Sender: TObject);
+begin
+  UpdateControls;
+end;
+
+procedure TExportVoxelForm.FileNameEditChange(Sender: TObject);
+begin
+  OKButton1.Enabled := Trim(FileNameEdit.Text) <> '';
+end;
+
+procedure TExportVoxelForm.SelectFileButtonClick(Sender: TObject);
+begin
+  if SaveVoxelDialog.Execute then
+  begin
+    FileNameEdit.Text := SaveVoxelDialog.FileName;
+    OKButton1.Enabled := True;
+  end;
+end;
+
 end.
+

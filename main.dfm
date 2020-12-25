@@ -8113,6 +8113,10 @@ object Form1: TForm1
           Caption = 'WAD Map...'
           OnClick = ExportWADFile1Click
         end
+        object MNExportVoxel1: TMenuItem
+          Caption = 'Voxel...'
+          OnClick = MNExportVoxel1Click
+        end
         object ExportObjModel1: TMenuItem
           Caption = 'Obj model'
           Visible = False

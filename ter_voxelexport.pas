@@ -35,14 +35,14 @@ uses
   ter_voxels;
 
 type
-  voxeloptions_t = record
+  exportvoxeloptions_t = record
     size: integer;
     minz, maxz: byte;
   end;
-  voxeloptions_p = ^voxeloptions_t;
+  exportvoxeloptions_p = ^exportvoxeloptions_t;
 
 procedure ExportTerrainToVoxel(const t: TTerrain; const buf: voxelbuffer_p;
-  const options: voxeloptions_p);
+  const options: exportvoxeloptions_p);
 
 implementation
 
@@ -50,10 +50,11 @@ uses
   Windows,
   Classes,
   Graphics,
+  ter_gl,
   ter_utils;
 
 procedure ExportTerrainToVoxel(const t: TTerrain; const buf: voxelbuffer_p;
-  const options: voxeloptions_p);
+  const options: exportvoxeloptions_p);
 var
   bmh: bitmapheightmap_p;
   i, j, k: integer;
@@ -79,7 +80,7 @@ begin
     for i := 0 to 255 do
       for j := 0 to 255 do
       begin
-        k := GetIntInRange(Round(128 + bmh[i, j] * 128 / HEIGHTMAPRANGE), 0, 255);
+        k := GetIntInRange(Round(128 + bmh[i, 255 - j] * 128 / HEIGHTMAPRANGE), 0, 255);
         vmap[i, j] := k;
       end;
   end
@@ -89,7 +90,7 @@ begin
     for i := 0 to options.size - 1 do
       for j := 0 to options.size - 1 do
       begin
-        k := GetIntInRange(Round(128 + bmh[i, j] * 128 / HEIGHTMAPRANGE), 0, 255);
+        k := GetIntInRange(Round(128 + bmh[i, options.size - j] * 128 / HEIGHTMAPRANGE), 0, 255);
         vmap[i, j] := round(k * fscale1);
         if vmap[i, j] >= options.size then
           vmap[i, j] := options.size - 1
@@ -103,22 +104,18 @@ begin
   bm.Height := options.size;
   bm.PixelFormat := pf32bit;
   bm.Canvas.StretchDraw(Rect(0, 0, options.size, options.size), t.Texture);
+  FlipBitmapVertical(bm);
 
   for j := 0 to options.size - 1 do
   begin
     line := bm.ScanLine[j];
     for i := 0 to options.size - 1 do
     begin
-      c := line[i];
+      c := RGBSwap(line[i]);
       if c = 0 then
         c := $1;
       for k := 0 to vmap[i, j] do
-      begin
-        if c <> 0 then
-          buf[i, options.size - k - 1, j] := c
-        else
-          buf[i, options.size - k - 1, j] := $1;
-      end;
+        buf[i, options.size - k - 1, j] := c
     end;
   end;
 

@@ -1,10 +1,10 @@
 object ExportWADMapForm: TExportWADMapForm
-  Left = 190
-  Top = 174
+  Left = 658
+  Top = 161
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
-  ClientHeight = 487
+  ClientHeight = 483
   ClientWidth = 681
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1052,7 +1052,7 @@ object ExportWADMapForm: TExportWADMapForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 446
+    Top = 442
     Width = 681
     Height = 41
     Align = alBottom
@@ -1094,27 +1094,10 @@ object ExportWADMapForm: TExportWADMapForm
     Left = 0
     Top = 0
     Width = 681
-    Height = 446
+    Height = 442
     Align = alClient
     Caption = ' '
     TabOrder = 1
-    object Label3: TLabel
-      Left = 16
-      Top = 16
-      Width = 22
-      Height = 13
-      Caption = 'File: '
-    end
-    object SelectFileButton: TSpeedButton
-      Left = 472
-      Top = 16
-      Width = 23
-      Height = 22
-      Hint = 'Select output WAD file'
-      Caption = '...'
-      Flat = True
-      OnClick = SelectFileButtonClick
-    end
     object Label1: TLabel
       Left = 24
       Top = 328
@@ -1171,7 +1154,7 @@ object ExportWADMapForm: TExportWADMapForm
         'DelphiDoom/RAD'
         'UDMF (GZDoom, K8Vavoom, etc)'
         'Hexen format (ZDoom, Vavoom)')
-      TabOrder = 1
+      TabOrder = 0
     end
     object OptionsGroupBox: TGroupBox
       Left = 240
@@ -1179,7 +1162,7 @@ object ExportWADMapForm: TExportWADMapForm
       Width = 185
       Height = 145
       Caption = ' Options '
-      TabOrder = 2
+      TabOrder = 1
       object DeformationsCheckBox: TCheckBox
         Left = 16
         Top = 16
@@ -1234,21 +1217,13 @@ object ExportWADMapForm: TExportWADMapForm
         OnClick = ExportFlatCheckBoxClick
       end
     end
-    object FileNameEdit: TEdit
-      Left = 56
-      Top = 16
-      Width = 417
-      Height = 21
-      TabOrder = 0
-      OnChange = FileNameEditChange
-    end
     object PreviewGroupBox: TGroupBox
       Left = 448
       Top = 56
       Width = 196
       Height = 369
       Caption = ' Preview '
-      TabOrder = 4
+      TabOrder = 3
       object Panel3: TPanel
         Left = 2
         Top = 15
@@ -1395,7 +1370,7 @@ object ExportWADMapForm: TExportWADMapForm
       Min = 384
       Frequency = 64
       Position = 512
-      TabOrder = 3
+      TabOrder = 2
       OnChange = CeilingHeightTrackBarChange
     end
     object GameRadioGroup: TRadioGroup
@@ -1411,7 +1386,7 @@ object ExportWADMapForm: TExportWADMapForm
         'Hexen'
         'Strife'
         'Radix')
-      TabOrder = 5
+      TabOrder = 4
     end
     object ElevationRadioGroup: TRadioGroup
       Left = 240
@@ -1425,7 +1400,7 @@ object ExportWADMapForm: TExportWADMapForm
         'Flat sectors'
         'Trace contour'
         'Minecraft')
-      TabOrder = 6
+      TabOrder = 5
       OnClick = ElevationRadioGroupClick
     end
     object LightLevalTrackBar: TTrackBar
@@ -1436,7 +1411,7 @@ object ExportWADMapForm: TExportWADMapForm
       Max = 255
       Frequency = 8
       Position = 192
-      TabOrder = 7
+      TabOrder = 6
       OnChange = LightLevalTrackBarChange
     end
     object LayerStepTrackBar: TTrackBar
@@ -1448,8 +1423,53 @@ object ExportWADMapForm: TExportWADMapForm
       Min = 16
       Frequency = 8
       Position = 24
-      TabOrder = 8
+      TabOrder = 7
       OnChange = LayerStepTrackBarChange
+    end
+    object Panel4: TPanel
+      Left = 1
+      Top = 1
+      Width = 679
+      Height = 41
+      Align = alTop
+      Caption = ' '
+      Color = 16579836
+      TabOrder = 8
+      TabStop = True
+      object Label3: TLabel
+        Left = 16
+        Top = 12
+        Width = 22
+        Height = 13
+        Caption = 'File: '
+        FocusControl = FileNameEdit
+      end
+      object SelectFileButton: TSpeedButton
+        Left = 472
+        Top = 11
+        Width = 23
+        Height = 22
+        Hint = 'Select output WAD file'
+        Caption = '...'
+        Flat = True
+        OnClick = SelectFileButtonClick
+      end
+      object Bevel2: TBevel
+        Left = 1
+        Top = 1
+        Width = 677
+        Height = 15
+        Align = alTop
+        Shape = bsTopLine
+      end
+      object FileNameEdit: TEdit
+        Left = 56
+        Top = 12
+        Width = 417
+        Height = 21
+        TabOrder = 0
+        OnChange = FileNameEditChange
+      end
     end
   end
   object SaveWADDialog: TSaveDialog

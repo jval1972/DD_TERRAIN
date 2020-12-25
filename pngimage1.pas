@@ -208,7 +208,7 @@ interface
 
 uses
  Windows {$IFDEF UseDelphi}, Classes, Graphics, SysUtils{$ENDIF},
- zlibpas, pnglang, ter_utils;
+ zlibpas, pnglang;
 
 const
   LibraryVersion = '1.564';

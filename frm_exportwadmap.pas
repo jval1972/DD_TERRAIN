@@ -47,9 +47,6 @@ type
     TrueColorFlatCheckBox: TCheckBox;
     MergeFlatSectorsCheckBox: TCheckBox;
     AddPlayerStartCheckBox: TCheckBox;
-    Label3: TLabel;
-    FileNameEdit: TEdit;
-    SelectFileButton: TSpeedButton;
     PreviewGroupBox: TGroupBox;
     Panel3: TPanel;
     PaintBox1: TPaintBox;
@@ -78,6 +75,11 @@ type
     StatSidedefsEdit1: TEdit;
     StatVertexesEdit1: TEdit;
     StatSectorsEdit1: TEdit;
+    Panel4: TPanel;
+    Label3: TLabel;
+    FileNameEdit: TEdit;
+    SelectFileButton: TSpeedButton;
+    Bevel2: TBevel;
     procedure SelectFileButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

@@ -35,8 +35,8 @@ uses
   Dialogs, xTGA, jpeg, zBitmap, ComCtrls, ExtCtrls, Buttons, Menus, FileCtrl,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1, ter_pk3, ter_colorpickerbutton,
-  ter_wadexport, xTIFF, ImgList;
-
+  ter_wadexport, ter_voxelexport, xTIFF, ImgList;
+                           
 type
   drawlayeritem_t = packed record
     pass: byte;
@@ -259,6 +259,7 @@ type
     N10: TMenuItem;
     MNExpoortTexture1: TMenuItem;
     SavePictureDialog3: TSavePictureDialog;
+    MNExportVoxel1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -348,6 +349,7 @@ type
     procedure ExportHeightmap1Click(Sender: TObject);
     procedure TextureScaleResetLabelDblClick(Sender: TObject);
     procedure MNExpoortTexture1Click(Sender: TObject);
+    procedure MNExportVoxel1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -357,7 +359,8 @@ type
     fpk3reader: TZipFile;
     fdirdirectory: string;
     fdirlist: TStringList;
-    fexportoptions: exportwadoptions_t;
+    fexportwadoptions: exportwadoptions_t;
+    fexportvoxeloptions: exportvoxeloptions_t;
     fdrawcolor: TColor;
     lpickcolormousedown: boolean;
     drawlayer: drawlayer_p;
@@ -459,7 +462,9 @@ uses
   frm_loadimagehelper,
   ter_colorpalettebmz,
   ter_cursors,
-  frm_exportwadmap;
+  frm_exportwadmap,
+  ter_voxels,
+  frm_exportvoxel;
 
 {$R *.dfm}
 
@@ -491,19 +496,23 @@ begin
 
   DoubleBuffered := True;
 
-  fexportoptions.engine := ENGINE_RAD;
-  fexportoptions.game := GAME_RADIX;
-  fexportoptions.levelname := 'E1M1';
-  fexportoptions.palette := @RadixPaletteRaw;
-  fexportoptions.defsidetex := 'RDXW0012';
-  fexportoptions.defceilingtex := 'F_SKY1';
-  fexportoptions.lowerid := 1255;
-  fexportoptions.raiseid := 1254;
-  fexportoptions.flags := ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
-  fexportoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
-  fexportoptions.defceilingheight := 512;
-  fexportoptions.deflightlevel := 192;
-  fexportoptions.layerstep := 24;
+  fexportwadoptions.engine := ENGINE_RAD;
+  fexportwadoptions.game := GAME_RADIX;
+  fexportwadoptions.levelname := 'E1M1';
+  fexportwadoptions.palette := @RadixPaletteRaw;
+  fexportwadoptions.defsidetex := 'RDXW0012';
+  fexportwadoptions.defceilingtex := 'F_SKY1';
+  fexportwadoptions.lowerid := 1255;
+  fexportwadoptions.raiseid := 1254;
+  fexportwadoptions.flags := ETF_CALCDXDY or ETF_TRUECOLORFLAT or ETF_MERGEFLATSECTORS or ETF_ADDPLAYERSTART or ETF_EXPORTFLAT;
+  fexportwadoptions.elevationmethod := ELEVATIONMETHOD_SLOPES;
+  fexportwadoptions.defceilingheight := 512;
+  fexportwadoptions.deflightlevel := 192;
+  fexportwadoptions.layerstep := 24;
+
+  fexportvoxeloptions.size := 256;
+  fexportvoxeloptions.minz := 0;
+  fexportvoxeloptions.maxz := 255;
 
   bitmapbuffer := TBitmap.Create;
   bitmapbuffer.PixelFormat := pf32bit;
@@ -2250,37 +2259,37 @@ var
   fs: TFileStream;
   ename: string;
 begin
-  if GetWADExportOptions(terrain, @fexportoptions, ename) then
+  if GetWADExportOptions(terrain, @fexportwadoptions, ename) then
   begin
     Screen.Cursor := crHourglass;
     try
       BackupFile(ename);
       fs := TFileStream.Create(ename, fmCreate);
-      case fexportoptions.engine of
+      case fexportwadoptions.engine of
         ENGINE_RAD:
-          if fexportoptions.game = GAME_HEXEN then
+          if fexportwadoptions.game = GAME_HEXEN then
             ExportTerrainToHexenFile(
               terrain,
               fs,
-              @fexportoptions
+              @fexportwadoptions
             )
           else
             ExportTerrainToWADFile(
               terrain,
               fs,
-              @fexportoptions
+              @fexportwadoptions
             );
         ENGINE_VAVOOM:
           ExportTerrainToHexenFile(
             terrain,
             fs,
-            @fexportoptions
+            @fexportwadoptions
           );
         ENGINE_UDMF:
           ExportTerrainToUDMFFile(
             terrain,
             fs,
-            @fexportoptions
+            @fexportwadoptions
           );
         end;
       fs.Free;
@@ -2921,6 +2930,31 @@ begin
       Screen.Cursor := crDefault;
     end;
   end;
+end;
+
+procedure TForm1.MNExportVoxel1Click(Sender: TObject);
+var
+  buf: voxelbuffer_p;
+  ename: string;
+begin
+  GetMem(buf, SizeOf(voxelbuffer_t));
+
+  if GetVoxelExportOptions(terrain, buf, @fexportvoxeloptions, ename) then
+  begin
+    Screen.Cursor := crHourglass;
+    try
+      ExportTerrainToVoxel(terrain, buf, @fexportvoxeloptions);
+      vox_shrinkyaxis(buf, fexportvoxeloptions.size, fexportvoxeloptions.minz, fexportvoxeloptions.maxz);
+      if UpperCase(ExtractFileExt(ename)) = '.VOX' then
+        VXE_ExportVoxelToSlab6VOX(buf, fexportvoxeloptions.size, ename)
+      else
+        VXE_ExportVoxelToDDVOX(buf, fexportvoxeloptions.size, ename);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
+
+  FreeMem(buf, SizeOf(voxelbuffer_t));
 end;
 
 end.

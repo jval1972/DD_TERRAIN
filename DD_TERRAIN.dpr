@@ -71,6 +71,7 @@ uses
   LibTiffDelphi in 'LibTiffDelphi.pas',
   ter_tmp in 'ter_tmp.pas',
   ter_voxels in 'ter_voxels.pas',
+  ter_voxelexport in 'ter_voxelexport.pas',
   frm_exportvoxel in 'frm_exportvoxel.pas' {ExportVoxelForm};
 
 {$R *.res}

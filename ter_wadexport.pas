@@ -122,43 +122,6 @@ uses
   ter_quantize,
   ter_contour;
 
-function V_FindAproxColorIndex(const pal: PLongWordArray; const c: LongWord;
-  const start: integer = 0; const finish: integer = 255): integer;
-var
-  r, g, b: integer;
-  rc, gc, bc: integer;
-  dr, dg, db: integer;
-  i: integer;
-  cc: LongWord;
-  dist: LongWord;
-  mindist: LongWord;
-begin
-  r := c and $FF;
-  g := (c shr 8) and $FF;
-  b := (c shr 16) and $FF;
-  result := start;
-  mindist := LongWord($ffffffff);
-  for i := start to finish do
-  begin
-    cc := pal[i];
-    rc := cc and $FF;
-    gc := (cc shr 8) and $FF;
-    bc := (cc shr 16) and $FF;
-    dr := r - rc;
-    dg := g - gc;
-    db := b - bc;
-    dist := dr * dr + dg * dg + db * db;
-    if dist < mindist then
-    begin
-      result := i;
-      if dist = 0 then
-        exit
-      else
-        mindist := dist;
-    end;
-  end;
-end;
-
 type
   TBooleanArray = packed array[0..$FFF] of boolean;
   PBooleanArray = ^TBooleanArray;
@@ -190,7 +153,7 @@ var
   wadwriter: TWadWriter;
   def_palL: array[0..255] of LongWord;
   scanline: PLongWordArray;
-  i, x, y: integer;
+  x, y: integer;
   c, r, g, b: LongWord;
   png: TPngObject;
   ms: TMemoryStream;
@@ -352,7 +315,7 @@ var
   wadwriter: TWadWriter;
   def_palL: array[0..255] of LongWord;
   scanline: PLongWordArray;
-  i, x, y: integer;
+  x, y: integer;
   c, r, g, b: LongWord;
   png: TPngObject;
   ms: TMemoryStream;

@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 17
-  Top = 43
+  Left = 43
+  Top = 40
   Width = 1037
   Height = 756
   Caption = 'Terrain Generator'
@@ -2745,7 +2745,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 405
-        ActivePage = TabSheet2
+        ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
         OnChange = TexturePageControlChange

@@ -34,11 +34,55 @@ uses
   Windows,
   ter_utils,
   SysUtils,
-  Graphics;
+  Graphics,
+  ter_voxels;
+
+function V_FindAproxColorIndex(const pal: PLongWordArray; const c: LongWord;
+  const start: integer = 0; const finish: integer = 255): integer;
 
 procedure ter_quantizebitmap(const bm: TBitmap; const numcolors: integer = 256);
 
+function vxe_getquantizevoxelpalette(const voxelbuffer: voxelbuffer_p; const voxelsize: Integer;
+  const pal: PLongWordArray; const numcolors: integer = 256): boolean;
+
 implementation
+
+function V_FindAproxColorIndex(const pal: PLongWordArray; const c: LongWord;
+  const start: integer = 0; const finish: integer = 255): integer;
+var
+  r, g, b: integer;
+  rc, gc, bc: integer;
+  dr, dg, db: integer;
+  i: integer;
+  cc: LongWord;
+  dist: LongWord;
+  mindist: LongWord;
+begin
+  r := c and $FF;
+  g := (c shr 8) and $FF;
+  b := (c shr 16) and $FF;
+  result := start;
+  mindist := LongWord($ffffffff);
+  for i := start to finish do
+  begin
+    cc := pal[i];
+    rc := cc and $FF;
+    gc := (cc shr 8) and $FF;
+    bc := (cc shr 16) and $FF;
+    dr := r - rc;
+    dg := g - gc;
+    db := b - bc;
+    dist := dr * dr + dg * dg + db * db;
+    if dist < mindist then
+    begin
+      result := i;
+      if dist = 0 then
+        exit
+      else
+        mindist := dist;
+    end;
+  end;
+end;
 
 // Color quantization algorithm from https://rosettacode.org
 type
@@ -436,6 +480,82 @@ begin
     end;
   end;
 
+  FreeMem(imgdata, imgsize * SizeOf(LongWord));
+end;
+
+function vxe_getquantizevoxelpalette(const voxelbuffer: voxelbuffer_p; const voxelsize: Integer;
+  const pal: PLongWordArray; const numcolors: integer = 256): boolean;
+var
+  i: integer;
+  x, y, z: integer;
+  c: LongWord;
+  colorlist256: TDNumberList;
+  imgsize: integer;
+  imgdata: PLongWordArray;
+begin
+  if numcolors > 256 then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  colorlist256 := TDNumberList.Create;
+
+  imgsize := 0;
+  for x := 0 to voxelsize - 1 do
+    for y := 0 to voxelsize - 1 do
+      for z := 0 to voxelsize - 1 do
+      begin
+        c := voxelbuffer[x, y, z];
+        if c <> 0 then
+        begin
+          inc(imgsize);
+          if colorlist256.Count <= numcolors + 1 then
+            if colorlist256.IndexOf(c) < 0 then
+              colorlist256.Add(c);
+        end;
+      end;
+
+  // All colors can be mapped
+  if colorlist256.Count <= numcolors then
+  begin
+    for i := 0 to colorlist256.Count - 1 do
+      pal[i] := colorlist256.Numbers[i];
+    colorlist256.Free;
+    Result := True;
+    Exit;
+  end;
+
+  colorlist256.Clear;
+
+  GetMem(imgdata, imgsize * SizeOf(LongWord));
+
+  imgsize := 0;
+  for x := 0 to voxelsize - 1 do
+    for y := 0 to voxelsize - 1 do
+      for z := 0 to voxelsize - 1 do
+      begin
+        c := voxelbuffer[x, y, z];
+        if c <> 0 then
+        begin
+          imgdata[imgsize] := c;
+          inc(imgsize);
+        end;
+      end;
+
+  color_quantize_list(imgdata, imgsize, numcolors, colorlist256, False);
+
+  // All colors can be mapped
+  if colorlist256.Count <= numcolors then
+  begin
+    for i := 0 to colorlist256.Count - 1 do
+      pal[i] := colorlist256.Numbers[i];
+    Result := True;
+  end
+  else
+    Result := False;
+
+  colorlist256.Free;
   FreeMem(imgdata, imgsize * SizeOf(LongWord));
 end;
 

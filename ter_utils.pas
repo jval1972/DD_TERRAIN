@@ -127,6 +127,10 @@ type
   TLongWordArray = array[0..$FFF] of LongWord;
   PLongWordArray = ^TLongWordArray;
 
+type
+  TByteArray = array[0..$FFF] of LongWord;
+  PByteArray = ^TByteArray;
+
 procedure SaveImageToDisk(const b: TBitmap; const imgfname: string);
 
 implementation

@@ -208,7 +208,7 @@ interface
 
 uses
  Windows {$IFDEF UseDelphi}, Classes, Graphics, SysUtils{$ENDIF},
- zlibpas, pnglang;
+ zlibpas, pnglang, ter_utils;
 
 const
   LibraryVersion = '1.564';
@@ -300,10 +300,6 @@ type
   TRGBPixel = packed record
     B, G, R: Byte;
   end;
-
-  {Pointer to an array of bytes type}
-  TByteArray = Array[Word] of Byte;
-  pByteArray = ^TByteArray;
 
   {Forward}
   TPNGObject = class;

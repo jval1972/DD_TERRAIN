@@ -69,7 +69,8 @@ uses
   LibDelphi in 'LibDelphi.pas',
   LibJpegDelphi in 'LibJpegDelphi.pas',
   LibTiffDelphi in 'LibTiffDelphi.pas',
-  ter_tmp in 'ter_tmp.pas';
+  ter_tmp in 'ter_tmp.pas',
+  ter_voxels in 'ter_voxels.pas';
 
 {$R *.res}
 

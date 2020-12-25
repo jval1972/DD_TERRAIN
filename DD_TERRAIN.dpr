@@ -70,7 +70,8 @@ uses
   LibJpegDelphi in 'LibJpegDelphi.pas',
   LibTiffDelphi in 'LibTiffDelphi.pas',
   ter_tmp in 'ter_tmp.pas',
-  ter_voxels in 'ter_voxels.pas';
+  ter_voxels in 'ter_voxels.pas',
+  frm_exportvoxel in 'frm_exportvoxel.pas' {ExportVoxelForm};
 
 {$R *.res}
 

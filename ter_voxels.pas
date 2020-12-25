@@ -47,6 +47,11 @@ type
 procedure vox_getviewbuffer(const buf: voxelbuffer_p; const size: integer;
   const outbuf: voxelbuffer2d_p; const vv: voxelview_t);
 
+procedure vox_shrinkyaxis(const buf: voxelbuffer_p; const size: integer;
+  const amin, amax: integer);
+
+procedure vox_removenonvisiblecells(const buf: voxelbuffer_p; const size: integer);
+
 procedure VXE_ExportVoxelToSlab6VOX(const voxelbuffer: voxelbuffer_p; const voxelsize: Integer;
   const fname: string);
 
@@ -175,6 +180,125 @@ begin
   end;
 end;
 
+procedure vox_shrinkyaxis(const buf: voxelbuffer_p; const size: integer;
+  const amin, amax: integer);
+var
+  bck: voxelbuffer_p;
+  mn, mx, tmp: integer;
+  x, y, y1, z: integer;
+  factor, mne: Extended;
+begin
+  if amin = 0 then
+    if amax = 255 then
+      Exit;
+
+  if amax = 0 then
+    if amin = 255 then
+      Exit;
+
+  GetMem(bck, MAXVOXELSIZE * MAXVOXELSIZE * size * SizeOf(voxelitem_t));
+  for x := 0 to size - 1 do
+    for y := 0 to size - 1 do
+      for z := 0 to size - 1 do
+        bck[x, y, z] := buf[x, y, z];
+
+  mn := amin;
+  mx := amax;
+
+  if mn < 0 then
+    mn := 0
+  else if mn > 255 then
+    mn := 255;
+
+  if mx < 0 then
+    mx := 0
+  else if mx > 255 then
+    mx := 255;
+
+  if mn > mx then
+  begin
+    tmp := mn;
+    mn := mx;
+    mx := tmp;
+  end;
+
+  for x := 0 to size - 1 do
+    for z := 0 to size - 1 do
+      for y := 0 to size - 1 do
+        buf[x, y, z] := 0;
+
+  factor := (mx - mn) / MAXVOXELSIZE;
+  if size = MAXVOXELSIZE then
+  begin
+    for x := 0 to size - 1 do
+      for z := 0 to size - 1 do
+        for y := 0 to size - 1 do
+        begin
+          y1 := Round(mn + y * factor);
+          if y1 < 0 then
+            y1 := 0
+          else if y1 >= MAXVOXELSIZE then
+            y1 := MAXVOXELSIZE;
+          if buf[x, y1, z] = 0 then
+            buf[x, y1, z] := bck[x, y, z];
+        end;
+  end
+  else
+  begin
+    mne := mn * size / MAXVOXELSIZE;
+    for x := 0 to size - 1 do
+      for z := 0 to size - 1 do
+        for y := 0 to size - 1 do
+        begin
+          y1 := Round(mne + y * factor);
+          if y1 < 0 then
+            y1 := 0
+          else if y1 >= size then
+            y1 := size;
+          if buf[x, y1, z] = 0 then
+            buf[x, y1, z] := bck[x, y, z];
+        end;
+  end;
+
+  FreeMem(bck, MAXVOXELSIZE * MAXVOXELSIZE * size * SizeOf(voxelitem_t));
+end;
+
+procedure vox_removenonvisiblecells(const buf: voxelbuffer_p; const size: integer);
+type
+  flags_t = array[0..MAXVOXELSIZE - 1, 0..MAXVOXELSIZE - 1, 0..MAXVOXELSIZE - 1] of boolean;
+  flags_p = ^flags_t;
+var
+  i, j, k: integer;
+  flags: flags_p;
+begin
+  GetMem(flags, SizeOf(flags_t));
+  FillChar(flags^, SizeOf(flags_t), Chr(0));
+
+  for i := 1 to size - 2 do
+  begin
+    for j := 1 to size - 2 do
+      for k := 1 to size - 2 do
+        if buf[i, j, k] <> 0 then
+          if buf[i - 1, j, k] <> 0 then
+            if buf[i + 1, j, k] <> 0 then
+              if buf[i, j - 1, k] <> 0 then
+                if buf[i, j + 1, k] <> 0 then
+                  if buf[i, j, k - 1] <> 0 then
+                    if buf[i, j, k + 1] <> 0 then
+                      flags^[i, j, k] := true;
+  end;
+
+  for i := 1 to size - 2 do
+  begin
+    for j := 1 to size - 2 do
+      for k := 1 to size - 2 do
+        if flags^[i, j, k] then
+          buf[i, j, k] := 0;
+  end;
+
+  FreeMem(flags, SizeOf(flags_t));
+end;
+
 procedure VXE_ExportVoxelToSlab6VOX(const voxelbuffer: voxelbuffer_p; const voxelsize: Integer;
   const fname: string);
 var
@@ -296,5 +420,5 @@ begin
   CloseFile(t);
 end;
 
-
 end.
+

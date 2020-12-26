@@ -103,6 +103,7 @@ begin
     f.FileNameEdit.Text := fname;
     f.TrackBar1.Position := options.minz;
     f.TrackBar2.Position := options.maxz;
+    f.SizeRadioGroup.ItemIndex := options.size shr 5;
 
     tmpoptions.size := 256;
     tmpoptions.minz := 0;
@@ -140,6 +141,7 @@ begin
       options.size := 256;
       options.minz := f.amin;
       options.maxz := f.amax;
+      options.size := 32 shl f.SizeRadioGroup.ItemIndex;
       fname := f.FileNameEdit.Text;
       Result := True;
     end;

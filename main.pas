@@ -183,75 +183,23 @@ type
     WADTabSheet1: TTabSheet;
     OpenWADMainPanel: TPanel;
     Panel3: TPanel;
-    Label23: TLabel;
-    SelectWADFileButton: TSpeedButton;
-    WADFileNameEdit: TEdit;
-    WADTextureListPanel: TPanel;
-    Panel5: TPanel;
-    Panel10: TPanel;
-    FlatsListBox: TListBox;
-    WADPreviewTexturePanel: TPanel;
-    Panel7: TPanel;
-    Panel8: TPanel;
-    Panel9: TPanel;
-    WADFlatPreviewImage: TImage;
-    PaletteSpeedButton1: TSpeedButton;
     Pk3TabSheet: TTabSheet;
     Panel12: TPanel;
     Panel13: TPanel;
-    Label5: TLabel;
-    SelectPK3FileButton: TSpeedButton;
-    PK3FileNameEdit: TEdit;
-    PK3TextureListPanel: TPanel;
-    Panel15: TPanel;
-    Panel16: TPanel;
-    PK3TexListBox: TListBox;
-    PK3PreviewTexturePanel: TPanel;
-    Panel18: TPanel;
-    Panel19: TPanel;
-    Panel20: TPanel;
-    PK3TexPreviewImage: TImage;
     OpenPK3Dialog: TOpenDialog;
-    Panel11: TPanel;
-    FlatSizeLabel: TLabel;
-    Panel21: TPanel;
-    PK3TexSizeLabel: TLabel;
     DirTabSheet: TTabSheet;
     Panel4: TPanel;
     Panel6: TPanel;
-    Label6: TLabel;
-    SelectDIRFileButton: TSpeedButton;
-    DIRFileNameEdit: TEdit;
-    DIRTextureListPanel: TPanel;
-    Panel14: TPanel;
-    Panel17: TPanel;
-    DIRTexListBox: TListBox;
-    DIRPreviewTexturePanel: TPanel;
-    Panel22: TPanel;
-    Panel23: TPanel;
-    Panel24: TPanel;
-    DIRTexPreviewImage: TImage;
-    Panel25: TPanel;
-    DIRTexSizeLabel: TLabel;
     Import1: TMenuItem;
     MNImportTexture1: TMenuItem;
     MNImportHeightmap1: TMenuItem;
     TextureScaleResetLabel: TLabel;
     TextureScalePaintBox: TPaintBox;
     TextureScaleLabel: TLabel;
-    WAADFlatNameLabel: TLabel;
-    PK3TextureNameLabel: TLabel;
-    DIRTextureNameLabel: TLabel;
     ImageList1: TImageList;
-    TabSheet2: TTabSheet;
+    ColorTabSheet: TTabSheet;
     SelectColorBackPanel: TPanel;
-    Panel26: TPanel;
-    Panel27: TPanel;
-    PickColorPalettePanel: TPanel;
     Panel29: TPanel;
-    ColorPanel1: TPanel;
-    ColorPaletteImage: TImage;
-    PickColorRGBLabel: TLabel;
     ExportHeightmap1: TMenuItem;
     SavePictureDialog2: TSavePictureDialog;
     ToolButton5: TToolButton;
@@ -260,6 +208,73 @@ type
     MNExpoortTexture1: TMenuItem;
     SavePictureDialog3: TSavePictureDialog;
     MNExportVoxel1: TMenuItem;
+    Panel5: TPanel;
+    WADPageControl1: TPageControl;
+    WADFlatsTabSheet: TTabSheet;
+    Panel7: TPanel;
+    WADFlatListPanel: TPanel;
+    Panel28: TPanel;
+    WADFlatsListBox: TListBox;
+    WADPreviewFlatPanel: TPanel;
+    Panel8: TPanel;
+    Panel9: TPanel;
+    Panel10: TPanel;
+    WADFlatPreviewImage: TImage;
+    Panel11: TPanel;
+    FlatSizeLabel: TLabel;
+    WAADFlatNameLabel: TLabel;
+    Panel30: TPanel;
+    PaletteSpeedButton1: TSpeedButton;
+    SelectWADFileButton: TSpeedButton;
+    WADFileNameEdit: TEdit;
+    Label23: TLabel;
+    Panel31: TPanel;
+    Label5: TLabel;
+    PK3FileNameEdit: TEdit;
+    SelectPK3FileButton: TSpeedButton;
+    Panel32: TPanel;
+    Label6: TLabel;
+    DIRFileNameEdit: TEdit;
+    SelectDIRFileButton: TSpeedButton;
+    Panel33: TPanel;
+    ColorPanel1: TPanel;
+    PickColorRGBLabel: TLabel;
+    Panel15: TPanel;
+    PK3PageControl: TPageControl;
+    PK3TexturesTabSheet: TTabSheet;
+    Panel16: TPanel;
+    PK3TextureListPanel: TPanel;
+    Panel34: TPanel;
+    PK3TexListBox: TListBox;
+    PK3PreviewTexturePanel: TPanel;
+    Panel18: TPanel;
+    Panel19: TPanel;
+    Panel20: TPanel;
+    PK3TexPreviewImage: TImage;
+    Panel21: TPanel;
+    PK3TexSizeLabel: TLabel;
+    PK3TextureNameLabel: TLabel;
+    Panel14: TPanel;
+    DirPageControl: TPageControl;
+    DirTexturesTabSheet: TTabSheet;
+    Panel17: TPanel;
+    DIRTextureListPanel: TPanel;
+    Panel36: TPanel;
+    DIRTexListBox: TListBox;
+    DIRPreviewTexturePanel: TPanel;
+    Panel22: TPanel;
+    Panel23: TPanel;
+    Panel24: TPanel;
+    DIRTexPreviewImage: TImage;
+    Panel25: TPanel;
+    DIRTexSizeLabel: TLabel;
+    DIRTextureNameLabel: TLabel;
+    Panel26: TPanel;
+    ColorPalettePageControl: TPageControl;
+    ColorPaletteTabSheet: TTabSheet;
+    Panel27: TPanel;
+    PickColorPalettePanel: TPanel;
+    ColorPaletteImage: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -297,7 +312,7 @@ type
     procedure ExportScreenshot1Click(Sender: TObject);
     procedure PaintBox1Paint(Sender: TObject);
     procedure SelectWADFileButtonClick(Sender: TObject);
-    procedure FlatsListBoxClick(Sender: TObject);
+    procedure WADFlatsListBoxClick(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure PaintBox1MouseUp(Sender: TObject; Button: TMouseButton;
@@ -418,8 +433,8 @@ type
     procedure TerrainToControls;
     procedure UpdateSliders;
     procedure UpdateFromSliders(Sender: TObject);
-    procedure PopulateFlatsListBox(const wadname: string);
     procedure BitmapToColorBuffer(const abitmap: TBitmap);
+    procedure PopulateFlatsListBox(const wadname: string);
     procedure NotifyFlatsListBox;
     function GetWADFlatAsBitmap(const fwad: string; const flat: string): TBitmap;
     procedure PopulatePK3ListBox(const pk3name: string);
@@ -486,6 +501,7 @@ var
   pfd: TPIXELFORMATDESCRIPTOR;
   pf: Integer;
   doCreate: boolean;
+  i: integer;
 begin
   Randomize;
 
@@ -495,6 +511,10 @@ begin
   colorbuffer := nil;
 
   DoubleBuffered := True;
+  for i := 0 to ComponentCount - 1 do
+    if Components[i].InheritsFrom(TWinControl) then
+      if not (Components[i] is TListBox) then
+        (Components[i] as TWinControl).DoubleBuffered := True;
 
   fexportwadoptions.engine := ENGINE_RAD;
   fexportwadoptions.game := GAME_RADIX;
@@ -1522,7 +1542,7 @@ begin
       drawx := drawx + hstep;
     end;
   end;
-  
+
   PaintBox1.Canvas.CopyRect(r, C, r);
 end;
 
@@ -1534,35 +1554,6 @@ begin
     WADFileNameEdit.Text := ExtractFileName(OpenWADDialog.FileName);
     PopulateFlatsListBox(fwadfilename);
   end;
-end;
-
-procedure TForm1.PopulateFlatsListBox(const wadname: string);
-var
-  wad: TWADReader;
-  i: integer;
-  inflats: boolean;
-  uEntry: string;
-begin
-  wad := TWADReader.Create;
-  wad.OpenWadFile(wadname);
-  inflats := False;
-  FlatsListBox.Items.Clear;
-  for i := 0 to wad.NumEntries - 1 do
-  begin
-    uEntry := UpperCase(wad.EntryName(i));
-    if (uEntry = 'F_START') or (uEntry = 'FF_START') then
-      inflats := True
-    else if (uEntry = 'F_END') or (uEntry = 'FF_END') then
-      inflats := False
-    else if inflats then
-      FlatsListBox.Items.Add(uEntry);
-  end;
-  wad.Free;
-  if FlatsListBox.Count > 0 then
-    FlatsListBox.ItemIndex := 0
-  else
-    FlatsListBox.ItemIndex := -1;
-  NotifyFlatsListBox;
 end;
 
 procedure TForm1.BitmapToColorBuffer(const abitmap: TBitmap);
@@ -1622,13 +1613,42 @@ begin
   end;
 end;
 
+procedure TForm1.PopulateFlatsListBox(const wadname: string);
+var
+  wad: TWADReader;
+  i: integer;
+  inflats: boolean;
+  uEntry: string;
+begin
+  wad := TWADReader.Create;
+  wad.OpenWadFile(wadname);
+  inflats := False;
+  WADFlatsListBox.Items.Clear;
+  for i := 0 to wad.NumEntries - 1 do
+  begin
+    uEntry := UpperCase(wad.EntryName(i));
+    if (uEntry = 'F_START') or (uEntry = 'FF_START') then
+      inflats := True
+    else if (uEntry = 'F_END') or (uEntry = 'FF_END') then
+      inflats := False
+    else if inflats then
+      WADFlatsListBox.Items.Add(uEntry);
+  end;
+  wad.Free;
+  if WADFlatsListBox.Count > 0 then
+    WADFlatsListBox.ItemIndex := 0
+  else
+    WADFlatsListBox.ItemIndex := -1;
+  NotifyFlatsListBox;
+end;
+
 procedure TForm1.NotifyFlatsListBox;
 var
   idx: integer;
   bm: TBitmap;
 begin
-  ChangeListHint(FlatsListBox, 'WAD Flats');
-  idx := FlatsListBox.ItemIndex;
+  ChangeListHint(WADFlatsListBox, 'WAD Flats');
+  idx := WADFlatsListBox.ItemIndex;
   if (idx < 0) or (fwadfilename = '') or not FileExists(fwadfilename) then
   begin
     WADFlatPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
@@ -1641,13 +1661,13 @@ begin
     exit;
   end;
 
-  bm := GetWADFlatAsBitmap(fwadfilename, FlatsListBox.Items[idx]);
+  bm := GetWADFlatAsBitmap(fwadfilename, WADFlatsListBox.Items[idx]);
 
   BitmapToColorBuffer(bm);
 
   colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
   WADFlatPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
-  WAADFlatNameLabel.Caption := FlatsListBox.Items[idx];
+  WAADFlatNameLabel.Caption := WADFlatsListBox.Items[idx];
   FlatSizeLabel.Caption := Format('(%dx%d)', [bm.Width, bm.Height]);
   bm.Free;
 end;
@@ -1752,7 +1772,7 @@ begin
 
   if lumpsize >= 2048 * 2048 then
     flatsize := 2048
-  if lumpsize >= 1024 * 1024 then
+  else if lumpsize >= 1024 * 1024 then
     flatsize := 1024
   else if lumpsize >= 512 * 512 then
     flatsize := 512
@@ -1782,7 +1802,7 @@ begin
   wad.Free;
 end;
 
-procedure TForm1.FlatsListBoxClick(Sender: TObject);
+procedure TForm1.WADFlatsListBoxClick(Sender: TObject);
 begin
   NotifyFlatsListBox;
 end;

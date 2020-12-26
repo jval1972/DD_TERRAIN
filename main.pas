@@ -275,6 +275,19 @@ type
     Panel27: TPanel;
     PickColorPalettePanel: TPanel;
     ColorPaletteImage: TImage;
+    WADPatchesTabSheet: TTabSheet;
+    Panel35: TPanel;
+    WADPatchListPanel: TPanel;
+    Panel37: TPanel;
+    WADPatchListBox: TListBox;
+    WADPreviewPatchPanel: TPanel;
+    Panel38: TPanel;
+    Panel39: TPanel;
+    Panel40: TPanel;
+    WADPatchPreviewImage: TImage;
+    Panel41: TPanel;
+    WADPatchSizeLabel: TLabel;
+    WADPatchNameLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -365,6 +378,7 @@ type
     procedure TextureScaleResetLabelDblClick(Sender: TObject);
     procedure MNExpoortTexture1Click(Sender: TObject);
     procedure MNExportVoxel1Click(Sender: TObject);
+    procedure WADPatchListBoxClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -437,6 +451,9 @@ type
     procedure PopulateFlatsListBox(const wadname: string);
     procedure NotifyFlatsListBox;
     function GetWADFlatAsBitmap(const fwad: string; const flat: string): TBitmap;
+    procedure PopulateWADPatchListBox(const wadname: string);
+    procedure NotifyWADPatchListBox;
+    function GetWADPatchAsBitmap(const fwad: string; const patch: string): TBitmap;
     procedure PopulatePK3ListBox(const pk3name: string);
     procedure NotifyPK3ListBox;
     function GetPK3TexAsBitmap(const tname: string): TBitmap;
@@ -479,7 +496,10 @@ uses
   ter_cursors,
   frm_exportwadmap,
   ter_voxels,
-  frm_exportvoxel;
+  frm_exportvoxel,
+  ter_doomdata,
+  ter_doomutils,
+  ter_wad;
 
 {$R *.dfm}
 
@@ -554,6 +574,7 @@ begin
   EditPageControl.ActivePageIndex := 0;
   TexturePageControl.ActivePageIndex := 0;
   MainPageControl.ActivePageIndex := 0;
+  WADPageControl1.ActivePageIndex := 0;
 
   GetMem(drawlayer, SizeOf(drawlayer_t));
   GetMem(heightlayer, SizeOf(heightlayer_t));
@@ -569,6 +590,7 @@ begin
   fwadfilename := bigstringtostring(@opt_lastwadfile);
   WADFileNameEdit.Text := ExtractFileName(fwadfilename);
   PopulateFlatsListBox(fwadfilename);
+  PopulateWADPatchListBox(fwadfilename);
 
   // Open PK3 resource
   fpk3filename := bigstringtostring(@opt_lastpk3file);
@@ -718,6 +740,7 @@ begin
   end;
 
   NotifyFlatsListBox; // This must be placed here to use the flats for drawing at startup.
+  NotifyWADPatchListBox;
 
   // when the app has spare time, render the GL scene
   Application.OnIdle := Idle;
@@ -1553,6 +1576,7 @@ begin
     fwadfilename := ExpandFilename(OpenWADDialog.FileName);
     WADFileNameEdit.Text := ExtractFileName(OpenWADDialog.FileName);
     PopulateFlatsListBox(fwadfilename);
+    PopulateWADPatchListBox(fwadfilename);
   end;
 end;
 
@@ -1805,6 +1829,278 @@ end;
 procedure TForm1.WADFlatsListBoxClick(Sender: TObject);
 begin
   NotifyFlatsListBox;
+end;
+
+procedure TForm1.PopulateWADPatchListBox(const wadname: string);
+var
+  wad: TWADReader;
+  i: integer;
+  inpatch: boolean;
+  uEntry: string;
+  pnames: Ppnames_t;
+  pnameslump: integer;
+  pnameslumpsize: integer;
+  lump: integer;
+begin
+  wad := TWADReader.Create;
+  wad.OpenWadFile(wadname);
+  inpatch := False;
+  WADPatchListBox.Items.Clear;
+  pnameslump := -1;
+  for i := 0 to wad.NumEntries - 1 do
+  begin
+    uEntry := UpperCase(wad.EntryName(i));
+    if uEntry = 'PNAMES' then
+      pnameslump := i
+    else if (uEntry = 'P_START') or (uEntry = 'PP_START') or (uEntry= 'TX_START') or (uEntry = 'HI_START') then
+      inpatch := True
+    else if (uEntry = 'P_END') or (uEntry = 'PP_END') or (uEntry= 'TX_END') or (uEntry = 'HI_END') then
+      inpatch := False
+    else if inpatch then
+      WADPatchListBox.Items.Add(uEntry);
+  end;
+  if pnameslump >= 0 then // get patches from PNAMES
+  begin
+    wad.ReadEntry(pnameslump, pointer(pnames), pnameslumpsize);
+    for i := 0 to pnames.numentries - 1 do
+    begin
+      uEntry := UpperCase(char8tostring(pnames.names[i]));
+      if WADPatchListBox.Items.IndexOf(uEntry) < 0 then
+      begin
+        lump := wad.EntryId(uEntry);
+        if lump >= 0 then
+          WADPatchListBox.Items.Add(uEntry);
+      end;
+    end;
+    FreeMem(pnames, pnameslumpsize);
+  end;
+  wad.Free;
+  if WADPatchListBox.Count > 0 then
+    WADPatchListBox.ItemIndex := 0
+  else
+    WADPatchListBox.ItemIndex := -1;
+  NotifyWADPatchListBox;
+end;
+
+procedure TForm1.NotifyWADPatchListBox;
+var
+  idx: integer;
+  bm: TBitmap;
+begin
+  ChangeListHint(WADPatchListBox, 'WAD Patches');
+  idx := WADPatchListBox.ItemIndex;
+  if (idx < 0) or (fwadfilename = '') or not FileExists(fwadfilename) then
+  begin
+    WADPatchPreviewImage.Picture.Bitmap.Canvas.Brush.Style := bsSolid;
+    WADPatchPreviewImage.Picture.Bitmap.Canvas.Brush.Color := RGB(255, 255, 255);
+    WADPatchPreviewImage.Picture.Bitmap.Canvas.FillRect(Rect(0, 0, 128, 128));
+    WADPatchNameLabel.Caption := '(None)';
+    WADPatchSizeLabel.Caption := Format('(%dx%d)', [128, 128]);
+    colorbuffersize := 128;
+    FillChar(colorbuffer^, SizeOf(colorbuffer_t), 255);
+    Exit;
+  end;
+
+  bm := GetWADPatchAsBitmap(fwadfilename, WADPatchListBox.Items[idx]);
+
+  BitmapToColorBuffer(bm);
+
+  colorbuffersize := MinI(bm.Height, MAXTEXTURESIZE);
+  WADPatchPreviewImage.Picture.Bitmap.Canvas.StretchDraw(Rect(0, 0, 128, 128), bm);
+  WADPatchNameLabel.Caption := WADPatchListBox.Items[idx];
+  WADPatchSizeLabel.Caption := Format('(%dx%d)', [bm.Width, bm.Height]);
+  bm.Free;
+end;
+
+function TForm1.GetWADPatchAsBitmap(const fwad: string; const patch: string): TBitmap;
+var
+  wad: TWADReader;
+  i, idx, palidx: integer;
+  inpatch: boolean;
+  wpal: PByteArray;
+  lpal: PLongWordArray;
+  palsize: integer;
+  lumpsize: integer;
+  flatsize: integer;
+  buf: PByteArray;
+  x, y: integer;
+  b: byte;
+  uEntry: string;
+  buildinrawpal: rawpalette_p;
+  jpg: TJpegImage;
+  png: TPNGObject;
+  m: TMemoryStream;
+begin
+  idx := -1;
+  palidx := -1;
+  wad := TWADReader.Create;
+  if (fwad <> '') and FileExists(fwad) then
+  begin
+    wad.OpenWadFile(fwad);
+    inpatch := False;
+    for i := 0 to wad.NumEntries - 1 do
+    begin
+      uEntry := UpperCase(wad.EntryName(i));
+      if (uEntry = 'PLAYPAL') or (uEntry = 'PALETTE') then
+        palidx := i
+      else if (uEntry = 'P_START') or (uEntry = 'PP_START') or (uEntry= 'TX_START') or (uEntry = 'HI_START') then
+        inpatch := True
+      else if (uEntry = 'P_END') or (uEntry = 'PP_END') or (uEntry= 'TX_END') or (uEntry = 'HI_END') then
+        inpatch := False
+      else if inpatch then
+      begin
+        if UpperCase(wad.EntryName(i)) = UpperCase(patch) then
+          idx := i;
+      end;
+    end;
+  end;
+
+  if idx < 0 then
+    idx := wad.EntryId(UpperCase(patch)); // Patch outsize namespace ??
+
+  if idx >= 0 then
+    lumpsize := wad.EntryInfo(idx).size
+  else
+    lumpsize := 0;
+
+  if lumpsize < 10 then
+  begin
+    Result := TBitmap.Create;
+    Result.Width := 64;
+    Result.Height := 64;
+    Result.Canvas.Brush.Style := bsSolid;
+    Result.Canvas.Brush.Color := RGB(255, 255, 255);
+    Result.Canvas.FillRect(Rect(0, 0, 64, 64));
+    wad.Free;
+    Exit;
+  end;
+
+  if fpalettename = spalDEFAULT then
+  begin
+    palsize := 0;
+    if (palidx >= 0) and (wad.EntryInfo(palidx).size >= 768) then
+      wad.ReadEntry(palidx, pointer(wpal), palsize);
+  end
+  else
+  begin
+    buildinrawpal := GetPaletteFromName(fpalettename);
+    if buildinrawpal <> nil then
+    begin
+      palsize := 768;
+      GetMem(wpal, palsize);
+      for i := 0 to 767 do
+        wpal[i] := buildinrawpal[i];
+    end
+    else
+      palsize := 0;
+  end;
+
+  if palsize = 0 then
+  begin
+    palsize := 768;
+    GetMem(wpal, palsize);
+    for i := 0 to 255 do
+    begin
+      wpal[3 * i] := i;
+      wpal[3 * i + 1] := i;
+      wpal[3 * i + 2] := i;
+    end;
+  end;
+
+  lumpsize := 0;
+  buf := nil;
+  wad.ReadEntry(idx, pointer(buf), lumpsize);
+
+  if lumpsize < 10 then
+  begin
+    lumpsize := 32 * 32;
+    ReallocMem(buf, lumpsize);
+    FillChar(buf^, lumpsize, 255);
+  end;
+
+  if (buf[1] = $50) and (buf[2] = $4E) and (buf[3] = $47) then // PNG
+  begin
+    m := TMemoryStream.Create;
+    try
+      m.Write(buf^, lumpsize);
+      m.Position := 0;
+      png := TPNGObject.Create;
+      png.LoadFromStream(m);
+      Result := TBitmap.Create;
+      Result.Assign(png);
+      png.Free;
+    finally
+      m.Free;
+    end;
+  end
+  else if (buf[6] = $4A) and (buf[7] = $46) and (buf[8] = $49) and (buf[9] = $46) then // JPEG
+  begin
+    m := TMemoryStream.Create;
+    try
+      m.Write(buf^, lumpsize);
+      m.Position := 0;
+      jpg := TJpegImage.Create;
+      jpg.LoadFromStream(m);
+      Result := TBitmap.Create;
+      Result.Assign(jpg);
+      jpg.Free;
+    finally
+      m.Free;
+    end;
+  end
+  else if IsValidWADPatchImage(buf, lumpsize) then // PATCH
+  begin
+    GetMem(lpal, 256 * SizeOf(LongWord));
+    for b := 0 to 255 do
+      lpal[b] := RGB(wpal[b * 3 + 2], wpal[b * 3 + 1], wpal[b * 3]);
+    Ppatch_t(buf).leftoffset := 0;  // Clear left offset
+    Ppatch_t(buf).topoffset := 0;   // Clear top offset
+    Result := DoomPatchToBitmap(buf, lumpsize, lpal);
+    FreeMem(lpal, 256 * SizeOf(LongWord));
+  end
+  else // Flat ?
+  begin
+    flatsize := 0;
+    if lumpsize = 2048 * 2048 then
+      flatsize := 2048
+    else if lumpsize = 1024 * 1024 then
+      flatsize := 1024
+    else if lumpsize = 512 * 512 then
+      flatsize := 512
+    else if lumpsize = 256 * 256 then
+      flatsize := 256
+    else if lumpsize = 128 * 128 then
+      flatsize := 128
+    else if lumpsize = 64 * 64 then
+      flatsize := 64;
+    if flatsize > 0 then
+    begin
+      Result := TBitmap.Create;
+      Result.Width := flatsize;
+      Result.Height := flatsize;
+      Result.PixelFormat := pf32bit;
+
+      for x := 0 to flatsize - 1 do
+        for y := 0 to flatsize - 1 do
+        begin
+          b := buf[(y * flatsize + x) mod lumpsize];
+          Result.Canvas.Pixels[x, y] := RGB(wpal[b * 3], wpal[b * 3 + 1], wpal[b * 3 + 2]);
+        end;
+    end
+    else
+    begin
+      Result := TBitmap.Create;
+      Result.Width := 64;
+      Result.Height := 64;
+      Result.Canvas.Brush.Style := bsSolid;
+      Result.Canvas.Brush.Color := RGB(255, 255, 255);
+      Result.Canvas.FillRect(Rect(0, 0, 64, 64));
+    end;
+  end;
+
+  FreeMem(buf, lumpsize);
+  FreeMem(wpal, 768);
+  wad.Free;
 end;
 
 procedure TForm1.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -2977,6 +3273,11 @@ begin
   end;
 
   FreeMem(buf, SizeOf(voxelbuffer_t));
+end;
+
+procedure TForm1.WADPatchListBoxClick(Sender: TObject);
+begin
+  NotifyWADPatchListBox;
 end;
 
 end.

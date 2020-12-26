@@ -30,13 +30,19 @@ unit ter_doomutils;
 
 interface
 
+uses
+  Graphics,
+  ter_utils;
+
 function IsValidWADPatchImage(const buf: pointer; const size: integer): boolean;
+
+function DoomPatchToBitmap(const buf: pointer; const size: integer;
+  const pal: PLongWordArray): TBitmap;
 
 implementation
 
 uses
-  ter_doomdata,
-  ter_utils;
+  ter_doomdata;
 
 function IsValidWADPatchImage(const buf: pointer; const size: integer): boolean;
 var
@@ -59,7 +65,8 @@ begin
   w := patch.width;
   h := patch.height;
 
-  if IsIntInRange(w, 0, 8192) and IsIntInRange(h, 0, 1024)  and (N = size) then
+  N := size;
+  if IsIntInRange(w, 0, 8192) and IsIntInRange(h, 0, 1024) then
   begin
     col := 0;
     desttop := 0;
@@ -128,6 +135,78 @@ begin
   end
   else
     Result := False;
+end;
+
+function DoomPatchToBitmap(const buf: pointer; const size: integer;
+  const pal: PLongWordArray): TBitmap;
+var
+  patch: Ppatch_t;
+  bm: TBitmap;
+  x, y: integer;
+  col, w: integer;
+  line: PLongWordArray;
+  tallpatch: boolean;
+  delta, prevdelta, count: integer;
+  column: Pcolumn_t;
+  source: PByte;
+begin
+  patch := buf;
+  bm := TBitmap.Create;
+  try
+    bm.Width := patch.height;
+    bm.Height := patch.width;
+    bm.PixelFormat := pf32bit;
+
+    x := -patch.leftoffset;
+    y := -patch.topoffset;
+
+    w := patch.width;
+
+    col := 0;
+
+    // Flipped draw bitmap
+    while col < w do
+    begin
+      if (col + x >= 0) and (col + x < bm.Height) then
+      begin
+        line := bm.ScanLine[col + x];
+        column := Pcolumn_t(integer(patch) + patch.columnofs[col]);
+        source := PByte(integer(column) + 3);
+        delta := 0;
+        tallpatch := false;
+        // step through the posts in a column
+        while column.topdelta <> $ff do
+        begin
+          delta := delta + column.topdelta;
+          count := column.length;
+          while count > 0 do
+          begin
+            dec(count);
+            if IsIntInRange(delta + count + y, 0, bm.Width - 1) then
+              line[delta + count + y] := pal[source^];
+            inc(source);
+          end;
+          if not tallpatch then
+          begin
+            prevdelta := column.topdelta;
+            column := Pcolumn_t(integer(column) + column.length + 4);
+            if column.topdelta > prevdelta then
+              delta := 0
+            else
+              tallpatch := true;
+          end
+          else
+            column := Pcolumn_t(integer(column) + column.length + 4);
+        end;
+      end;
+      inc(col);
+    end;
+
+    RotateBitmap90DegreesCounterClockwise(bm);
+
+  finally
+    Result := bm;
+  end;
 end;
 
 end.

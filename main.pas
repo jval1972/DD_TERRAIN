@@ -379,6 +379,7 @@ type
     procedure MNExpoortTexture1Click(Sender: TObject);
     procedure MNExportVoxel1Click(Sender: TObject);
     procedure WADPatchListBoxClick(Sender: TObject);
+    procedure WADPageControl1Change(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -741,8 +742,8 @@ begin
     undoManager.Clear;
   end;
 
-  NotifyFlatsListBox; // This must be placed here to use the flats for drawing at startup.
   NotifyWADPatchListBox;
+  NotifyFlatsListBox; // This must be placed here to use the flats for drawing at startup.
 
   // when the app has spare time, render the GL scene
   Application.OnIdle := Idle;
@@ -3098,8 +3099,10 @@ begin
   case TexturePageControl.ActivePageIndex of
   0:
     begin
-      NotifyFlatsListBox;
-      NotifyWADPatchListBox;
+      case WADPageControl1.ActivePageIndex of
+      0: NotifyFlatsListBox;
+      1: NotifyWADPatchListBox;
+      end;
     end;
   1: NotifyPK3ListBox;
   2: NotifyDIRListBox;
@@ -3305,6 +3308,14 @@ end;
 procedure TForm1.WADPatchListBoxClick(Sender: TObject);
 begin
   NotifyWADPatchListBox;
+end;
+
+procedure TForm1.WADPageControl1Change(Sender: TObject);
+begin
+  case WADPageControl1.ActivePageIndex of
+  0: NotifyFlatsListBox;
+  1: NotifyWADPatchListBox;
+  end;
 end;
 
 end.

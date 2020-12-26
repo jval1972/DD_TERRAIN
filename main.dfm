@@ -2745,7 +2745,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 405
-        ActivePage = DirTabSheet
+        ActivePage = WADTabSheet1
         Align = alClient
         TabOrder = 0
         OnChange = TexturePageControlChange
@@ -2871,6 +2871,7 @@ object Form1: TForm1
                 Align = alClient
                 Style = tsFlatButtons
                 TabOrder = 0
+                OnChange = WADPageControl1Change
                 object WADFlatsTabSheet: TTabSheet
                   Caption = 'Flats'
                   object Panel7: TPanel

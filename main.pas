@@ -1449,12 +1449,6 @@ var
   drawredpoints: boolean;
   drawheightmap: boolean;
 
-  procedure lineandpoint(const ax, ay: integer);
-  begin
-    C.LineTo(ax, ay);
-    if drawredpoints then
-  end;
-
   function hcolor: LongWord;
   var
     g: integer;
@@ -1492,15 +1486,11 @@ begin
             hy := drawy + hitem.dy;
             for k := -hstep div 2 to hstep + 2 do
             begin
-//              if (hy + k) mod 8 = 4 then
-//              if (hy + k) mod 4 <> 2 then
               if (hy + k) mod 2 <> 1 then
               begin
                 C.MoveTo(hx - hstep div 2, hy + k);
                 C.LineTo(hx + hstep div 2, hy + k);
               end;
-//              if (hx + k) mod 8 = 4 then
-//              if (hx + k) mod 4 <> 2 then
               if (hx + k) mod 2 <> 1 then
               begin
                 C.MoveTo(hx + k, hy - hstep div 2);
@@ -1720,6 +1710,7 @@ var
   b: byte;
   uEntry: string;
   buildinrawpal: rawpalette_p;
+  line: PLongWordarray;
 begin
   idx := -1;
   palidx := -1;
@@ -1824,15 +1815,18 @@ begin
   Result.Height := flatsize;
   Result.PixelFormat := pf32bit;
 
-  for x := 0 to flatsize - 1 do
-    for y := 0 to flatsize - 1 do
+  for y := 0 to flatsize - 1 do
+  begin
+    line := Result.ScanLine[y];
+    for x := 0 to flatsize - 1 do
     begin
       b := buf[(y * flatsize + x) mod lumpsize];
-      Result.Canvas.Pixels[x, y] := RGB(wpal[b * 3], wpal[b * 3 + 1], wpal[b * 3 + 2]);
+      line[x] := RGB(wpal[b * 3 + 2], wpal[b * 3 + 1], wpal[b * 3]);
     end;
+  end;
 
   FreeMem(buf, flatsize * flatsize);
-  FreeMem(wpal, 768);
+  FreeMem(wpal, palsize);
   wad.Free;
 end;
 
@@ -1940,6 +1934,7 @@ var
   jpg: TJpegImage;
   png: TPNGObject;
   m: TMemoryStream;
+  line: PLongWordArray;
 begin
   idx := -1;
   palidx := -1;
@@ -2090,12 +2085,16 @@ begin
       Result.Height := flatsize;
       Result.PixelFormat := pf32bit;
 
-      for x := 0 to flatsize - 1 do
-        for y := 0 to flatsize - 1 do
+      for y := 0 to flatsize - 1 do
+      begin
+        line := Result.ScanLine[y];
+        for x := 0 to flatsize - 1 do
         begin
           b := buf[(y * flatsize + x) mod lumpsize];
-          Result.Canvas.Pixels[x, y] := RGB(wpal[b * 3], wpal[b * 3 + 1], wpal[b * 3 + 2]);
+          line[x] := RGB(wpal[b * 3 + 2], wpal[b * 3 + 1], wpal[b * 3]);
         end;
+      end;
+
     end
     else
     begin
@@ -2109,7 +2108,7 @@ begin
   end;
 
   FreeMem(buf, lumpsize);
-  FreeMem(wpal, 768);
+  FreeMem(wpal, palsize);
   wad.Free;
 end;
 
@@ -2218,6 +2217,7 @@ var
   newopacity: integer;
   hchanged: boolean;
   hitem: heightbufferitem_t;
+  ypos: integer;
 begin
   tsize := terrain.texturesize;
   iX1 := GetIntInRange(X - fpensize div 2, 0, tsize - 1);
@@ -2226,17 +2226,18 @@ begin
   iY2 := GetIntInRange(Y + fpensize div 2, 0, tsize - 1);
 
   ftexturescale := GetIntInRange(ftexturescale, MINTEXTURESCALE, MAXTEXTURESCALE);
-  
+
   if PenSpeedButton1.Down then
   begin
     for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
+      ypos := Round(iY / ftexturescale * 100) mod colorbuffersize;
       for iX := iX1 to iX2 do
         if drawlayer[iX, iY].pass < fopacity then
         begin
           drawlayer[iX, iY].pass := fopacity;
-          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, ypos];
           c2 := RGBSwap(tline[iX]);
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
@@ -2250,6 +2251,7 @@ begin
     for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
+      ypos := Round(iY / ftexturescale * 100) mod colorbuffersize;
       for iX := iX1 to iX2 do
       begin
         newopacity := pen2mask[iX - X, iY - Y];
@@ -2261,7 +2263,7 @@ begin
             c2 := drawlayer[iX, iY].color;
           drawlayer[iX, iY].color := c2;
           drawlayer[iX, iY].pass := newopacity;
-          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, ypos];
           c := coloraverage(c2, c1, fopacity);
           tline[iX] := RGBSwap(c);
         end;
@@ -2275,6 +2277,7 @@ begin
     for iY := iY1 to iY2 do
     begin
       tline := terrain.Texture.ScanLine[iY];
+      ypos := Round(iY / ftexturescale * 100) mod colorbuffersize;
       for iX := iX1 to iX2 do
       begin
         newopacity := pen3mask[iX - X, iY - Y];
@@ -2286,7 +2289,7 @@ begin
             c2 := drawlayer[iX, iY].color;
           drawlayer[iX, iY].color := c2;
           drawlayer[iX, iY].pass := newopacity;
-          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, Round(iY / ftexturescale * 100) mod colorbuffersize];
+          c1 := colorbuffer[Round(iX / ftexturescale * 100) mod colorbuffersize, ypos];
           c := coloraverage(c2, c1, newopacity);
           tline[iX] := RGBSwap(c);
         end;

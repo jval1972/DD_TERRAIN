@@ -2261,7 +2261,7 @@ object ExportVoxelForm: TExportVoxelForm
   end
   object SaveVoxelDialog: TSaveDialog
     DefaultExt = 'ddvox'
-    Filter = 'DD_VOXEL files (*.ddvox)|*.ddvox|Slab6(*.vox)|*.vox'
+    Filter = 'DelphiDOOM Voxel (*.ddvox)|*.ddvox|Slab6 voxel (*.vox)|*.vox'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 433
     Top = 48

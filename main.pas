@@ -1750,6 +1750,8 @@ begin
     FillChar(buf^, lumpsize, 255);
   end;
 
+  if lumpsize >= 2048 * 2048 then
+    flatsize := 2048
   if lumpsize >= 1024 * 1024 then
     flatsize := 1024
   else if lumpsize >= 512 * 512 then

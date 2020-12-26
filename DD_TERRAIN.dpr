@@ -72,7 +72,8 @@ uses
   ter_tmp in 'ter_tmp.pas',
   ter_voxels in 'ter_voxels.pas',
   ter_voxelexport in 'ter_voxelexport.pas',
-  frm_exportvoxel in 'frm_exportvoxel.pas' {ExportVoxelForm};
+  frm_exportvoxel in 'frm_exportvoxel.pas' {ExportVoxelForm},
+  ter_doomutils in 'ter_doomutils.pas';
 
 {$R *.res}
 

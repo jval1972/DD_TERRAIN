@@ -3274,6 +3274,8 @@ procedure TForm1.MNExportVoxel1Click(Sender: TObject);
 var
   buf: voxelbuffer_p;
   ename: string;
+  voxoptions: exportvoxeloptions_t;
+  vox_typ: string;
 begin
   GetMem(buf, SizeOf(voxelbuffer_t));
 
@@ -3281,12 +3283,17 @@ begin
   begin
     Screen.Cursor := crHourglass;
     try
-      ExportTerrainToVoxel(terrain, buf, @fexportvoxeloptions);
-      vox_shrinkyaxis(buf, fexportvoxeloptions.size, fexportvoxeloptions.minz, fexportvoxeloptions.maxz);
-      if UpperCase(ExtractFileExt(ename)) = '.VOX' then
-        VXE_ExportVoxelToSlab6VOX(buf, fexportvoxeloptions.size, ename)
+      voxoptions := fexportvoxeloptions;
+      vox_typ := UpperCase(ExtractFileExt(ename));
+      if vox_typ = '.VOX' then // Special case: we can not have vox files 256x256x256
+        if voxoptions.size = 256 then
+          voxoptions.size := 255;
+      ExportTerrainToVoxel(terrain, buf, @voxoptions);
+      vox_shrinkyaxis(buf, voxoptions.size, voxoptions.minz, voxoptions.maxz);
+      if vox_typ = '.VOX' then
+        VXE_ExportVoxelToSlab6VOX(buf, voxoptions.size, ename)
       else
-        VXE_ExportVoxelToDDVOX(buf, fexportvoxeloptions.size, ename);
+        VXE_ExportVoxelToDDVOX(buf, voxoptions.size, ename);
     finally
       Screen.Cursor := crDefault;
     end;

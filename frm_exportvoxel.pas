@@ -42,14 +42,11 @@ type
     OKButton1: TButton;
     CancelButton1: TButton;
     MainPanel: TPanel;
-    GroupBox1: TGroupBox;
+    ConstrainsGroupBox: TGroupBox;
     TrackBar1: TTrackBar;
     TrackBar2: TTrackBar;
-    GroupBox2: TGroupBox;
+    PreviewGroupBox: TGroupBox;
     Image1: TImage;
-    Panel3: TPanel;
-    Label1: TLabel;
-    Label2: TLabel;
     Panel1: TPanel;
     Bevel2: TBevel;
     Label3: TLabel;
@@ -57,6 +54,8 @@ type
     SelectFileButton: TSpeedButton;
     SaveVoxelDialog: TSaveDialog;
     SizeRadioGroup: TRadioGroup;
+    Label1: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure TrackBarChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

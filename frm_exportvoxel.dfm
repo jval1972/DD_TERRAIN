@@ -3,8 +3,8 @@ object ExportVoxelForm: TExportVoxelForm
   Top = 159
   BorderStyle = bsDialog
   Caption = 'Export Voxel'
-  ClientHeight = 481
-  ClientWidth = 630
+  ClientHeight = 427
+  ClientWidth = 734
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -1052,14 +1052,14 @@ object ExportVoxelForm: TExportVoxelForm
   TextHeight = 13
   object BottomPanel: TPanel
     Left = 0
-    Top = 440
-    Width = 630
+    Top = 386
+    Width = 734
     Height = 41
     Align = alBottom
     Caption = ' '
     TabOrder = 0
     object ButtonPanel: TPanel
-      Left = 357
+      Left = 461
       Top = 1
       Width = 272
       Height = 39
@@ -1093,18 +1093,32 @@ object ExportVoxelForm: TExportVoxelForm
   object MainPanel: TPanel
     Left = 0
     Top = 0
-    Width = 630
-    Height = 440
+    Width = 734
+    Height = 386
     Align = alClient
     Caption = ' '
     TabOrder = 1
-    object GroupBox1: TGroupBox
+    object ConstrainsGroupBox: TGroupBox
       Left = 144
-      Top = 104
-      Width = 129
+      Top = 64
+      Width = 249
       Height = 305
       Caption = ' Constrains '
-      TabOrder = 0
+      TabOrder = 1
+      object Label1: TLabel
+        Left = 112
+        Top = 24
+        Width = 25
+        Height = 13
+        Caption = 'Top: '
+      end
+      object Label2: TLabel
+        Left = 112
+        Top = 256
+        Width = 39
+        Height = 13
+        Caption = 'Bottom: '
+      end
       object TrackBar1: TTrackBar
         Left = 16
         Top = 16
@@ -1131,13 +1145,13 @@ object ExportVoxelForm: TExportVoxelForm
         OnChange = TrackBarChange
       end
     end
-    object GroupBox2: TGroupBox
-      Left = 296
-      Top = 104
+    object PreviewGroupBox: TGroupBox
+      Left = 408
+      Top = 64
       Width = 305
       Height = 305
       Caption = ' Preview '
-      TabOrder = 1
+      TabOrder = 2
       object Image1: TImage
         Left = 25
         Top = 25
@@ -2175,35 +2189,10 @@ object ExportVoxelForm: TExportVoxelForm
           0000}
       end
     end
-    object Panel3: TPanel
-      Left = 1
-      Top = 42
-      Width = 628
-      Height = 41
-      Align = alTop
-      Caption = ' '
-      Color = 16579836
-      TabOrder = 2
-      TabStop = True
-      object Label1: TLabel
-        Left = 136
-        Top = 16
-        Width = 25
-        Height = 13
-        Caption = 'Top: '
-      end
-      object Label2: TLabel
-        Left = 224
-        Top = 16
-        Width = 39
-        Height = 13
-        Caption = 'Bottom: '
-      end
-    end
     object Panel1: TPanel
       Left = 1
       Top = 1
-      Width = 628
+      Width = 732
       Height = 41
       Align = alTop
       Caption = ' '
@@ -2213,7 +2202,7 @@ object ExportVoxelForm: TExportVoxelForm
       object Bevel2: TBevel
         Left = 1
         Top = 1
-        Width = 626
+        Width = 730
         Height = 15
         Align = alTop
         Shape = bsTopLine
@@ -2246,8 +2235,8 @@ object ExportVoxelForm: TExportVoxelForm
       end
     end
     object SizeRadioGroup: TRadioGroup
-      Left = 16
-      Top = 104
+      Left = 24
+      Top = 64
       Width = 105
       Height = 145
       Caption = ' Size '
@@ -2256,7 +2245,7 @@ object ExportVoxelForm: TExportVoxelForm
         '64x64x64'
         '128x128x128'
         '256x256x256')
-      TabOrder = 4
+      TabOrder = 0
     end
   end
   object SaveVoxelDialog: TSaveDialog

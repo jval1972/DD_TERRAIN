@@ -1,0 +1,125 @@
+<h1>Terrain Generator</h1>
+
+<p><img src="img/logo.png"></p>
+ <p>Terrain Generator is a simple terrain/elevation editor. 
+ It can generate terrains that can be saved as:</p>
+ <ul>
+ <li>Doom levels (UDMF format) for advanced source ports as GZDoom, K8Vavoom etc</li>
+ <li><a href="https://www.doomworld.com/forum/topic/114297-rad-source-port-of-radix-beyond-the-void-using-id-tech1/">RAD</a> levels in Doom format </li>
+ </ul>
+ 
+<p>
+	<b>Project Page:</b> <a href="https://sourceforge.net/projects/dd-terrain/">https://sourceforge.net/projects/dd-terrain/</a></br>
+	<b>Source Code Repository:</b> <a href="https://github.com/jval1972/DD_TERRAIN">https://github.com/jval1972/DD_TERRAIN</a></br>
+</p>
+ <hr>
+ 
+ <h1>Main Application Window</h1>
+ 
+<p><img src="img/mainwindow.jpg"></p></br>
+The main application consists of the drawing and editing tools, the texture manager, the 2d preview and the 3d preview.
+
+ <hr>
+ <h2>Drawing Tools</h2>
+The drawing tools are used for painting directly to the terrain texture. <br>
+There are 3 drawing tools:
+<p><img src="img/tools1.jpg"></p>
+<ul>
+<li><b>rectangle: </b>Draws rectangular shape</li>
+<li><b>circle: </b>Draws round shape</li>
+<li><b>round edge: </b>Draws round shape with smooth edge</li>
+</ul>
+The drawing tools can be configured by the Drawing Options:
+<p><img src="img/tools1options.jpg"></p>
+<ul>
+<li><b>Size: </b>The size of the shape</li>
+<li><b>Opacity: </b>The drawing opacity percentage (from 1 to 100)</li>
+<li><b>Scale: </b>The drawing source scale (from 10% to 400%)</li>
+</ul>
+ 
+ <hr>
+ <h2>Mesh Tools</h2>
+The mesh tools are used for altering the terrain geometry. <br>
+There are 3 mesh tools:
+<p><img src="img/tools2.jpg"></p>
+<ul>
+<li><b>edit mesh: </b>Changes the position grid vertexes</li>
+<li><b>elevation: </b>Changes the elevation of the terrain</li>
+<li><b>smooth: </b>Smoothes the elevation of the terrain</li>
+</ul>
+The mesh tools can be configured by the following options:
+<p><img src="img/tools2options.jpg"></p>
+<ul>
+<li><b>Height: </b>The amount of elevation that the elevation tool applies</li>
+<li><b>Smooth: </b>The strength of smoothness that the smooth tool applies</li>
+</ul>
+
+By pressing the <b>right mouse button</b> over the 2d preview of the terrain the "Edit Heightmap Item" dialog appears:
+<p><img src="img/editpoint.jpg"></p>
+In this dialog you can manually set the elevation and x/y offsets of a vertex.<br>
+There are the following options:
+<ul>
+<li><b>Height: </b>The amount of elevation of the vertex</li>
+<li><b>DX/DY: </b>Horizontal plane offsets to make ﻿﻿accurate deformations to geometry, not limited by automatic grid spacing </li>
+</ul>
+
+ <hr>
+
+  <h2>Texture Manager</h2>
+The texture manager allows you to load texture from various sources.<br>
+The selection is used by the drawing tools.
+<p><img src="img/tex1.jpg"></p>
+There are 4 tabs:
+<ul>
+<li><b>WAD file: </b>Loads flats from a WAD file</li>
+<li><b>PK3 file: </b>Loads textures from a PK3 archive. PNG and JPG images are supported</li>
+<li><b>Directory: </b>Loads textures from a directory in your hard drive. PNG, JPG, TGA and BMP images are supported</li>
+<li><b>Color: </b>Plain color </li>
+</ul>
+
+<hr>
+ <h2>2D Preview</h2>
+This is where all the editing is performed with the drawing and mesh tools. <br>
+<p><img src="img/2d.jpg"></p>
+
+<hr>
+ <h2>3D Preview</h2>
+This is where we can observe our efforts.<br>
+We can change the camera position by clicking the left or right mouse button, or by scrolling the middle mouse button.
+<p><img src="img/3d.jpg"></p>
+
+<hr>
+ <h1>Creating a New Terrain</h1>
+ You can create a new terrain by selecting the File/New menu item: 
+<p><img src="img/new1.jpg"></p>
+ Then the "New Terrain" dialog appears:
+<p><img src="img/new2.jpg"></p>
+In this dialog we can select the properties of the terrain:
+<ul>
+<li><b>Texture Size: </b>The actual size of the terrain. This is the drawing surface and can have sizes from 256x256 to 2048x2048 pixels</li>
+<li><b>Heightmap Size: </b>This control the number of vertexes. It's size can be from 5x5 to 65x65</li>
+</ul>
+
+ 
+<hr>
+ <h1>Import and Export</h1>
+Terrains generated with <b>Terrain Generator</b> are saved in a custom format. In order to share data between diffent applications we use the import and export menu items.<br>
+<hr>
+ <h2>Import</h2>
+<p><img src="img/import1.jpg"></p>
+<ul>
+<li><b>Terrain texture: </b>Loads the terrain texture from an image on disk. The image will be stretched to fit the terrain dimentions</li>
+<li><b>Heightmap: </b>Loads the heightmap from an image on disk. The image will be stretched to fit the heighmap size. The image will be converted to grayscale and each pixel will represent the elevation of the terrain</li>
+</ul>
+
+<hr>
+ <h2>Export</h2>
+<p><img src="img/export1.jpg"></p>
+<ul>
+<li><b>Screenshot (3d View): </b>Saves the current 3D view of the terrain on an image on disk.</li>
+<li><b>Radix WAD Map: </b>Saves the terrain in a WAD file that can be used with RAD source port of Radix: Beyond the Void</li>
+<li><b>UDMF Map: </b>Saves the terrain in a UDMF file that can be used with advanced source ports</li>
+</ul>
+
+The exported maps can be edited with DoomBuilder: 
+<p><img src="img/doombuilder1.jpg"></p>

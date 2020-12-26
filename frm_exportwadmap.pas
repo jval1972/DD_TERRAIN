@@ -399,8 +399,18 @@ begin
 end;
 
 procedure TExportWADMapForm.FileNameEditChange(Sender: TObject);
+var
+  uName, uExt: string;
+  e: boolean;
 begin
-  OKButton1.Enabled := Trim(FileNameEdit.Text) <> '';
+  uName := Trim(FileNameEdit.Text);
+  e := uName <> '';
+  if e then
+  begin
+    uExt := UpperCase(ExtractFileExt(uName));
+    e := uExt = '.WAD';
+  end;
+  OKButton1.Enabled := e;
 end;
 
 procedure TExportWADMapForm.ExportFlatCheckBoxClick(Sender: TObject);

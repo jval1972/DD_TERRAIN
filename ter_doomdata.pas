@@ -236,6 +236,16 @@ type
   column_t = post_t;
   Pcolumn_t = ^column_t;
 
+  patch_t = packed record
+    width: smallint; // bounding box size
+    height: smallint;
+    leftoffset: smallint; // pixels to the left of origin
+    topoffset: smallint;  // pixels below the origin
+    columnofs: array[0..7] of integer; // only [width] used
+    // the [0] is &columnofs[width]
+  end;
+  Ppatch_t = ^patch_t;
+
 implementation
 
 end.

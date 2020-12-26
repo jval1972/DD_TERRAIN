@@ -262,8 +262,18 @@ begin
 end;
 
 procedure TExportVoxelForm.FileNameEditChange(Sender: TObject);
+var
+  uName, uExt: string;
+  e: boolean;
 begin
-  OKButton1.Enabled := Trim(FileNameEdit.Text) <> '';
+  uName := Trim(FileNameEdit.Text);
+  e := uName <> '';
+  if e then
+  begin
+    uExt := UpperCase(ExtractFileExt(uName));
+    e := (uExt = '.DDVOX') or (uExt = '.VOX');
+  end;
+  OKButton1.Enabled := e;
 end;
 
 procedure TExportVoxelForm.SelectFileButtonClick(Sender: TObject);

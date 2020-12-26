@@ -10039,9 +10039,13 @@ object Form1: TForm1
     end
     object Help1: TMenuItem
       Caption = '&Help'
+      object Onlinedocumentation1: TMenuItem
+        Caption = 'Online documentation'
+        ShortCut = 112
+        OnClick = Onlinedocumentation1Click
+      end
       object About1: TMenuItem
         Caption = '&About'
-        ShortCut = 112
         OnClick = AboutButton1Click
       end
     end

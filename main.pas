@@ -288,6 +288,7 @@ type
     Panel41: TPanel;
     WADPatchSizeLabel: TLabel;
     WADPatchNameLabel: TLabel;
+    Onlinedocumentation1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -380,6 +381,7 @@ type
     procedure MNExportVoxel1Click(Sender: TObject);
     procedure WADPatchListBoxClick(Sender: TObject);
     procedure WADPageControl1Change(Sender: TObject);
+    procedure Onlinedocumentation1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -3319,6 +3321,11 @@ begin
   0: NotifyFlatsListBox;
   1: NotifyWADPatchListBox;
   end;
+end;
+
+procedure TForm1.Onlinedocumentation1Click(Sender: TObject);
+begin
+  I_GoToWebPage('https://dd-terrain.sourceforge.io');
 end;
 
 end.

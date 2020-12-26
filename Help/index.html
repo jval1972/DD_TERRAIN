@@ -2,13 +2,14 @@
 
 <p><img src="img/logo.png"></p>
  <p>Terrain Generator is a simple terrain/elevation editor. 
- It can generate terrains that can be saved as:</p>
+ It can generate terrains that can be exported as:</p>
  <ul>
- <li>Doom levels (UDMF format) for advanced source ports as GZDoom, K8Vavoom etc</li>
- <li><a href="https://www.doomworld.com/forum/topic/114297-rad-source-port-of-radix-beyond-the-void-using-id-tech1/">RAD</a> levels in Doom format </li>
+ <li>Doom levels for advanced source ports as GZDoom, ZDoom, K8Vavoom, Vavoom, <a href="https://sourceforge.net/projects/delphidoom/">DelphiDoom</a>, <a href="https://sourceforge.net/p/rad-x/">RAD</a> etc</li>
+ <li>Voxels</li>
  </ul>
  
 <p>
+	<b>Download latest version</b> <a href="https://sourceforge.net/projects/dd-terrain/files/latest/download">https://sourceforge.net/projects/dd-terrain/files/latest/download</a></br>
 	<b>Project Page:</b> <a href="https://sourceforge.net/projects/dd-terrain/">https://sourceforge.net/projects/dd-terrain/</a></br>
 	<b>Source Code Repository:</b> <a href="https://github.com/jval1972/DD_TERRAIN">https://github.com/jval1972/DD_TERRAIN</a></br>
 </p>
@@ -71,7 +72,7 @@ The selection is used by the drawing tools.
 <p><img src="img/tex1.jpg"></p>
 There are 4 tabs:
 <ul>
-<li><b>WAD file: </b>Loads flats from a WAD file</li>
+<li><b>WAD file: </b>Loads flats and patches from a WAD file. It will detect and display PNG & JPG images</li>
 <li><b>PK3 file: </b>Loads textures from a PK3 archive. PNG and JPG images are supported</li>
 <li><b>Directory: </b>Loads textures from a directory in your hard drive. PNG, JPG, TGA and BMP images are supported</li>
 <li><b>Color: </b>Plain color </li>
@@ -116,10 +117,62 @@ Terrains generated with <b>Terrain Generator</b> are saved in a custom format. I
  <h2>Export</h2>
 <p><img src="img/export1.jpg"></p>
 <ul>
+<li><b>WAD Map: </b>Opens the Export WAD Map dialog with many options to configure WAD export.</li>
+<li><b>Voxel: </b>Opens the Export Voxel dialog with many options to configure Voxel export.</li>
+<li><b>Terrain Texture: </b>Exports the terrain texture to disk.</li>
+<li><b>Heightmap: </b>Exports the terrain heightmap to disk.</li>
 <li><b>Screenshot (3d View): </b>Saves the current 3D view of the terrain on an image on disk.</li>
-<li><b>Radix WAD Map: </b>Saves the terrain in a WAD file that can be used with RAD source port of Radix: Beyond the Void</li>
-<li><b>UDMF Map: </b>Saves the terrain in a UDMF file that can be used with advanced source ports</li>
 </ul>
+
+<hr>
+ <h2>Export WAD Map dialog</h2>
+<p><img src="img/ExportWAD.jpg"></p>
+In this dialog we select the properties of the generated MAP. <br>
+<b>Engine</b>
+<ul>
+<li><b>DelphiDoom/RAD</b> </li>
+<li><b>UDMF (GZDoom/K8Vavoom etc)</b> </li>
+<li><b>Hexen format (ZDoom/Vavoom)</b> </li>
+</ul>
+<br>
+<b>Game</b>
+<ul>
+<li><b>Doom</b> </li>
+<li><b>Heretic</b> </li>
+<li><b>Hexen</b> </li>
+<li><b>Strife</b> </li>
+<li><b>Radix</b> </li>
+</ul>
+<br>
+When selecting the Radix game, you can still use the map with ZDoom and Vavoom family source ports but you must also use the <a href="https://sourceforge.net/projects/rad-x/files/RAD%201.0/RAD2WAD_1.0.r804_win32.zip/download">RAD2WAD</a> tool to create an editing WAD for RADIX.DAT file. 
+If you want to use it with the DelphiDoom family source ports it is recommented use it with RAD. 
+<br><br>
+<b>Elevation Method</b>
+<ul>
+<li><b>Sloped sectors: </b>It will create a map full of slopes! </li>
+<li><b>Flat sectors: </b>Naive method to export a map without slopes. </li>
+<li><b>Trace contour: </b>This method is using the <a href="https://blog.bruce-hill.com/meandering-triangles">meandering triangles algorithm</a> to generate the map. </li>
+<li><b>Minecraft: </b>This method will generate a map that resembles minecraft. Note that it will still generate in some cases triangular sectors. </li>
+</ul>
+<br>
+
 
 The exported maps can be edited with DoomBuilder: 
 <p><img src="img/doombuilder1.jpg"></p>
+
+<hr>
+ <h2>Export VOXEL Map dialog</h2>
+<p><img src="img/ExportVOXEL.jpg"></p>
+In this dialog we select the properties of the exported Voxel. <br>
+<ul>
+<li><b>Size: </b>The output size of the voxel from 32x32x32 up to 256x256x256. </li>
+<li><b>Constrains: </b>Control the elevation stretching. </li>
+</ul>
+<br>
+
+Voxels can be saved as: <br>
+<ul>
+<li><b>DelphiDOOM ddvox </b>  </li>
+<li><b>Slab6 vox </b> </li>
+</ul>
+Both formats are supported from DelphiDoom family source ports and DD_VOXEL editor. You can use the Slab6 vox format to use the voxel with other source ports.

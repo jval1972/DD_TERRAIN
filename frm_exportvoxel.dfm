@@ -1105,14 +1105,14 @@ object ExportVoxelForm: TExportVoxelForm
       Height = 305
       Caption = ' Constrains '
       TabOrder = 1
-      object Label1: TLabel
+      object TopLabel: TLabel
         Left = 112
         Top = 24
         Width = 25
         Height = 13
         Caption = 'Top: '
       end
-      object Label2: TLabel
+      object BottomLabel: TLabel
         Left = 112
         Top = 256
         Width = 39
@@ -2248,6 +2248,7 @@ object ExportVoxelForm: TExportVoxelForm
         '128x128x128'
         '256x256x256')
       TabOrder = 0
+      OnClick = SizeRadioGroupClick
     end
   end
   object SaveVoxelDialog: TSaveDialog

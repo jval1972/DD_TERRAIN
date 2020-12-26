@@ -54,14 +54,15 @@ type
     SelectFileButton: TSpeedButton;
     SaveVoxelDialog: TSaveDialog;
     SizeRadioGroup: TRadioGroup;
-    Label1: TLabel;
-    Label2: TLabel;
+    TopLabel: TLabel;
+    BottomLabel: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure TrackBarChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FileNameEditChange(Sender: TObject);
     procedure SelectFileButtonClick(Sender: TObject);
+    procedure SizeRadioGroupClick(Sender: TObject);
   private
     { Private declarations }
     amin, amax: integer;
@@ -150,7 +151,15 @@ begin
 end;
 
 procedure TExportVoxelForm.FormCreate(Sender: TObject);
+var
+  i: integer;
 begin
+  DoubleBuffered := True;
+  for i := 0 to ComponentCount - 1 do
+    if Components[i].InheritsFrom(TWinControl) then
+      if not (Components[i] is TListBox) then
+        (Components[i] as TWinControl).DoubleBuffered := True;
+
   destroying := false;
   sample := TBitmap.Create;
   sample.Width := 256;
@@ -217,10 +226,11 @@ end;
 
 procedure TExportVoxelForm.UpdateControls;
 var
-  b: TBitmap;
+  b, b2: TBitmap;
+  sz: integer;
 begin
-  Label1.Caption := Format('Top: %.*d/255', [3, amin]);
-  Label2.Caption := Format('Bottom: %.*d/255', [3, amax]);
+  TopLabel.Caption := Format('Top: %.*d/255', [3, amin]);
+  BottomLabel.Caption := Format('Bottom: %.*d/255', [3, amax]);
 
   b := TBitmap.Create;
   try
@@ -231,18 +241,35 @@ begin
     b.Canvas.Brush.Color := clBlack;
     b.Canvas.Pen.Style := psSolid;
     b.Canvas.Pen.Color := clBlack;
-    b.Canvas.FillRect(Rect(0, 0, 255, 255));
-    if not destroying then
-      b.Canvas.StretchDraw(Rect(0, amin, 255, amax), sample);
+    b.Canvas.FillRect(Rect(0, 0, 256, 256));
+    if not destroying and (SizeRadioGroup.ItemIndex >= 0) then
+    begin
+      sz := 32 shl SizeRadioGroup.ItemIndex;
+      if sz = 256 then
+        b.Canvas.StretchDraw(Rect(0, amin, 255, amax), sample)
+      else
+      begin
+        b2 := TBitmap.Create;
+        try
+          b2.Width := sz;
+          b2.Height := sz;
+          b2.PixelFormat := pf32bit;
+          b2.Canvas.StretchDraw(Rect(0, 0, sz + 1, sz + 1), sample);
+          b.Canvas.StretchDraw(Rect(0, amin, 255, amax), b2)
+        finally
+          b2.Free;
+        end;
+      end;
+    end;
     b.Canvas.Brush.Style := bsDiagCross;
     b.Canvas.Brush.Color := clBlue;
-    b.Canvas.FillRect(Rect(0, 0, 255, amin));
-    b.Canvas.FillRect(Rect(0, amax, 255, 255));
+    b.Canvas.FillRect(Rect(0, 0, 256, amin));
+    b.Canvas.FillRect(Rect(0, amax, 256, 256));
     b.Canvas.Pen.Color := clYellow;
     b.Canvas.MoveTo(0, amin);
-    b.Canvas.LineTo(255, amin);
+    b.Canvas.LineTo(256, amin);
     b.Canvas.MoveTo(0, amax);
-    b.Canvas.LineTo(255, amax);
+    b.Canvas.LineTo(256, amax);
     Image1.Picture.Bitmap.Canvas.Draw(0, 0, b);
     Image1.Invalidate;
   finally
@@ -283,6 +310,11 @@ begin
     FileNameEdit.Text := SaveVoxelDialog.FileName;
     OKButton1.Enabled := True;
   end;
+end;
+
+procedure TExportVoxelForm.SizeRadioGroupClick(Sender: TObject);
+begin
+  UpdateControls;
 end;
 
 end.

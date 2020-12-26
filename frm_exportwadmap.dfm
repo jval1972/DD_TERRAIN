@@ -1,6 +1,6 @@
 object ExportWADMapForm: TExportWADMapForm
-  Left = 658
-  Top = 161
+  Left = 177
+  Top = 156
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export WAD Map'
@@ -1452,6 +1452,8 @@ object ExportWADMapForm: TExportWADMapForm
         Hint = 'Select output WAD file'
         Caption = '...'
         Flat = True
+        ParentShowHint = False
+        ShowHint = True
         OnClick = SelectFileButtonClick
       end
       object Bevel2: TBevel

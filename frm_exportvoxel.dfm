@@ -4,7 +4,7 @@ object ExportVoxelForm: TExportVoxelForm
   BorderStyle = bsDialog
   Caption = 'Export Voxel'
   ClientHeight = 427
-  ClientWidth = 734
+  ClientWidth = 686
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -1053,13 +1053,13 @@ object ExportVoxelForm: TExportVoxelForm
   object BottomPanel: TPanel
     Left = 0
     Top = 386
-    Width = 734
+    Width = 686
     Height = 41
     Align = alBottom
     Caption = ' '
     TabOrder = 0
     object ButtonPanel: TPanel
-      Left = 461
+      Left = 413
       Top = 1
       Width = 272
       Height = 39
@@ -1072,7 +1072,7 @@ object ExportVoxelForm: TExportVoxelForm
         Top = 8
         Width = 75
         Height = 25
-        Caption = 'OK'
+        Caption = 'Save'
         Default = True
         Enabled = False
         ModalResult = 1
@@ -1093,7 +1093,7 @@ object ExportVoxelForm: TExportVoxelForm
   object MainPanel: TPanel
     Left = 0
     Top = 0
-    Width = 734
+    Width = 686
     Height = 386
     Align = alClient
     Caption = ' '
@@ -1101,7 +1101,7 @@ object ExportVoxelForm: TExportVoxelForm
     object ConstrainsGroupBox: TGroupBox
       Left = 144
       Top = 64
-      Width = 249
+      Width = 201
       Height = 305
       Caption = ' Constrains '
       TabOrder = 1
@@ -1146,7 +1146,7 @@ object ExportVoxelForm: TExportVoxelForm
       end
     end
     object PreviewGroupBox: TGroupBox
-      Left = 408
+      Left = 360
       Top = 64
       Width = 305
       Height = 305
@@ -2192,7 +2192,7 @@ object ExportVoxelForm: TExportVoxelForm
     object Panel1: TPanel
       Left = 1
       Top = 1
-      Width = 732
+      Width = 684
       Height = 41
       Align = alTop
       Caption = ' '
@@ -2202,7 +2202,7 @@ object ExportVoxelForm: TExportVoxelForm
       object Bevel2: TBevel
         Left = 1
         Top = 1
-        Width = 730
+        Width = 682
         Height = 15
         Align = alTop
         Shape = bsTopLine
@@ -2223,6 +2223,8 @@ object ExportVoxelForm: TExportVoxelForm
         Hint = 'Select output Voxel file'
         Caption = '...'
         Flat = True
+        ParentShowHint = False
+        ShowHint = True
         OnClick = SelectFileButtonClick
       end
       object FileNameEdit: TEdit

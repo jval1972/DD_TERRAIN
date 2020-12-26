@@ -2745,7 +2745,7 @@ object Form1: TForm1
         Top = 0
         Width = 250
         Height = 405
-        ActivePage = WADTabSheet1
+        ActivePage = DirTabSheet
         Align = alClient
         TabOrder = 0
         OnChange = TexturePageControlChange

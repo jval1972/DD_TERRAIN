@@ -523,6 +523,8 @@ var
   doCreate: boolean;
   i: integer;
 begin
+  Screen.Cursor := crHourglass;
+
   Randomize;
 
   CreateCustomCursors;
@@ -744,6 +746,8 @@ begin
 
   // when the app has spare time, render the GL scene
   Application.OnIdle := Idle;
+
+  Screen.Cursor := crDefault;
 end;
 
 procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1573,10 +1577,15 @@ procedure TForm1.SelectWADFileButtonClick(Sender: TObject);
 begin
   if OpenWADDialog.Execute then
   begin
-    fwadfilename := ExpandFilename(OpenWADDialog.FileName);
-    WADFileNameEdit.Text := ExtractFileName(OpenWADDialog.FileName);
-    PopulateFlatsListBox(fwadfilename);
-    PopulateWADPatchListBox(fwadfilename);
+    Screen.Cursor := crHourglass;
+    try
+      fwadfilename := ExpandFilename(OpenWADDialog.FileName);
+      WADFileNameEdit.Text := ExtractFileName(OpenWADDialog.FileName);
+      PopulateFlatsListBox(fwadfilename);
+      PopulateWADPatchListBox(fwadfilename);
+    finally
+      Screen.Cursor := crDefault;
+    end;
   end;
 end;
 
@@ -2752,9 +2761,14 @@ procedure TForm1.SelectPK3FileButtonClick(Sender: TObject);
 begin
   if OpenPK3Dialog.Execute then
   begin
-    fpk3filename := ExpandFilename(OpenPK3Dialog.FileName);
-    PK3FileNameEdit.Text := ExtractFileName(OpenPK3Dialog.FileName);
-    PopulatePK3ListBox(fpk3filename);
+    Screen.Cursor := crHourglass;
+    try
+      fpk3filename := ExpandFilename(OpenPK3Dialog.FileName);
+      PK3FileNameEdit.Text := ExtractFileName(OpenPK3Dialog.FileName);
+      PopulatePK3ListBox(fpk3filename);
+    finally
+      Screen.Cursor := crDefault;
+    end;
   end;
 end;
 
@@ -2879,6 +2893,7 @@ var
 begin
   if OpenPictureDialog1.Execute then
   begin
+    Screen.Cursor := crHourglass;
     f := TLoadImageHelperForm.Create(nil);
     try
       f.Image1.Picture.LoadFromFile(OpenPictureDialog1.FileName);
@@ -2891,6 +2906,7 @@ begin
     finally
       f.Free;
     end;
+    Screen.Cursor := crDefault;
   end;
 end;
 
@@ -2974,8 +2990,6 @@ begin
     exit;
   end;
 
-  Screen.Cursor := crHourglass;
-
   f := TLoadImageHelperForm.Create(nil);
   bm := TBitmap.Create;
   bm.PixelFormat := pf32bit;
@@ -2987,8 +3001,6 @@ begin
   finally
     f.Free;
   end;
-
-  Screen.Cursor := crDefault;
 
   BitmapToColorBuffer(bm);
 
@@ -3026,10 +3038,14 @@ begin
         newdir := newdir + '\';
     if newdir <> fdirdirectory then
     begin
-      fdirdirectory := newdir;
-//      DIRFileNameEdit.Text := MkShortName(fdirdirectory, DIRTexEditNameSize);
-      DIRFileNameEdit.Text := fdirdirectory;
-      PopulateDirListBox;
+      Screen.Cursor := crHourglass;
+      try
+        fdirdirectory := newdir;
+        DIRFileNameEdit.Text := fdirdirectory;
+        PopulateDirListBox;
+      finally
+        Screen.Cursor := crDefault;
+      end;
     end;
   end;
 end;
@@ -3080,7 +3096,11 @@ end;
 procedure TForm1.TexturePageControlChange(Sender: TObject);
 begin
   case TexturePageControl.ActivePageIndex of
-  0: NotifyFlatsListBox;
+  0:
+    begin
+      NotifyFlatsListBox;
+      NotifyWADPatchListBox;
+    end;
   1: NotifyPK3ListBox;
   2: NotifyDIRListBox;
   3:

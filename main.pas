@@ -463,7 +463,6 @@ type
     procedure PopulateDirListBox;
     procedure NotifyDIRListBox;
     function DIRTexListBoxNameSize: integer;
-    function DIRTexEditNameSize: integer;
     procedure LLeftMousePaintAt(const X, Y: integer);
     procedure LLeftMousePaintTo(const X, Y: integer);
     procedure CalcPenMasks;
@@ -476,6 +475,9 @@ type
     procedure NotifyColor;
     procedure RecreateColorPickPalette;
     procedure PickColorPalette(const X, Y: integer);
+  protected
+    // Made protected to avoid "Private symbol never used" warning.
+    function DIRTexEditNameSize: integer;
   public
     { Public declarations }
   end;

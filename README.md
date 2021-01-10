@@ -21,6 +21,8 @@ Export screenshots to clipboard
 Multiple Undo/Redo
 
 ## Downloads
+[version 1.1.6.24 (20210110 - win32)](https://sourceforge.net/projects/dd-terrain/files/DD_Terrain_1.1.6.24/DD_Terrain_1.1.6.24_win32.zip/download)
+
 [version 1.1.5.21 (20201227 - win32)](https://sourceforge.net/projects/dd-terrain/files/DD_Terrain_1.1.5.21/DD_Terrain_1.1.5.21_win32.zip/download)
 
 [version 1.0.4.16 (20201214 - win32)](https://sourceforge.net/projects/dd-terrain/files/DD_Terrain_1.0.4.16/DD_Terrain_1.0.4.16_win32.zip/download)

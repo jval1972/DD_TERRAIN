@@ -133,7 +133,7 @@ var
   fs: TFileStream;
   stats: wadexportstats_t;
 begin
-  writeln('TER2WAD version 1.0, (c) 2020 - Jim Valavanis');
+  writeln('TER2WAD version 1.1, (c) 2020-2021, Jim Valavanis');
   writeln;
   if M_CheckOption('-h') then
   begin

@@ -949,7 +949,7 @@ begin
 end;
 
 resourcestring
-  copyright = 'Copyright (c) 2020, Jim Valavanis';
+  copyright = 'Copyright (c) 2020-2021, Jim Valavanis';
 
 procedure TForm1.AboutButton1Click(Sender: TObject);
 begin
@@ -957,7 +957,7 @@ begin
     Handle,
     PChar(Format('%s'#13#10 +
     'Version ' + I_VersionBuilt + #13#10 +
-    'Copyright (c) 2020, jvalavanis@gmail.com'#13#10 +
+    'Copyright (c) 2020-2021, jvalavanis@gmail.com'#13#10 +
     #13#10'A tool to create Terrains.'#13#10#13#10,
         [rsTitle])),
     PChar(rsTitle),

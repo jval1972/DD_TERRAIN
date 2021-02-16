@@ -2433,6 +2433,8 @@ begin
   ZeroMemory(@pen2mask, SizeOf(pen2mask));
   ZeroMemory(@pen3mask, SizeOf(pen3mask));
   sqmaxdist := sqr(fpensize div 2);
+  if sqmaxdist <= 0 then
+    sqmaxdist := 1;
   for iY := -fpensize div 2 to fpensize div 2 do
   begin
     sqry := iY * iY;

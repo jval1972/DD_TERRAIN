@@ -73,7 +73,8 @@ uses
   ter_voxels in 'ter_voxels.pas',
   ter_voxelexport in 'ter_voxelexport.pas',
   frm_exportvoxel in 'frm_exportvoxel.pas' {ExportVoxelForm},
-  ter_doomutils in 'ter_doomutils.pas';
+  ter_doomutils in 'ter_doomutils.pas',
+  frm_zeroheightmapvalues in 'frm_zeroheightmapvalues.pas' {ZeroHeightmapValuesForm};
 
 {$R *.res}
 

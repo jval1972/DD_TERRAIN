@@ -289,6 +289,7 @@ type
     WADPatchSizeLabel: TLabel;
     WADPatchNameLabel: TLabel;
     Onlinedocumentation1: TMenuItem;
+    SetHeightmapValuestoZero1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -382,6 +383,7 @@ type
     procedure WADPatchListBoxClick(Sender: TObject);
     procedure WADPageControl1Change(Sender: TObject);
     procedure Onlinedocumentation1Click(Sender: TObject);
+    procedure SetHeightmapValuestoZero1Click(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -492,6 +494,7 @@ uses
   ter_defs,
   ter_utils,
   frm_newterrain,
+  frm_zeroheightmapvalues,
   ter_wadreader,
   frm_editheightmapitem,
   frm_scaleheightmap,
@@ -3330,6 +3333,43 @@ end;
 procedure TForm1.Onlinedocumentation1Click(Sender: TObject);
 begin
   I_GoToWebPage('https://dd-terrain.sourceforge.io');
+end;
+
+procedure TForm1.SetHeightmapValuestoZero1Click(Sender: TObject);
+var
+  z1, z2: integer;
+  iX, iY: integer;
+  it: heightbufferitem_t;
+  hchange: boolean;
+begin
+  z1 := -14;
+  z2 := 11;
+  if GetZeroHeightmapValues(z1, z2) then
+  begin
+    hchange := false;
+
+    for iX := 0 to terrain.heightmapsize - 1 do
+      for iY := 0 to terrain.heightmapsize - 1 do
+        if IsIntInRange(terrain.Heightmap[iX, iY].height, MinI(z1, z2), MaxI(z1, z2)) then
+        begin
+          if not hchange then
+          begin
+            hchange := True;
+            SaveUndo(false);
+          end;
+          it := terrain.Heightmap[iX, iY];
+          it.height := 0;
+          terrain.Heightmap[iX, iY] := it;
+        end;
+
+    if hchange then
+    begin
+      changed := True;
+      PaintBox1.Invalidate;
+      glneedsupdate := True;
+      glneedstexturerecalc := True;
+    end;
+  end;
 end;
 
 end.

@@ -10023,6 +10023,10 @@ object Form1: TForm1
         Caption = 'Resample Heightmap (x2)'
         OnClick = MNResampleHeightmapX2Click
       end
+      object SetHeightmapValuestoZero1: TMenuItem
+        Caption = 'Set Heightmap Values to Zero'
+        OnClick = SetHeightmapValuestoZero1Click
+      end
     end
     object Options1: TMenuItem
       Caption = '&Options'

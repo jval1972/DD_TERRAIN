@@ -111,7 +111,7 @@ const
     'Incompatible version', // Z_VERSION_ERROR  (-6)
     ''
   );
-  
+
 type
   // Abstract ancestor class
   TCustomZlibStream = class(TStream)

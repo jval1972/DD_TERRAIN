@@ -250,7 +250,7 @@ type
     numentries: LongWord;
     names: array[0..0] of char8_t;
   end;
-  Ppnames_t = ^pnames_t; 
+  Ppnames_t = ^pnames_t;
 
 implementation
 

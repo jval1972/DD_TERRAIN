@@ -384,7 +384,7 @@ type
   end;
 
   TSelectionMode = (smNone, smColor, smBW, smRamp);
-  
+
   TColorPopup = class(TWinControl)
   private
     FDefaultText,

@@ -36,7 +36,7 @@ uses
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, ter_class, ter_undo,
   ter_filemenuhistory, ter_slider, PngImage1, ter_pk3, ter_colorpickerbutton,
   ter_wadexport, ter_voxelexport, xTIFF, ImgList;
-                           
+
 type
   drawlayeritem_t = packed record
     pass: byte;
@@ -1057,7 +1057,7 @@ procedure TForm1.Idle(Sender: TObject; var Done: Boolean);
 begin
   if closing then
     Exit;
-    
+
   UpdateEnable;
 
   Done := False;
@@ -2167,7 +2167,7 @@ begin
     lmousedowny := Y;
     lmousedown := False;
     glneedstexturerecalc := PenSpeedButton1.Down or PenSpeedButton2.Down or PenSpeedButton3.Down;
-    glneedsupdate := True; 
+    glneedsupdate := True;
     lasthmouseheightmapx := -1;
     lasthmouseheightmapy := -1;
   end;

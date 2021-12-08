@@ -128,7 +128,7 @@ type
 
 const
   SIDEDEFPACKLIMIT = 32000;
-    
+
 {$DEFINE DOOM_FORMAT}
 {$UNDEF HEXEN_FORMAT}
 {$UNDEF UDMF_FORMAT}
@@ -399,7 +399,7 @@ begin
 
   // Remove zero length lines
   RemoveZeroLengthLines;
-  
+
   // Remove all other unused elements
   RemoveUnusedElements;
 
@@ -682,7 +682,7 @@ begin
 
   // Remove zero length lines
   RemoveZeroLengthLines;
-    
+
   // Remove all other unused elements
   RemoveUnusedElements;
 

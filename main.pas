@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 //
 //  DD_TERRAIN: Terrain Generator
-//  Copyright (C) 2020-2021 by Jim Valavanis
+//  Copyright (C) 2020-2022 by Jim Valavanis
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -598,15 +598,25 @@ begin
 
   // Open WAD resource
   fwadfilename := bigstringtostring(@opt_lastwadfile);
-  WADFileNameEdit.Text := ExtractFileName(fwadfilename);
-  PopulateFlatsListBox(fwadfilename);
-  PopulateWADPatchListBox(fwadfilename);
+  if FileExists(fwadfilename) and (fwadfilename <> '') then
+  begin
+    WADFileNameEdit.Text := ExtractFileName(fwadfilename);
+    PopulateFlatsListBox(fwadfilename);
+    PopulateWADPatchListBox(fwadfilename);
+  end
+  else
+    fwadfilename := '';
 
   // Open PK3 resource
   fpk3filename := bigstringtostring(@opt_lastpk3file);
-  fpk3reader := TZipFile.Create(fpk3filename);
-  PK3FileNameEdit.Text := ExtractFileName(fpk3filename);
-  PopulatePK3ListBox(fpk3filename);
+  if FileExists(fpk3filename) and (fpk3filename <> '') then
+  begin
+    fpk3reader := TZipFile.Create(fpk3filename);
+    PK3FileNameEdit.Text := ExtractFileName(fpk3filename);
+    PopulatePK3ListBox(fpk3filename);
+  end
+  else
+    fpk3filename := '';
 
   // Open Directory resource
   fdirdirectory := bigstringtostring(@opt_lastdirectory);
@@ -960,7 +970,7 @@ begin
     Handle,
     PChar(Format('%s'#13#10 +
     'Version ' + I_VersionBuilt + #13#10 +
-    'Copyright (c) 2020-2021, jvalavanis@gmail.com'#13#10 +
+    'Copyright (c) 2020-2022, jvalavanis@gmail.com'#13#10 +
     #13#10'A tool to create Terrains.'#13#10#13#10,
         [rsTitle])),
     PChar(rsTitle),
